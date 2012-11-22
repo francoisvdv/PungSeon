@@ -16,7 +16,7 @@
 \fancypagestyle{plain}{%
 \fancyhf{}
 \fancyhead[LO,RE]{\sffamily\bfseries\large Technische Universiteit Eindhoven}
-\fancyhead[RO,LE]{\sffamily\bfseries\large 2IW05 Software Specification}
+\fancyhead[RO,LE]{\sffamily\bfseries\large 2IO23 DBL Specification and Game}
 \fancyfoot[LO,RE]{\sffamily\bfseries\large department of mathematics and computer science}
 \fancyfoot[RO,LE]{\sffamily\bfseries\thepage}
 \renewcommand{\headrulewidth}{0pt}
@@ -26,7 +26,7 @@
 \pagestyle{fancy}
 \fancyhf{}
 \fancyhead[RO,LE]{\sffamily\bfseries\large Technische Universiteit Eindhoven}
-\fancyhead[LO,RE]{\sffamily\bfseries\large 2IW05 Software Specification}
+\fancyhead[LO,RE]{\sffamily\bfseries\large 2IO23 DBL Specification and Game}
 \fancyfoot[LO,RE]{\sffamily\bfseries\large department of mathematics and computer science}
 \fancyfoot[RO,LE]{\sffamily\bfseries\thepage}
 \renewcommand{\headrulewidth}{1pt}
@@ -92,5 +92,178 @@ Francois van der Ven, 0782851
 \newpage
 \section{Introduction}
 \section{Use Cases}
-
+\subsection*{Play round}
+\begin{enumerate}
+\item Pre-condition(s): None
+\item Trigger: Presses the "Play" button.
+\item Guarantee: The round is started.
+\item Scenarios: 
+	\begin{enumerate}
+	\item Main scenario
+		\begin{enumerate}[1)]
+		\item Player presses the "Play" button.
+		\item The player is placed into a lobby by the server.
+		\item The player presses the "Ready" button.
+		\item The game starts.
+		\end{enumerate}
+	\item Alternatives
+		\begin{description}
+		\item[2.1] The client failed to connect to the server and is 			not placed into a lobby.
+		\item[4.1] One of the other players in the lobby did not press 			the "Ready" button yet, and hence the player has to wait for 			this player before the game will start.
+		\end{description}
+	\end{enumerate}
+\end{enumerate}
+\subsection*{Edit options}
+\begin{enumerate}
+\item Pre-condition: None
+\item Trigger: The player presses the "Options" button.
+\item Guarantee: The player's changed options are saved.
+\item Scenarios: 
+	\begin{enumerate}
+	\item Main scenario
+		\begin{enumerate}[1)]
+		\item The Player presses the "Options" button.
+		\item The Player edits one or several options.
+		\end{enumerate}
+	\item Alternatives
+		\begin{description}
+		\item[2.1] The player does not edit any options and hence no 			options are changed.
+		\end{description}
+	\end{enumerate}
+\end{enumerate}
+\subsection*{Check how to play}
+\begin{enumerate}
+\item Pre-condition: None
+\item Trigger: The player presses the "How to play" button.
+\item Guarantee: The player is presented a how to play menu.
+\item Scenarios: 
+	\begin{enumerate}
+	\item Main scenario
+		\begin{enumerate}[1)]
+		\item The player presses the "How to play" button.
+		\item The player is presented a how to play screen.
+		\end{enumerate}
+	\end{enumerate}
+\end{enumerate}
+\subsection*{Check highscores}
+\begin{enumerate}
+\item Pre-condition: None 
+\item Trigger: The player presses the "Highscores" button.
+\item Guarantee: The player is presented the highscores.
+\item Scenarios: 
+	\begin{enumerate}
+	\item Main scenario
+		\begin{enumerate}[1)]
+		\item The player presses the "High scores" button.
+		\item The client presents a high scores screen to the player.
+		\end{enumerate}
+	\item Alternatives
+		\begin{description}
+		\item[2.1] The client failed to connect to the server and hence 		is presented an empty high scores screen.
+		\end{description}
+	\end{enumerate}
+\end{enumerate}
+\subsection*{Quit game}
+\begin{enumerate}
+\item Pre-condition: None
+\item Trigger: The player presses the "Quit" button.
+\item Guarantee: The game is closed.
+\item Scenarios: 
+	\begin{enumerate}
+	\item Main scenario
+		\begin{enumerate}[1)]
+		\item The player presses the "Quit" button.
+		\end{enumerate}
+	\end{enumerate}
+\end{enumerate}
+\subsection*{Move}
+\begin{enumerate}
+\item Pre-condition: 
+\item Trigger:
+\item Guarantee:
+\item Scenarios: 
+	\begin{enumerate}
+	\item Main scenario
+		\begin{enumerate}[1)]
+		\item S1
+		\item S2
+		\end{enumerate}
+	\item Alternatives
+		\begin{description}
+		\item[2.1]
+		\end{description}
+	\end{enumerate}
+\end{enumerate}
+\subsection*{Pick up flag}
+\begin{enumerate}
+\item Pre-condition: 
+\item Trigger:
+\item Guarantee:
+\item Scenarios: 
+	\begin{enumerate}
+	\item Main scenario
+		\begin{enumerate}[1)]
+		\item S1
+		\item S2
+		\end{enumerate}
+	\item Alternatives
+		\begin{description}
+		\item[2.1]
+		\end{description}
+	\end{enumerate}
+\end{enumerate}
+\subsection*{Activate block}
+\begin{enumerate}
+\item Pre-condition: 
+\item Trigger:
+\item Guarantee:
+\item Scenarios: 
+	\begin{enumerate}
+	\item Main scenario
+		\begin{enumerate}[1)]
+		\item S1
+		\item S2
+		\end{enumerate}
+	\item Alternatives
+		\begin{description}
+		\item[2.1]
+		\end{description}
+	\end{enumerate}
+\end{enumerate}
+\subsection*{Fire weapon}
+\begin{enumerate}
+\item Pre-condition: 
+\item Trigger:
+\item Guarantee:
+\item Scenarios: 
+	\begin{enumerate}
+	\item Main scenario
+		\begin{enumerate}[1)]
+		\item S1
+		\item S2
+		\end{enumerate}
+	\item Alternatives
+		\begin{description}
+		\item[2.1]
+		\end{description}
+	\end{enumerate}
+\end{enumerate}
+\subsection*{Deliver flag}
+\begin{enumerate}
+\item Pre-condition: 
+\item Trigger:
+\item Guarantee:
+\item Scenarios: 
+	\begin{enumerate}
+	\item Main scenario
+		\begin{enumerate}[1)]
+		\item S1
+		\item S2
+		\end{enumerate}
+	\item Alternatives
+		\begin{description}
+		\item[2.1]
+		\end{description}
+	\end{enumerate}
+\end{enumerate}
 \end{document}

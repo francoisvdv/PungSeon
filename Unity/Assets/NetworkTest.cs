@@ -73,10 +73,12 @@ public class NetworkTest : MonoBehaviour {
 
 	}
 	
+	string ip = "127.0.0.1";
+	string port = "4550";
 	void OnGUI()
 	{
-		string ip = GUI.TextField(new Rect(0,10,200,30), "127.0.0.1");
-		string port = GUI.TextField(new Rect(0,45,200,30), "4550");
+		ip = GUI.TextField(new Rect(0,10,200,30), ip);
+		port = GUI.TextField(new Rect(0,45,200,30), port);
 		
 		if(GUI.Button(new Rect(210, 10, 100, 100), "Connect"))
 		{
