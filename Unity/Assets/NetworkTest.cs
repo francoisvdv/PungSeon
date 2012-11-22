@@ -26,7 +26,7 @@ public class NetworkTest : MonoBehaviour {
 	{
 		object state = new object();
 		
-		tcpListener = new TcpListener(IPAddress.Parse("127.0.0.1"), 4550);
+		tcpListener = new TcpListener(IPAddress.Any, 4550);
 		tcpListener.Start();
 		tcpListener.BeginAcceptTcpClient(OnAccept, tcpListener);
 	}
