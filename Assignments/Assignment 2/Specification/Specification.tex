@@ -1,5 +1,5 @@
 \documentclass[a4paper,twoside,11pt]{article}
-\usepackage{enumerate, a4wide,graphicx,fancyhdr,amsmath,amssymb, amsfonts, listings}
+\usepackage{enumerate, a4wide,graphicx,fancyhdr,amsmath,amssymb, amsfonts, listings, titlesec}
 
 %----------------------- Macros and Definitions --------------------------
 
@@ -31,6 +31,11 @@
 \fancyfoot[RO,LE]{\sffamily\bfseries\thepage}
 \renewcommand{\headrulewidth}{1pt}
 \renewcommand{\footrulewidth}{0pt}
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries\centering}{\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\centering}{\thesubsection}{1em}{}
 
 %-------------------------------- Title ----------------------------------
 
@@ -83,14 +88,9 @@ Francois van der Ven, 0782851
 {\large \today}
 \end{center}
 \end{titlepage}
-
-\begin{center}
-\section{Table of contents}
-\end{center}
 \tableofcontents
 \newpage
-\begin{center}
 \section{Introduction}
-\end{center}
+\section{Use Cases}
 
 \end{document}
