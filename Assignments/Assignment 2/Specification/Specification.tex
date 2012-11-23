@@ -178,91 +178,87 @@ Francois van der Ven, 0782851
 \end{enumerate}
 \subsection*{Move}
 \begin{enumerate}
-\item Pre-condition: 
-\item Trigger:
-\item Guarantee:
+\item Pre-condition: Player is allowed to move.
+\item Trigger: Player presses one of the four move buttons.
+\item Guarantee: Player has moved to another location.
 \item Scenarios: 
 	\begin{enumerate}
 	\item Main scenario
 		\begin{enumerate}[1)]
-		\item S1
-		\item S2
+		\item The player presses a move button.
+		\item The player is moved to another location.
 		\end{enumerate}
 	\item Alternatives
 		\begin{description}
-		\item[2.1]
+		\item[2.1] The player was unable to move to this side, and 		         hence is not moved.
 		\end{description}
 	\end{enumerate}
 \end{enumerate}
 \subsection*{Pick up flag}
 \begin{enumerate}
-\item Pre-condition: 
-\item Trigger:
-\item Guarantee:
+\item Pre-condition: Player is not already carrying a flag.
+\item Trigger: The player moved onto a flag.
+\item Guarantee: The player is carrying a flag.
 \item Scenarios: 
 	\begin{enumerate}
 	\item Main scenario
 		\begin{enumerate}[1)]
-		\item S1
-		\item S2
+		\item The player moves on top of a flag.
+		\item The player is now carrying a flag.
 		\end{enumerate}
-	\item Alternatives
-		\begin{description}
-		\item[2.1]
-		\end{description}
 	\end{enumerate}
 \end{enumerate}
 \subsection*{Activate block}
 \begin{enumerate}
-\item Pre-condition: 
-\item Trigger:
-\item Guarantee:
+\item Pre-condition: None
+\item Trigger: The player moved on top of a block.
+\item Guarantee: The player triggers a block effect.
 \item Scenarios: 
 	\begin{enumerate}
 	\item Main scenario
 		\begin{enumerate}[1)]
-		\item S1
-		\item S2
+		\item The player moves on top of a block.
+		\item A block effect is triggered.
 		\end{enumerate}
-	\item Alternatives
-		\begin{description}
-		\item[2.1]
-		\end{description}
 	\end{enumerate}
 \end{enumerate}
 \subsection*{Fire weapon}
 \begin{enumerate}
-\item Pre-condition: 
-\item Trigger:
-\item Guarantee:
+\item Pre-condition: The player is allowed to fire.
+\item Trigger: The player presses the "fire" key.
+\item Guarantee: A shot is fired.
 \item Scenarios: 
 	\begin{enumerate}
 	\item Main scenario
 		\begin{enumerate}[1)]
-		\item S1
-		\item S2
+		\item The player presses the "fire" key.
+		\item The player fires his weapon.
+		\item The player hits an enemy player.
+		\item The enemy players health is decreased.
 		\end{enumerate}
 	\item Alternatives
 		\begin{description}
-		\item[2.1]
+		\item[3.1] The player misses.
+		\item[4.1] The enemy players health is negative. Which 					results in the enemy player dying.
 		\end{description}
 	\end{enumerate}
 \end{enumerate}
 \subsection*{Deliver flag}
 \begin{enumerate}
-\item Pre-condition: 
-\item Trigger:
-\item Guarantee:
+\item Pre-condition: The player is carrying a flag. The player is in a valid flag drop zone.
+\item Trigger: The player enters a base's flag drop zone.
+\item Guarantee: The flag is delivered.
 \item Scenarios: 
 	\begin{enumerate}
 	\item Main scenario
 		\begin{enumerate}[1)]
-		\item S1
-		\item S2
+		\item The player moves into his own base's flag drop zone.
+		\item The player delivers the flag.
+		\item The player is given his points.
 		\end{enumerate}
 	\item Alternatives
 		\begin{description}
-		\item[2.1]
+		\item[1.1] The player enters a neutral base's flag drop zone, 			and did	not claim a base yet. This neutral base becomes his 			own.
 		\end{description}
 	\end{enumerate}
 \end{enumerate}
