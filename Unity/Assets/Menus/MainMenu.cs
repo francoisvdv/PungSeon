@@ -25,7 +25,7 @@ public class MainMenu : MonoBehaviour
 	enum MenuState { MainMenu, Lobby, HowTo, HighScores }
 	MenuState State = MenuState.MainMenu;
 	
-	public float AnimationDuration = 0.2f;
+	public float AnimationDuration = 0.1f;
 	public Texture LeftTexture;
 	public Texture CenterTexture;
 	public Texture RightTexture;
@@ -43,7 +43,7 @@ public class MainMenu : MonoBehaviour
 	{
 		if(animating)
 		{
-			animationTimer += Time.deltaTime;
+			animationTimer += Time.fixedDeltaTime;
 			if(animationTimer > AnimationDuration)
 			{
 				animating = false;
@@ -87,8 +87,13 @@ public class MainMenu : MonoBehaviour
 			int rightWidth = Mathf.RoundToInt(ratio * RightTexture.width);
 			
 			GUI.DrawTexture(new Rect(backgroundBounds.x, backgroundBounds.y, leftWidth, backgroundBounds.height), LeftTexture);
-			GUI.DrawTexture(new Rect(backgroundBounds.x + leftWidth, backgroundBounds.y,
-				backgroundBounds.width - leftWidth - rightWidth, backgroundBounds.height), CenterTexture);
+			
+			//GUI.DrawTexture(new Rect(backgroundBounds.x + leftWidth, backgroundBounds.y,
+			//	backgroundBounds.width - leftWidth - rightWidth, backgroundBounds.height), CenterTexture,ScaleMode.StretchToFill);
+			Rect centerBounds = new Rect(backgroundBounds.x + leftWidth, backgroundBounds.y, 
+				backgroundBounds.width - leftWidth - rightWidth, backgroundBounds.height);
+			DrawTiled (centerBounds, CenterTexture);
+			
 			GUI.DrawTexture(new Rect(backgroundBounds.x + backgroundBounds.width - rightWidth, backgroundBounds.y, rightWidth,
 				backgroundBounds.height), RightTexture);
 		}
@@ -113,7 +118,20 @@ public class MainMenu : MonoBehaviour
 		GUI.EndGroup();
 		GUI.skin = oldSkin;
 	}
-	
+	void DrawTiled (Rect rect, Texture tex)
+	{
+	    GUI.BeginGroup(rect);
+	    {
+	        int width = Mathf.RoundToInt(rect.width);
+	        int height = Mathf.RoundToInt(rect.height);
+
+            for (int x = 0; x < width; x += tex.width)
+            {
+                GUI.DrawTexture(new Rect(x, 0, tex.width, height), tex);
+            }
+	    }
+	    GUI.EndGroup();
+	}
 	void GuiMainMenu()
 	{	
 		int buttonWidth = 140;
@@ -148,6 +166,15 @@ public class MainMenu : MonoBehaviour
 	}
 	void GuiLobby()
 	{
+		int rowWidth = boxWidth - 40;
+		int rowHeight = 20;
+		int rowX = 0;
+		
+		//box
+		{
+	//		GUI.BeginGroup(new Rect(20, 150, rowWidth, (int)(boxHeight / (float)rowHeight)));
+		}
+		
 		if(GUI.Button(new Rect((boxWidth - 100) / 2, 10, 100, 30), "Back to main"))
 		{
 			AnimateBackground(mainMenuWidth, mainMenuHeight);
