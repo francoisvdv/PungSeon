@@ -22,14 +22,15 @@ public class MainMenu : MonoBehaviour
 	bool animating = false;
 	float animationTimer;
 	
-	enum MenuState { MainMenu, Lobby, HowTo, HighScores }
+	enum MenuState { MainMenu, Lobby, HowTo, Options, HighScores }
 	MenuState State = MenuState.MainMenu;
 	
-	public float AnimationDuration = 0.1f;
+	public float AnimationDuration = 0.2f;
 	public Texture LeftTexture;
 	public Texture CenterTexture;
 	public Texture RightTexture;
 	public GUISkin Skin;
+	public Texture TableBackground;
 	
 	// Use this for initialization
 	void Start ()
@@ -110,6 +111,9 @@ public class MainMenu : MonoBehaviour
 		case MenuState.HowTo:
 			GuiHowTo();
 			break;
+		case MenuState.Options:
+			GuiOptions();
+			break;
 		case MenuState.HighScores:
 			GuiHighScores();
 			break;
@@ -152,7 +156,8 @@ public class MainMenu : MonoBehaviour
 		}
 		if(GUI.Button(new Rect(x, y += buttonHeight + gap, buttonWidth, buttonHeight), "Options"))
 		{
-			print ("Not implemented");
+			AnimateBackground(howToWidth, howToHeight);
+			State = MenuState.Options;
 		}
 		if(GUI.Button(new Rect(x, y += buttonHeight + gap, buttonWidth, buttonHeight), "High Scores"))
 		{
@@ -175,16 +180,55 @@ public class MainMenu : MonoBehaviour
 	//		GUI.BeginGroup(new Rect(20, 150, rowWidth, (int)(boxHeight / (float)rowHeight)));
 		}
 		
-		if(GUI.Button(new Rect((boxWidth - 100) / 2, 10, 100, 30), "Back to main"))
+		//Title
+		GUI.Label(new Rect(110, 91, 300, 50), "Multiplayer lobby");
+		
+		//Lobby Table
+		GUI.DrawTexture(new Rect(50,140,360,210), TableBackground);
+		
+		if(GUI.Button(new Rect(100, boxHeight-80, 70, 30), "Back"))
+		{
+			AnimateBackground(mainMenuWidth, mainMenuHeight);
+			State = MenuState.MainMenu;
+		}
+		
+		if(GUI.Button(new Rect((boxWidth-180), boxHeight-80, 80, 30), "Join"))
+		{
+		}
+	}
+	void GuiHowTo()
+	{
+		//Title
+		GUI.Label(new Rect(110, 91, 300, 50), "How-to");
+		
+		if(GUI.Button(new Rect(100, boxHeight-80, 70, 30), "Back"))
 		{
 			AnimateBackground(mainMenuWidth, mainMenuHeight);
 			State = MenuState.MainMenu;
 		}
 	}
-	void GuiHowTo()
+	
+	void GuiOptions()
 	{
+		//Title
+		GUI.Label(new Rect(110, 91, 300, 50), "Options");
+		
+		if(GUI.Button(new Rect(100, boxHeight-80, 70, 30), "Back"))
+		{
+			AnimateBackground(mainMenuWidth, mainMenuHeight);
+			State = MenuState.MainMenu;
+		}
 	}
+	
 	void GuiHighScores()
 	{
+		//Title
+		GUI.Label(new Rect(110, 91, 300, 50), "Highscores");
+		
+		if(GUI.Button(new Rect(100, boxHeight-80, 70, 30), "Back"))
+		{
+			AnimateBackground(mainMenuWidth, mainMenuHeight);
+			State = MenuState.MainMenu;
+		}
 	}
 }
