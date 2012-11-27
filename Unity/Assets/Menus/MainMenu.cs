@@ -7,7 +7,11 @@ public class MainMenu : MonoBehaviour
 	const int mainMenuHeight = 443;
 	const int lobbyWidth = 460;
 	const int lobbyHeight = 443;
-
+	const int howToWidth = 460;
+	const int howToHeight = 443;
+	const int highScoresWidth = 460;
+	const int highScoresHeight = 443;
+	
 	int boxWidth;
 	int boxHeight;
 	int sourceBoxWidth;
@@ -18,7 +22,7 @@ public class MainMenu : MonoBehaviour
 	bool animating = false;
 	float animationTimer;
 	
-	enum MenuState { MainMenu, Lobby, HowTo }
+	enum MenuState { MainMenu, Lobby, HowTo, HighScores }
 	MenuState State = MenuState.MainMenu;
 	
 	public float AnimationDuration = 0.2f;
@@ -101,6 +105,9 @@ public class MainMenu : MonoBehaviour
 		case MenuState.HowTo:
 			GuiHowTo();
 			break;
+		case MenuState.HighScores:
+			GuiHighScores();
+			break;
 		}
 		
 		GUI.EndGroup();
@@ -109,36 +116,34 @@ public class MainMenu : MonoBehaviour
 	
 	void GuiMainMenu()
 	{	
-		int x = (boxWidth - 100) / 2;
+		int buttonWidth = 140;
+		int buttonHeight = 30;
+		int x = (boxWidth - buttonWidth) / 2;
 		int y = 150;
-		int width = 100;
-		int height = 30;
 		int gap = 10;
 		
-		if(GUI.Button(new Rect(x, y, width, height), "Play"))
+		if(GUI.Button(new Rect(x, y, buttonWidth, buttonHeight), "Play"))
 		{
 			AnimateBackground(lobbyWidth, lobbyHeight);
 			State = MenuState.Lobby;
 		}
-		if(GUI.Button(new Rect(x, y += height + gap, width, height), "How to Play"))
+		if(GUI.Button(new Rect(x, y += buttonHeight + gap, buttonWidth, buttonHeight), "How to Play"))
 		{
-			AnimateBackground(lobbyWidth, lobbyHeight);
-			State = MenuState.Lobby;
+			AnimateBackground(howToWidth, howToHeight);
+			State = MenuState.HowTo;
 		}
-		if(GUI.Button(new Rect(x, y += height + gap, width, height), "Options"))
+		if(GUI.Button(new Rect(x, y += buttonHeight + gap, buttonWidth, buttonHeight), "Options"))
 		{
-			AnimateBackground(lobbyWidth, lobbyHeight);
-			State = MenuState.Lobby;
+			print ("Not implemented");
 		}
-		if(GUI.Button(new Rect(x, y += height + gap, width, height), "High Scores"))
+		if(GUI.Button(new Rect(x, y += buttonHeight + gap, buttonWidth, buttonHeight), "High Scores"))
 		{
-			AnimateBackground(lobbyWidth, lobbyHeight);
-			State = MenuState.Lobby;
+			AnimateBackground(highScoresWidth, highScoresHeight);
+			State = MenuState.HighScores;
 		}
-		if(GUI.Button(new Rect(x, y += height + gap, width, height), "Quit"))
+		if(GUI.Button(new Rect(x, y += buttonHeight + gap, buttonWidth, buttonHeight), "Quit"))
 		{
-			AnimateBackground(lobbyWidth, lobbyHeight);
-			State = MenuState.Lobby;
+			GUIUtility.ExitGUI();
 		}
 	}
 	void GuiLobby()
@@ -150,6 +155,9 @@ public class MainMenu : MonoBehaviour
 		}
 	}
 	void GuiHowTo()
+	{
+	}
+	void GuiHighScores()
 	{
 	}
 }
