@@ -22,7 +22,7 @@ public class MainMenu : MonoBehaviour
 	bool animating = false;
 	float animationTimer;
 	
-	enum MenuState { MainMenu, Lobby, HowTo, Options, HighScores }
+	enum MenuState { MainMenu, LobbyList, CreateLobby, Lobby, HowTo, Options, HighScores }
 	MenuState State = MenuState.MainMenu;
 	
 	public float AnimationDuration = 0.2f;
@@ -98,6 +98,12 @@ public class MainMenu : MonoBehaviour
 			GUI.DrawTexture(new Rect(backgroundBounds.x + backgroundBounds.width - rightWidth, backgroundBounds.y, rightWidth,
 				backgroundBounds.height), RightTexture);
 		}
+		
+		if(animating)
+			GUI.color = new Color(GUI.color.r, GUI.color.g, GUI.color.b, Mathf.SmoothStep (0, 1, animationTimer / AnimationDuration));
+		else
+			GUI.color = new Color(GUI.color.r, GUI.color.g, GUI.color.b, 1);
+		
 		GUI.BeginGroup(backgroundBounds);
 		
 		switch(State)
@@ -120,6 +126,8 @@ public class MainMenu : MonoBehaviour
 		}
 		
 		GUI.EndGroup();
+		GUI.color = new Color(GUI.color.r, GUI.color.g, GUI.color.b, 1);
+		
 		GUI.skin = oldSkin;
 	}
 	void DrawTiled (Rect rect, Texture tex)
@@ -169,6 +177,12 @@ public class MainMenu : MonoBehaviour
 			GUIUtility.ExitGUI();
 		}
 	}
+	void GuiLobbyList()
+	{
+	}
+	void GuiCreateLobby()
+	{
+	}
 	void GuiLobby()
 	{
 		int rowWidth = boxWidth - 40;
@@ -207,7 +221,6 @@ public class MainMenu : MonoBehaviour
 			State = MenuState.MainMenu;
 		}
 	}
-	
 	void GuiOptions()
 	{
 		//Title
@@ -219,7 +232,6 @@ public class MainMenu : MonoBehaviour
 			State = MenuState.MainMenu;
 		}
 	}
-	
 	void GuiHighScores()
 	{
 		//Title
