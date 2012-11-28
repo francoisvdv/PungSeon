@@ -92,16 +92,38 @@ Francois van der Ven, 0782851
 \newpage
 \section{Introduction}
 \section{Use Cases}
-\subsection*{Play round}
+\subsection*{Create match}
 \begin{enumerate}
 \item Pre-condition(s): None
-\item Trigger: Presses the "Play" button.
-\item Guarantee: The round is started.
+\item Trigger: Presses the "Create match" button.
+\item Guarantee: A lobby is created.
 \item Scenarios: 
 	\begin{enumerate}
 	\item Main scenario
 		\begin{enumerate}[1)]
-		\item Player presses the "Play" button.
+		\item Player presses the "Create match" button.
+		\item The player is placed into a lobby by the server.
+		\item Enough players join to start the game, and set themselfs 			to be ready.
+		\item The player presses the "Ready" button.
+		\item The game starts.
+		\end{enumerate}
+	\item Alternatives
+		\begin{description}
+		\item[2.1] The client failed to connect to the server and is 			not placed into a lobby.
+		\item[5.1] One of the other players in the lobby did not press 			the "Ready" button yet, and hence the player(s) has to wait for 			this player before the game will start.
+		\end{description}
+	\end{enumerate}
+\end{enumerate}
+\subsection*{Join match}
+\begin{enumerate}
+\item Pre-condition(s): None
+\item Trigger: Player clicks on a lobby to join.
+\item Guarantee: A lobby is joined.
+\item Scenarios: 
+	\begin{enumerate}
+	\item Main scenario
+		\begin{enumerate}[1)]
+		\item Player clicks on a lobby to join.
 		\item The player is placed into a lobby by the server.
 		\item The player presses the "Ready" button.
 		\item The game starts.
@@ -109,7 +131,8 @@ Francois van der Ven, 0782851
 	\item Alternatives
 		\begin{description}
 		\item[2.1] The client failed to connect to the server and is 			not placed into a lobby.
-		\item[4.1] One of the other players in the lobby did not press 			the "Ready" button yet, and hence the player has to wait for 			this player before the game will start.
+		\item[2.2] The lobby was deleted before the player could join.
+		\item[4.1] One of the other players in the lobby did not press 			the "Ready" button yet, and hence the player(s) has to wait for 			this player before the game will start.
 		\end{description}
 	\end{enumerate}
 \end{enumerate}
@@ -262,4 +285,10 @@ Francois van der Ven, 0782851
 		\end{description}
 	\end{enumerate}
 \end{enumerate}
+\section{Class diagram}
+
+\section{Message Sequence Chart}
+
+\section{Z}
+
 \end{document}
