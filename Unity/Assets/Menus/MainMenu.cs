@@ -7,7 +7,11 @@ public class MainMenu : MonoBehaviour
 	const int mainMenuHeight = 443;
 	const int lobbyWidth = 460;
 	const int lobbyHeight = 443;
-
+	const int howToWidth = 460;
+	const int howToHeight = 443;
+	const int highScoresWidth = 460;
+	const int highScoresHeight = 443;
+	
 	int boxWidth;
 	int boxHeight;
 	int sourceBoxWidth;
@@ -18,7 +22,7 @@ public class MainMenu : MonoBehaviour
 	bool animating = false;
 	float animationTimer;
 	
-	enum MenuState { MainMenu, Lobby, HowTo }
+	enum MenuState { MainMenu, Lobby, HowTo, Options, HighScores }
 	MenuState State = MenuState.MainMenu;
 	
 	public float AnimationDuration = 0.2f;
@@ -26,6 +30,7 @@ public class MainMenu : MonoBehaviour
 	public Texture CenterTexture;
 	public Texture RightTexture;
 	public GUISkin Skin;
+	public Texture TableBackground;
 	
 	// Use this for initialization
 	void Start ()
@@ -39,7 +44,7 @@ public class MainMenu : MonoBehaviour
 	{
 		if(animating)
 		{
-			animationTimer += Time.deltaTime;
+			animationTimer += Time.fixedDeltaTime;
 			if(animationTimer > AnimationDuration)
 			{
 				animating = false;
@@ -83,8 +88,13 @@ public class MainMenu : MonoBehaviour
 			int rightWidth = Mathf.RoundToInt(ratio * RightTexture.width);
 			
 			GUI.DrawTexture(new Rect(backgroundBounds.x, backgroundBounds.y, leftWidth, backgroundBounds.height), LeftTexture);
-			GUI.DrawTexture(new Rect(backgroundBounds.x + leftWidth, backgroundBounds.y,
-				backgroundBounds.width - leftWidth - rightWidth, backgroundBounds.height), CenterTexture);
+			
+			//GUI.DrawTexture(new Rect(backgroundBounds.x + leftWidth, backgroundBounds.y,
+			//	backgroundBounds.width - leftWidth - rightWidth, backgroundBounds.height), CenterTexture,ScaleMode.StretchToFill);
+			Rect centerBounds = new Rect(backgroundBounds.x + leftWidth, backgroundBounds.y, 
+				backgroundBounds.width - leftWidth - rightWidth, backgroundBounds.height);
+			DrawTiled (centerBounds, CenterTexture);
+			
 			GUI.DrawTexture(new Rect(backgroundBounds.x + backgroundBounds.width - rightWidth, backgroundBounds.y, rightWidth,
 				backgroundBounds.height), RightTexture);
 		}
@@ -101,55 +111,124 @@ public class MainMenu : MonoBehaviour
 		case MenuState.HowTo:
 			GuiHowTo();
 			break;
+		case MenuState.Options:
+			GuiOptions();
+			break;
+		case MenuState.HighScores:
+			GuiHighScores();
+			break;
 		}
 		
 		GUI.EndGroup();
 		GUI.skin = oldSkin;
 	}
-	
+	void DrawTiled (Rect rect, Texture tex)
+	{
+	    GUI.BeginGroup(rect);
+	    {
+	        int width = Mathf.RoundToInt(rect.width);
+	        int height = Mathf.RoundToInt(rect.height);
+
+            for (int x = 0; x < width; x += tex.width)
+            {
+                GUI.DrawTexture(new Rect(x, 0, tex.width, height), tex);
+            }
+	    }
+	    GUI.EndGroup();
+	}
 	void GuiMainMenu()
 	{	
-		int x = (boxWidth - 100) / 2;
+		int buttonWidth = 140;
+		int buttonHeight = 30;
+		int x = (boxWidth - buttonWidth) / 2;
 		int y = 150;
-		int width = 100;
-		int height = 30;
 		int gap = 10;
 		
-		if(GUI.Button(new Rect(x, y, width, height), "Play"))
+		if(GUI.Button(new Rect(x, y, buttonWidth, buttonHeight), "Play"))
 		{
 			AnimateBackground(lobbyWidth, lobbyHeight);
 			State = MenuState.Lobby;
 		}
-		if(GUI.Button(new Rect(x, y += height + gap, width, height), "How to Play"))
+		if(GUI.Button(new Rect(x, y += buttonHeight + gap, buttonWidth, buttonHeight), "How to Play"))
 		{
-			AnimateBackground(lobbyWidth, lobbyHeight);
-			State = MenuState.Lobby;
+			AnimateBackground(howToWidth, howToHeight);
+			State = MenuState.HowTo;
 		}
-		if(GUI.Button(new Rect(x, y += height + gap, width, height), "Options"))
+		if(GUI.Button(new Rect(x, y += buttonHeight + gap, buttonWidth, buttonHeight), "Options"))
 		{
-			AnimateBackground(lobbyWidth, lobbyHeight);
-			State = MenuState.Lobby;
+			AnimateBackground(howToWidth, howToHeight);
+			State = MenuState.Options;
 		}
-		if(GUI.Button(new Rect(x, y += height + gap, width, height), "High Scores"))
+		if(GUI.Button(new Rect(x, y += buttonHeight + gap, buttonWidth, buttonHeight), "High Scores"))
 		{
-			AnimateBackground(lobbyWidth, lobbyHeight);
-			State = MenuState.Lobby;
+			AnimateBackground(highScoresWidth, highScoresHeight);
+			State = MenuState.HighScores;
 		}
-		if(GUI.Button(new Rect(x, y += height + gap, width, height), "Quit"))
+		if(GUI.Button(new Rect(x, y += buttonHeight + gap, buttonWidth, buttonHeight), "Quit"))
 		{
-			AnimateBackground(lobbyWidth, lobbyHeight);
-			State = MenuState.Lobby;
+			GUIUtility.ExitGUI();
 		}
 	}
 	void GuiLobby()
 	{
-		if(GUI.Button(new Rect((boxWidth - 100) / 2, 10, 100, 30), "Back to main"))
+		int rowWidth = boxWidth - 40;
+		int rowHeight = 20;
+		int rowX = 0;
+		
+		//box
+		{
+	//		GUI.BeginGroup(new Rect(20, 150, rowWidth, (int)(boxHeight / (float)rowHeight)));
+		}
+		
+		//Title
+		GUI.Label(new Rect(110, 91, 300, 50), "Multiplayer lobby");
+		
+		//Lobby Table
+		GUI.DrawTexture(new Rect(50,140,360,210), TableBackground);
+		
+		if(GUI.Button(new Rect(100, boxHeight-80, 70, 30), "Back"))
+		{
+			AnimateBackground(mainMenuWidth, mainMenuHeight);
+			State = MenuState.MainMenu;
+		}
+		
+		if(GUI.Button(new Rect((boxWidth-180), boxHeight-80, 80, 30), "Join"))
+		{
+		}
+	}
+	void GuiHowTo()
+	{
+		//Title
+		GUI.Label(new Rect(110, 91, 300, 50), "How-to");
+		
+		if(GUI.Button(new Rect(100, boxHeight-80, 70, 30), "Back"))
 		{
 			AnimateBackground(mainMenuWidth, mainMenuHeight);
 			State = MenuState.MainMenu;
 		}
 	}
-	void GuiHowTo()
+	
+	void GuiOptions()
 	{
+		//Title
+		GUI.Label(new Rect(110, 91, 300, 50), "Options");
+		
+		if(GUI.Button(new Rect(100, boxHeight-80, 70, 30), "Back"))
+		{
+			AnimateBackground(mainMenuWidth, mainMenuHeight);
+			State = MenuState.MainMenu;
+		}
+	}
+	
+	void GuiHighScores()
+	{
+		//Title
+		GUI.Label(new Rect(110, 91, 300, 50), "Highscores");
+		
+		if(GUI.Button(new Rect(100, boxHeight-80, 70, 30), "Back"))
+		{
+			AnimateBackground(mainMenuWidth, mainMenuHeight);
+			State = MenuState.MainMenu;
+		}
 	}
 }
