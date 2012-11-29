@@ -5,6 +5,10 @@ public class Menu : MonoBehaviour
 {
 	const int mainMenuWidth = 230;
 	const int mainMenuHeight = 443;
+	const int lobbyListWidth = 460;
+	const int lobbyListHeight = 443;
+	const int createLobbyWidth = 460;
+	const int createLobbyHeight = 443;
 	const int lobbyWidth = 460;
 	const int lobbyHeight = 443;
 	const int howToWidth = 460;
@@ -114,6 +118,9 @@ public class Menu : MonoBehaviour
 		case MenuState.LobbyList:
 			GuiLobbyList();
 			break;
+		case MenuState.CreateLobby:
+			GuiCreateLobby();
+			break;
 		case MenuState.Lobby:
 			GuiLobby();
 			break;
@@ -157,7 +164,7 @@ public class Menu : MonoBehaviour
 		
 		if(GUI.Button(new Rect(x, y, buttonWidth, buttonHeight), "Play"))
 		{
-			AnimateBackground(lobbyWidth, lobbyHeight);
+			AnimateBackground(lobbyListWidth, lobbyListHeight);
 			State = MenuState.LobbyList;
 		}
 		if(GUI.Button(new Rect(x, y += buttonHeight + gap, buttonWidth, buttonHeight), "How to Play"))
@@ -182,16 +189,6 @@ public class Menu : MonoBehaviour
 	}
 	void GuiLobbyList()
 	{
-		if(GUI.Button(new Rect(0,0,200,30), "Create match"))
-		{
-			OnCreateMatchPressed();
-		}
-	}
-	void GuiCreateLobby()
-	{
-	}
-	void GuiLobby()
-	{
 		int rowWidth = boxWidth - 40;
 		int rowHeight = 20;
 		int rowX = 0;
@@ -201,28 +198,53 @@ public class Menu : MonoBehaviour
 	//		GUI.BeginGroup(new Rect(20, 150, rowWidth, (int)(boxHeight / (float)rowHeight)));
 		}
 		
-		//Title
-		GUI.Label(new Rect(110, 91, 300, 50), "Multiplayer lobby");
-		
+		GuiTitle("Multiplayer Lobbies");
+
 		//Lobby Table
 		GUI.DrawTexture(new Rect(50,140,360,210), TableBackground);
 		
-		if(GUI.Button(new Rect(100, boxHeight-80, 70, 30), "Back"))
+		if(GuiBackButton())
 		{
 			AnimateBackground(mainMenuWidth, mainMenuHeight);
 			State = MenuState.MainMenu;
 		}
 		
-		if(GUI.Button(new Rect((boxWidth-180), boxHeight-80, 80, 30), "Join"))
+		if(GUI.Button(new Rect(boxWidth-180, boxHeight-80, 70, 30), "Create"))
 		{
+			AnimateBackground(createLobbyWidth, createLobbyHeight);
+			State = MenuState.CreateLobby;
+		}
+	}
+	void GuiCreateLobby()
+	{
+		GuiTitle("Create Lobby");
+		
+		if(GuiBackButton())
+		{
+			AnimateBackground(lobbyListWidth, lobbyListHeight);
+			State = MenuState.LobbyList;
+		}
+	}
+	void GuiLobby()
+	{	
+		GuiTitle("Lobby");
+
+		if(GuiBackButton())
+		{
+			AnimateBackground(mainMenuWidth, mainMenuHeight);
+			State = MenuState.MainMenu;
+		}
+		
+		if(GUI.Button(new Rect(0,0,200,30), "Create match"))
+		{
+			OnCreateMatchPressed();
 		}
 	}
 	void GuiHowTo()
 	{
-		//Title
-		GUI.Label(new Rect(110, 91, 300, 50), "How-to");
+		GuiTitle("How-to");
 		
-		if(GUI.Button(new Rect(100, boxHeight-80, 70, 30), "Back"))
+		if(GuiBackButton())
 		{
 			AnimateBackground(mainMenuWidth, mainMenuHeight);
 			State = MenuState.MainMenu;
@@ -230,10 +252,9 @@ public class Menu : MonoBehaviour
 	}
 	void GuiOptions()
 	{
-		//Title
-		GUI.Label(new Rect(110, 91, 300, 50), "Options");
+		GuiTitle("Options");
 		
-		if(GUI.Button(new Rect(100, boxHeight-80, 70, 30), "Back"))
+		if(GuiBackButton())
 		{
 			AnimateBackground(mainMenuWidth, mainMenuHeight);
 			State = MenuState.MainMenu;
@@ -241,14 +262,22 @@ public class Menu : MonoBehaviour
 	}
 	void GuiHighScores()
 	{
-		//Title
-		GUI.Label(new Rect(110, 91, 300, 50), "Highscores");
+		GuiTitle("Highscores");
 		
-		if(GUI.Button(new Rect(100, boxHeight-80, 70, 30), "Back"))
+		if(GuiBackButton())
 		{
 			AnimateBackground(mainMenuWidth, mainMenuHeight);
 			State = MenuState.MainMenu;
 		}
+	}
+	
+	void GuiTitle(string title)
+	{
+		GUI.Label(new Rect(110, 91, 300, 50), title);
+	}
+	bool GuiBackButton()
+	{
+		return GUI.Button(new Rect(100, boxHeight-80, 70, 30), "Back");
 	}
 	
 	void OnCreateMatchPressed()

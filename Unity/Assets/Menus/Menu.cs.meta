@@ -2,7 +2,12 @@ fileFormatVersion: 2
 guid: f3287e438e6ee2246b54968ba11ee39d
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - LeftTexture: {fileID: 2800000, guid: 1589432d85b6649a1a4fe4d464ad6dd4, type: 3}
+  - CenterTexture: {fileID: 2800000, guid: 49897d55395874d9190842223d865956, type: 3}
+  - RightTexture: {fileID: 2800000, guid: fd83c5a02bd8d4017a0e734566bd64d5, type: 3}
+  - Skin: {fileID: 11400000, guid: 6f7418177c9a3434ca42c8684f604fa4, type: 2}
+  - TableBackground: {fileID: 2800000, guid: f7183ce315ee54e959de80713584aac5, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
