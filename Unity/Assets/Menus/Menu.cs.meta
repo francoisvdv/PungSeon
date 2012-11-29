@@ -7,7 +7,7 @@ MonoImporter:
   - CenterTexture: {fileID: 2800000, guid: 49897d55395874d9190842223d865956, type: 3}
   - RightTexture: {fileID: 2800000, guid: fd83c5a02bd8d4017a0e734566bd64d5, type: 3}
   - Skin: {fileID: 11400000, guid: 6f7418177c9a3434ca42c8684f604fa4, type: 2}
-  - TableBackground: {fileID: 2800000, guid: f7183ce315ee54e959de80713584aac5, type: 3}
+  - LobbyItemSkin: {fileID: 11400000, guid: 63b2823bfaa7a5a419a8bdd6bc18fe7f, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

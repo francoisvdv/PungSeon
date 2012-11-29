@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Menu : MonoBehaviour
 {
@@ -34,7 +35,9 @@ public class Menu : MonoBehaviour
 	public Texture CenterTexture;
 	public Texture RightTexture;
 	public GUISkin Skin;
-	public Texture TableBackground;
+	public GUISkin LobbyItemSkin;
+
+	Vector2 lobbyListScrollPosition = Vector2.zero;
 	
 	// Use this for initialization
 	void Start ()
@@ -66,9 +69,6 @@ public class Menu : MonoBehaviour
 	
 	void AnimateBackground(int targetWidth, int targetHeight)
 	{
-		if(animating)
-			return;
-		
 		animating = true;
 		animationTimer = 0;
 		sourceBoxWidth = boxWidth;
@@ -189,19 +189,38 @@ public class Menu : MonoBehaviour
 	}
 	void GuiLobbyList()
 	{
-		int rowWidth = boxWidth - 40;
-		int rowHeight = 20;
-		int rowX = 0;
-		
-		//box
-		{
-	//		GUI.BeginGroup(new Rect(20, 150, rowWidth, (int)(boxHeight / (float)rowHeight)));
-		}
+		int rowWidth = boxWidth - 120;
+		int rowHeight = 30;
+		int rowGap = 3;
 		
 		GuiTitle("Multiplayer Lobbies");
-
-		//Lobby Table
-		GUI.DrawTexture(new Rect(50,140,360,210), TableBackground);
+				
+		//table box
+		{
+			int lobbyCount = 40;
+			
+			lobbyListScrollPosition = GUI.BeginScrollView(
+				new Rect(50, 150, boxWidth - 100, boxHeight - 250),
+				lobbyListScrollPosition,
+				new Rect(0,0, rowWidth, lobbyCount * rowHeight + (lobbyCount - 1) * rowGap));
+			
+			int y = 0;
+			for(int i = 0; i < lobbyCount; i++)
+			{
+				GUI.BeginGroup(new Rect(0, y, rowWidth, rowHeight));
+				
+				if(GUI.Button(new Rect(0, 0, rowWidth, rowHeight), "", LobbyItemSkin.button))
+					OnJoinLobbyPressed();
+				
+				GUI.Label(new Rect(0, 0, rowWidth - 20, 30), "Yo Momma's Server");
+				GUI.Label(new Rect(rowWidth - 30, 0, 30, 30), "2/6");
+				
+				GUI.EndGroup();
+				y += rowHeight + rowGap;
+			}
+			
+			GUI.EndScrollView();
+		}
 		
 		if(GuiBackButton())
 		{
@@ -233,11 +252,6 @@ public class Menu : MonoBehaviour
 		{
 			AnimateBackground(mainMenuWidth, mainMenuHeight);
 			State = MenuState.MainMenu;
-		}
-		
-		if(GUI.Button(new Rect(0,0,200,30), "Create match"))
-		{
-			OnCreateMatchPressed();
 		}
 	}
 	void GuiHowTo()
@@ -280,7 +294,10 @@ public class Menu : MonoBehaviour
 		return GUI.Button(new Rect(100, boxHeight-80, 70, 30), "Back");
 	}
 	
-	void OnCreateMatchPressed()
+	void OnJoinLobbyPressed()
+	{
+	}
+	void OnCreateLobbyPressed()
 	{
 		print ("IK BEN BEDRUKT!");
 	}
