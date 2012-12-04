@@ -1,0 +1,93 @@
+
+\begin{schema}{Client}
+username: String\\
+players: list String
+\end{schema}
+
+\begin{schema}{Server}
+lobyIPs: list list String\\
+readyList: list list bool
+\end{schema}
+
+\begin{schema}{File}
+title: String\\
+content: String
+\end{schema}
+
+\begin{schema}{Message}
+label: String\\
+data: String\\
+IP: String
+\end{schema}
+
+\begin{schema}{Ready}
+\Delta Server\\
+i?: Message
+\where
+i?.label = "Ready"\\
+\exists[n,j \ in \mathbb{N} \and j < 6 \and i?.IP = lobby[n][j] : ready'[n][j] = true]\\
+\end{schema}
+
+\begin{schema}{CreateLobby}
+\Delta Server\\
+i?: Message
+\where
+i?.label = "CreateLobby"\\
+lobbyIPs'[(int) i?.data][0] = i?.IP
+\end{schema}
+
+\begin{schema}{JoinLobby}
+\Delta Server\\
+i?: Message
+\where
+i?.label = "JoinLobby"\\
+\exists[j \in \mathbb{N} \and j < 6 \and lobbyIPs[(int) i?.data][j] = "" : lobbyIPs'[(int) i?.data][j] = i?.IP]\\
+\end{schema}
+
+\begin{schema}{LeaveLobby}
+\Delta Server\\
+i?: Message
+\where
+i?.label = "LeaveLobby"
+\exists[n,j \in \matbb{N} \and j < 6 \and lobbyIPs[n][j] = i?.IP : lobbyIPs'[n][j] = ""]
+\end{schema}
+
+\begin{schema}{Start}
+\Delta Server\\
+\Delta Client\\
+o!: Message
+\where
+\exists[n \in \matbb{N} :\\
+\forall[j \in \matbb{N} \and j < 6 \and lobbyIPs[n][j] \neq "" : readyList[n][j] = true] \and
+\forall[j \in \matbb{N} \and j < 6 : lobbyIPs[n][j] = "" \and readyList'[n][j] = false] \and
+o!.data = lobbyIPs[n]]\\
+o!.label = "Start"
+\end{schema}
+
+\begin{schema}{Highscore}
+\Xi Server\\
+\Xi File\\
+i?: Message\\
+o?: Message
+\where
+title = "Highscores"
+i?.label = "Highscores"
+o!.label = "Highscores"
+o!.data = content
+\end{schema}
+
+\begin{schema}{Lobby}
+\Xi Server\\
+i?: Message\\
+o?: Message
+\where
+i?.label = "Lobby"
+o!.label = "Lobby"
+o!.data = lobbyIPs
+\end{schema}
+
+\begin{schema}{Error}
+\Xi Server\\
+i?: Message\\
+\where
+\end{schema}
