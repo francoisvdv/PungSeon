@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "netwerken", "netwerken\netwerken.csproj", "{F23DEF28-C3E7-4010-842D-97069E8EB6FA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F23DEF28-C3E7-4010-842D-97069E8EB6FA}.Debug|x86.ActiveCfg = Debug|x86
+		{F23DEF28-C3E7-4010-842D-97069E8EB6FA}.Debug|x86.Build.0 = Debug|x86
+		{F23DEF28-C3E7-4010-842D-97069E8EB6FA}.Release|x86.ActiveCfg = Release|x86
+		{F23DEF28-C3E7-4010-842D-97069E8EB6FA}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = netwerken\netwerken.csproj
+	EndGlobalSection
+EndGlobal
