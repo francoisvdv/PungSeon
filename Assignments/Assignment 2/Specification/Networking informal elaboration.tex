@@ -1,0 +1,32 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\begin{document}
+\section{Client}
+The Client has 2 variables:
+\begin{enumerate}
+\item[\textbf{userName}] The username associated with this client.
+\item[\textbf{peers}] A list of the IP addresses of the clients this client currently has a peer to peer connection with.
+\end{enumerate}
+The Client has 3 methods:
+\begin{enumerate}
+\item[\textbf{Connect}] Connects the client to a peer/server at the given IP.
+\item[\textbf{SendMessage}] Sends a message to a connected peer/server.
+\item[\textbf{ReceiveMessage}] Receives a message from a connected peer/server.
+\end{enumerate}
+\section{Server}
+The Server has 2 variables:
+\begin{enumerate}
+\item[\textbf{lobbyIPs}] List of lobbies, where a lobby is a list (of at most length 6) of IP addresses. 
+\item[\textbf{readyList}] List inside a list mapped one to one to lobbyIPs. This two dimensional list contains booleans indicating if a player is ready. The player associated with each boolean is the owner of the IP address the boolean is mapped to.
+\end{enumerate}
+The Server has 4 methods:
+\begin{enumerate}
+\item[\textbf{Listen}] Listens to connection requests from clients and connects to the clients.
+\item[\textbf{WaitRequest}] Waits for messages from connected clients.
+\item[\textbf{HandleRequest}] Processes messages from connected clients and sends messages back if required.
+\item[\textbf{Start}] Broadcasts the IP addresses in a lobby to the clients in the lobby as soon as the requirements to start the game are satisfied, and empties the lobby.
+\end{enumerate}
+\end{document}
