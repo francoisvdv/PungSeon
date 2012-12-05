@@ -2,6 +2,7 @@ using System;
 using System.Net.Sockets;
 using System.Net;
 using System.IO;
+using System.Collections.Generic;
 
 namespace netwerken
 {	
@@ -11,111 +12,114 @@ namespace netwerken
 		/* The name of person using the client */
 		private string username;
 		
-		/* The names of players that joined the network */
-		private List<String> players;
+		/* The list of peer IP's*/
+		private List<string> peerIP;
 		
 		/* The tcp connection to the server */
-		private TcpClient server = new TcpClient();
-		
+		private TcpClient server;
+				
 		/* The list of tcp connections to the server */ 
-		private List<TcpClient> peers = new Array<TcpClient>();
-
+		private List<TcpClient> peers;
+		
+		/* The id assigned to the client by the server*/
+		private int clientID; 
+		
+		/* Listens for peer connections*/
+		private TcpListener tcp;
 		
 		/*
 		 * Initialise the client
 		 */ 
-		public Client(String username)
-		{
+		public Client(string username) {
 			this.username = username;
-			peers = new List<String>();
-			players = new List<String>();
+			peers = new List<TcpClient>();
+			startlisten();
 		}
-				
-		/******************************************************************************
-		 * 
-		 *   client-server methods
-		 * 
-		 ******************************************************************************
 		
 		/*
-		 * Connect the client to the server
-		 * 
-		 * -make tcp connection
-		 * -send username to be registered
+		 * Connect to a server
+		 */ 
+		public void Connect(){
+			server = new TcpClient();
+		}
+		
+		/*
+		 * Connect to a peer
 		 */
-		public void Connect(String ip, int port){
-			server.Connect(ip, port);
+		public void Connect(string ip, int port){
+			TcpClient peer = new TcpClient();
+			
+			peer.BeginConnect(ip, port, onConnect, new object());
+		}
+		
+		void onConnect(IAsyncResult iar){
+			Console.WriteLine("succes");
+		}
+		
+		void startlisten(){
+			object state = new object();
+			tcp = new TcpListener(IPAddress.Any, 4550);
+			tcp.Start();
+			tcp.BeginAcceptTcpClient(onAccept, tcp);
+		}
+		
+		void onAccept(IAsyncResult iar){
+			TcpListener l = (TcpListener) iar.AsyncState;
+	        TcpClient peer;
+	        try
+	        {
+	            peer = l.EndAcceptTcpClient(iar);
+				
+				Console.WriteLine("New connection! Connections: " + peers.Count);
+				
+	            l.BeginAcceptTcpClient(new AsyncCallback(onAccept), l);
+				
+	        }
+	        catch (SocketException ex)
+	        {
+				Console.WriteLine("Error accepting TCP connection: " + ex.Message);
+	            return;
+	        }
+	        catch (ObjectDisposedException)
+	        {
+	            // The listener was Stop()'d, disposing the underlying socket and
+	            // triggering the completion of the callback. We're already exiting,
+	            // so just return.
+				Console.WriteLine("Listen canceled.");
+	            return;
+	        }
+			
+			if(peer != null && peer.Connected)
+			{
+				Console.WriteLine("Connected: " + peer.Connected);
+				peers.Add(peer);
+			}
 		}
 		
 		/*
 		 * Send queued data to server
 		 */
-		public void sendServerData(String label, String message){
-				NetworkStream serverStream = server.GetStream();
-				StreamWriter sw = new StreamWriter(serverStream);
-		}
-		
-		public String[] getReceivedServerData(){
-			String s = received.FindFirst().Split(',');
-			lock(received){
-         	  	receivedServer.RemoveFirst(System.Text.Encoding.ASCII.GetString(inStream));	
-			}
-			return s;
+		public void sendData(String message, String ip){
+			
 		}
 		
 		/*
-		 * @return: label and content of the received message from server
+		 * Label and content of the received message from server
 		 */
-		public void receiveServerData(){
-			while(true){
-				NetworkStream serverStream = server.GetStream();
-				
-				byte[] inStream = new byte[10025];
-				
-            	serverStream.Read(inStream, 0, (int)clientSocket.ReceiveBufferSize);
-				lock(received){
-         	  		received.AddLast(System.Text.Encoding.ASCII.GetString(inStream));	
-				}
-			}
+		public void receiveData(){
+						
 		}
-		
-		/****************************************************************************************************
-		 * 
-		 *    Peer 2 peer methods
-		 * 
-		 ****************************************************************************************************/
 		
 		/* 
 		 * Returns whether the network is available 
 		 */
 		public Boolean networkAvailable(){
-			return NetworkInformation.NetworkInterface.GetIsNetworkAvailable();
+			return System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable();
 		}
 		
-		/*
-		 * Loop to continuously receive messages from peers
-		 */
-		public void Receive(){
-			while(true){
-				
-			}
-		}
-		
-		/*
-		 * Loop to send queued messages
-		 */
-		public void Send(){
-			while(true){
-				if(send.Length>0){
-					
-					
-				}
-			}
-		}
-		
-		public static void Main (string[] args)
+		public static void Main()
 		{
-			
+			Client t = new Client("");
 		}
 	}
 }
