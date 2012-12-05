@@ -33,6 +33,7 @@ namespace netwerken
 		public Client(string username) {
 			this.username = username;
 			peers = new List<TcpClient>();
+			Console.WriteLine("start accepting");
 			startlisten();
 		}
 		
@@ -120,6 +121,8 @@ namespace netwerken
 		public static void Main()
 		{
 			Client t = new Client("");
+			t.Connect("131.155.241.205", 4550);
+			while(true){};
 		}
 	}
 }
