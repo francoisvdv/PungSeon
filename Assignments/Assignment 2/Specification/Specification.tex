@@ -100,17 +100,17 @@ Francois van der Ven, 0782851
 \item Scenarios: 
 	\begin{enumerate}
 	\item Main scenario
-		\begin{enumerate}[1)]
+		\begin{enumerate}[1)]		
+		\item The Player presses the "Play" button.
+		\item The Client connects to the Server and retrieves the lobby data.
 		\item Player presses the "Create match" button.
-		\item The player is placed into a lobby by the server.
-		\item Enough players join to start the game, and set themselfs 			to be ready.
-		\item The player presses the "Ready" button.
-		\item The game starts.
+		\item The player is placed into a new lobby by the server.
+		\item The player presses the "Ready" button and sends a message to the server.
+		\item The server waits for all players to be ready and tells all players to start.
 		\end{enumerate}
 	\item Alternatives
 		\begin{description}
-		\item[2.1] The client failed to connect to the server and is 			not placed into a lobby.
-		\item[5.1] One of the other players in the lobby did not press 			the "Ready" button yet, and hence the player(s) has to wait for 			this player before the game will start.
+		\item[2.1] The client failed to connect. And hence the player is returned to the main menu.
 		\end{description}
 	\end{enumerate}
 \end{enumerate}
@@ -123,16 +123,18 @@ Francois van der Ven, 0782851
 	\begin{enumerate}
 	\item Main scenario
 		\begin{enumerate}[1)]
+		\item The Player presses the "Play" button.
+		\item The Client connects to the Server and retrieves the lobby data.
 		\item Player clicks on a lobby to join.
 		\item The player is placed into a lobby by the server.
-		\item The player presses the "Ready" button.
+		\item The player presses the "Ready" button and sends a message to the server.
+		\item The server waits for all players to be ready and tells all players to start.
 		\item The game starts.
 		\end{enumerate}
 	\item Alternatives
-		\begin{description}
-		\item[2.1] The client failed to connect to the server and is 			not placed into a lobby.
-		\item[2.2] The lobby was deleted before the player could join.
-		\item[4.1] One of the other players in the lobby did not press 			the "Ready" button yet, and hence the player(s) has to wait for 			this player before the game will start.
+		\begin{description}		
+		\item[2.1] The client failed to connect. And hence the player is returned to the main menu.
+		\item[4.1] The lobby was deleted before the player could join.
 		\end{description}
 	\end{enumerate}
 \end{enumerate}
