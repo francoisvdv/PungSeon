@@ -2,34 +2,21 @@ using System;
 using System.Net.Sockets;
 using System.Net;
 using System.IO;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace netwerken
 {
 	public class Server
 	{		
-		List<List<String>> Lobby;
+		private List<List<String>> Lobby;
 		
-		List<List<Boolean>> Ready;	
-		
-		List<TcpClient> clients();
+		private List<List<Boolean>> Ready;	
 		
 		public Server(){
-			clients = new List<TcpClient>();
+			Clients = new List<TcpClient>();
 			Lobby = new List<List<String>>();
-			Lobby.setCapacity(3);
 			Ready = new List<List<Boolean>>();	
-			Ready.setCapacity(3);
-			foreach(List<String> numPlayers in Lobby){
-				numPlayers = new List<String>();
-				numPlayers.setCapacity(6);
-			}
-			foreach(List<Boolean> numReady in Ready){
-				numReady = new List<String>();
-				numReady.setCapacity(6);
-				foreach(Boolean ready in numReady){
-					ready = true;
-				}
-			}
 		}
 		
 		public void Connect(){
@@ -68,20 +55,65 @@ namespace netwerken
 			if(client != null && client.Connected)
 			{
 				Console.WriteLine("Connected: " + client.Connected);
-				clients.Add(client);
+				Thread handleClient = new Thread(this.WaitRequest(client));
+				handleClient.Start();
 			}
 		}
 		
-		public void WaitRequest(){
-			
+		/*
+		 * Waits for a request from the client 
+		 */
+		public void WaitRequest(TcpClient client){
+			StreamReader read = new StreamReader(client.GetStream());
+			while(client.Connected()){
+				String s;
+				if(s = read.ReadLine() != null){
+					HandleRequest(client, s);					
+				}
+			}
 		}
 		
-		public void HandleRequest(){
+		/*
+		 * Processes the request of the client
+		 */
+		public void HandleRequest(TcpClient client, String request){
+			StreamWriter writer = new StreamWriter(Client.GetStream());
+			StreamWriter filewriter = new StreamWriter(new File("highscores"));
+			String[] split = s.Split(',');
+			switch(split[0]){
 			
+			case "CreateLobby": 
+				//add entry to lobby
+				//set all entry points to false
+				break;
+			case "JoinLobby": 
+				//add entry to lobby
+				//set ready entry to false
+				break;
+			case "LeaveLobby": 
+				//remove entry from lobby
+				//set ready entry to true
+				break;
+			case "GetLobby":
+				//send lobby list to client
+				break;
+			case "GetHighScores": 
+				//read file get database
+				break;
+			case "SetHighScores":
+				//write highscores to file
+				break;
+			}
 		}
 		
+		/*
+		 * Start a game 
+		 */
 		public void Start(){
-			
+			//repeatedly scan the lobby
+			//if all entries in the list are ready
+			//create a network by sending ip adresses
+			//flush the list
 		}
 		
 		public static void Main(String[] args){

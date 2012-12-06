@@ -53,10 +53,11 @@ namespace netwerken
 			peer.BeginConnect(ip, port, onConnect, new object());
 		}
 		
-		void onConnect(IAsyncResult iar){
-			Console.WriteLine("succes");
-		}
+		void onConnect(IAsyncResult iar){ /* no need to do anything here */ }
 		
+		/*
+		 * Start listening for connections from peers 
+		 */
 		void startlisten(){
 			object state = new object();
 			tcp = new TcpListener(IPAddress.Any, 4550);
@@ -64,12 +65,15 @@ namespace netwerken
 			tcp.BeginAcceptTcpClient(onAccept, tcp);
 		}
 		
+		/*
+		 * This is executed when the connection request from another peer is accepted
+		 */
 		void onAccept(IAsyncResult iar){
 			TcpListener l = (TcpListener) iar.AsyncState;
 	        TcpClient peer;
 	        try
 	        {
-	            peer = l.EndAcceptTcpClient(iar);
+	            peer = l.EndAcceptTcpClient(iar); //new peer
 				
 				Console.WriteLine("New connection! Connections: " + peers.Count);
 				
@@ -120,9 +124,7 @@ namespace netwerken
 		
 		public static void Main()
 		{
-			Client t = new Client("");
-			t.Connect("131.155.241.205", 4550);
-			while(true){};
+			
 		}
 	}
 }
