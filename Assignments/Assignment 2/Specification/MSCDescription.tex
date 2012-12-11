@@ -1,0 +1,155 @@
+\documentclass[a4paper,twoside,11pt]{article}
+\usepackage{enumerate, a4wide,graphicx,fancyhdr,amsmath,amssymb, amsfonts, listings, titlesec}
+
+%----------------------- Macros and Definitions --------------------------
+
+\setlength\headheight{20pt}
+\addtolength\topmargin{-10pt}
+\addtolength\footskip{20pt}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\ch}{\mathcal{CH}}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+\newcommand{\solution}[1]{\noindent{\bf Solution to Exercise #1:}}
+
+\fancypagestyle{plain}{%
+\fancyhf{}
+\fancyhead[LO,RE]{\sffamily\bfseries\large Technische Universiteit Eindhoven}
+\fancyhead[RO,LE]{\sffamily\bfseries\large 2IO23 DBL Specification and Game}
+\fancyfoot[LO,RE]{\sffamily\bfseries\large department of mathematics and computer science}
+\fancyfoot[RO,LE]{\sffamily\bfseries\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[RO,LE]{\sffamily\bfseries\large Technische Universiteit Eindhoven}
+\fancyhead[LO,RE]{\sffamily\bfseries\large 2IO23 DBL Specification and Game}
+\fancyfoot[LO,RE]{\sffamily\bfseries\large department of mathematics and computer science}
+\fancyfoot[RO,LE]{\sffamily\bfseries\thepage}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries\centering}{\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\centering}{\thesubsection}{1em}{}
+
+%-------------------------------- Title ----------------------------------
+
+\title{\vspace{-\baselineskip}\sffamily\bfseries Meeting Scheduler}
+\author{Author, nummer}
+
+\date{\today}
+
+%--------------------------------- Text ----------------------------------
+
+\begin{document}
+
+\section{Message Sequence Charts}
+\subsection{Connect}
+The following MSC describes the connecting of a client with a server.
+
+\subsection{SendReceiveServer}
+The following MSC describes the sending of data from a client to a server, where the server then processes the data and sends a reply.
+
+\subsection{SendReceivePeers}
+The following MSC describes the sending of data from one client to another client.
+
+\subsection{GetHighScoreData}
+The following MSC describes the retrieval of retrieving the high score data which is stored on the server.
+
+\subsection{Create match}
+The following MSC describes the creation of a match.\\
+The creation of the match follows several steps:
+\begin{enumerate}
+\item Connecting to the server (2-5).
+\item Loading the lobby list (6-7).
+\item Lobby creation (8-10).
+\item Having enough players that are ready (11-12).
+\item Starting the game (13).
+\end{enumerate}
+
+\subsection{Join match}
+The following MSC describes the creation of a match.\\
+The joining of the match follows several steps:
+\begin{enumerate}
+\item Connecting to the server (2-5).
+\item Loading the lobby list (6-7).
+\item Joining a lobby (8-10).
+\item Having enough players that are ready (11-12).
+\item Starting the game (13).
+\end{enumerate}
+
+\subsection{Edit options}
+The following MSC describes the editing of the options relating to the game.\\
+The editing of the options has two steps:
+\begin{enumerate}
+\item Getting the options (1-3).
+\item While the play did not press close, the play can edit any amount of options (which are instantly saved when edited).
+\end{enumerate}
+
+\subsection{Check how to play}
+The following MSC describes the checking of the how to play of the game.\\
+
+\subsection{Check highscores}
+The following MSC describes the checking of the highscores of the game.\\
+The checking of the highscores has two steps:
+\begin{enumerate}
+\item Getting the highscore data (ref GetHighScoreData, section TODO.4)
+\item Display the highscore data.
+\end{enumerate}
+
+\subsection{Quit game}
+The following MSC describes the quiting of the game.\\
+
+\subsection{Move}
+The following MSC describes the move action in the game.\\
+Movement in the game is described in two steps:
+\begin{enumerate}
+\item Notifying other peers in the game of the move (1-3).
+\item All peers update their respective players (4-5).
+\end{enumerate}
+
+\subsection{Pick up flag}
+The following MSC describes the pick up flag action in the game.\\
+The picking up of a flag can be divided in two steps:
+\begin{enumerate}
+\item Picking up the flag, and notifying other peers of it (1-3)
+\item Showing the fact that the player has picked up flag to all other players (4).
+\end{enumerate}
+
+\subsection{Activate block}
+The following MSC describes the activate block action in the game.\\
+The activation of a block can be divided in two steps:
+\begin{enumerate}
+\item Colliding with the block (1)
+\item Stating the fact that there has been a collision with a block to other peers (2-3).
+\item Updating the effect of the player activating the block on all peers (4).
+\end{enumerate}
+
+\subsection{Fire weapon}
+The following MSC describes firing in the game.\\
+The firing divided in two steps:
+\begin{enumerate}
+\item The player firing (1)
+\item Notifying all other peers of the fact that player fired (2-3).
+\item Update player health in response to the firing (4-5).
+\end{enumerate}
+
+\subsection{Deliver flag}
+The following MSC describes delivering a flag in the game.\\
+Delivering a flag can be divided in several steps:
+\begin{enumerate}
+\item The player moves (ref Move, section TODO.11).
+\item The player is in the drop zone (1).
+\item Notify all other peers that the player moved into the drop zone (2-3).
+\item Open the doors of the base in which drop zone the player is (4-5).
+\item The flag is delivered (6).
+\item Notifying all the other peers of the player delivering a flag (7-8).
+\item Either the flag is delivered and points are given to the player (9-10) or the base is claimed, and a point given to the player (11-12).  
+\end{enumerate}
+
+\end{document}
