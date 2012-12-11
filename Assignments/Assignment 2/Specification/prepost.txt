@@ -12,11 +12,11 @@ Class: Base
 Class: Player
   void Move()
     @pre: The player is able to move (not in front of an inanimate object)
-    @post: The players movement direction is changed (up,down,left,right) or stopped and his current location is updated to the other clients.
+    @post: The players movement direction is changed (up,down,left,right) or stopped and his current location and movement direction is updated to the other clients.
 
   void Fire() 
     @pre: The player is able to fire
-    @post: A laser is fired from the gun.
+    @post: A laser is fired from the gun. (and this is shared with the rest of the clients)
 
   void Update(): ?????????
     @pre:
@@ -24,19 +24,19 @@ Class: Player
 
   bool UpdateHealth(int amount)
     @pre: Player is not dead
-    @post: The players health is updated and a boolean is returned indicating if the player is still alive (iow: hp is not less or equal than zero)
+    @post: The players health is updated (and this is shared with the rest of the clients) and a boolean is returned indicating if the player is still alive (iow: hp is not less or equal than zero)
 
   void GiveFlag()
     @pre: The player does not carry a flag
-    @post: The player now carries a flag. The flag is now removed from the map (no other players can pick up this flag)
+    @post: The player now carries a flag (this is shared with the rest of the clients). The flag is now removed from the map (no other players can pick up this flag)
 
   void DeliverFlag()
     @pre: The player is carrying a flag
-    @post: The player's score is increased with 1 and the flag is removed from the players inventory
+    @post: The player's score is increased with 1 (this is shared with the rest of the clients) and the flag is removed from the players inventory
 
   void ApplyBlockEffect()
     @pre: Player is in radius 1lu of a powerup block
-    @post: Player's effect is reset (entirely disabled, reset effect timer, everything) and set to the new block's effect
+    @post: Player's effect is reset (entirely disabled, reset effect timer, everything) and set to the new block's effect. This is shared with the rest of the clients.
 
 class Menu
   void GuiMainMenu()
