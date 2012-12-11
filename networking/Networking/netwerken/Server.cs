@@ -8,17 +8,31 @@ using System.Threading;
 namespace netwerken
 {
 	public class Server
-	{		
+	{	
+		/* A list of lobby's and the users in them */
 		private List<List<String>> Lobby;
 		
+		/* Users that are ready */
 		private List<List<Boolean>> Ready;	
 		
+		/*
+		 * Constructor
+		 */
 		public Server(){
 			Clients = new List<TcpClient>();
 			Lobby = new List<List<String>>();
 			Ready = new List<List<Boolean>>();	
+			//all empty elements by default have ready value true
+			foreach(List<Boolean> clients in Ready){
+				foreach(Boolean client in clients){
+					client = true;
+				}
+			}
 		}
 		
+		/*
+		 * Listens for clients connection requests
+		 */ 
 		public void Connect(){
 			object state = new object();
 			tcp = new TcpListener(IPAddress.Any, 4550);
@@ -26,6 +40,9 @@ namespace netwerken
 			tcp.BeginAcceptTcpClient(onAccept, tcp);
 		}
 		
+		/*
+		 * When a client connection is accepted
+		 */
 		void onAccept(IAsyncResult iar){
 			TcpListener l = (TcpListener) iar.AsyncState;
 	        TcpClient client;
@@ -90,6 +107,10 @@ namespace netwerken
 				//add entry to lobby
 				//set ready entry to false
 				break;
+			case "Ready":
+				//set ready true
+				//broadcast to everyone in the lobby
+				break;
 			case "LeaveLobby": 
 				//remove entry from lobby
 				//set ready entry to true
@@ -117,7 +138,7 @@ namespace netwerken
 		}
 		
 		public static void Main(String[] args){
-				
+			
 		}
 	}
 }

@@ -1,0 +1,110 @@
+lu = length unit, approaching a meter in the game.
+
+Class: Base
+  void openDoors()
+    @pre: Player is within a 3lu radius of the base's door
+    @post: The door is opened and the player can enter the base.
+
+  void claimBase(int newOwner)
+    @pre: The player hasn't claimed a base yet and is in 4lu radius of the elevator.
+    @post: The animation is played and the player has now a base. 
+
+Class: Player
+  void Move()
+    @pre: The player is able to move (not in front of an inanimate object)
+    @post: The players movement direction is changed (up,down,left,right) or stopped and his current location and movement direction is updated to the other clients.
+
+  void Fire() 
+    @pre: The player is able to fire
+    @post: A laser is fired from the gun. (and this is shared with the rest of the clients)
+
+  void Update(): ?????????
+    @pre:
+    @post:
+
+  bool UpdateHealth(int amount)
+    @pre: Player is not dead
+    @post: The players health is updated (and this is shared with the rest of the clients) and a boolean is returned indicating if the player is still alive (iow: hp is not less or equal than zero)
+
+  void GiveFlag()
+    @pre: The player does not carry a flag
+    @post: The player now carries a flag (this is shared with the rest of the clients). The flag is now removed from the map (no other players can pick up this flag)
+
+  void DeliverFlag()
+    @pre: The player is carrying a flag
+    @post: The player's score is increased with 1 (this is shared with the rest of the clients) and the flag is removed from the players inventory
+
+  void ApplyBlockEffect()
+    @pre: Player is in radius 1lu of a powerup block
+    @post: Player's effect is reset (entirely disabled, reset effect timer, everything) and set to the new block's effect. This is shared with the rest of the clients.
+
+class Menu
+  void GuiMainMenu()
+    @pre: state == MenuState.MainMenu
+    @post: the gui of the Mainmenu is shown
+
+  void GuiLobbyList()
+    @pre: state == MenuState.LobbyList
+    @post: the gui of the Lobby list is shown  
+
+  void GuiLobby()
+    @pre: state == MenuState.Lobby
+    @post: the gui of the Lobby is shown 
+
+  void GuiHowTo()
+    @pre: state == MenuState.HowTo
+    @post: the gui of the How-to window is shown
+
+  void GuiOptions()
+    @pre: state == MenuState.Options
+    @post: the gui of the Options window is shown  
+
+  void GuiHighscores()
+    @pre: state == MenuState.Highscores
+    @post: the gui of the Highscores list is shown 
+
+  void OnPlayPressed()
+    @pre: state == MenuState.MainMenu
+    @post: The active lobbies are retrieved from the server and state == MenuState.LobbyList
+
+  void OnCreateLobbyPressed()
+    @pre: state == MenuState.LobbyList
+    @post: A new lobby is created at the server and the player is placed into this new lobby; state == MenuState.Lobby
+
+  void OnJoinLobbyPressed()
+    @pre: state == MenuState.LobbyPressed
+    @post: Information about the selected lobby is retreived and the player is placed into this lobby; state == MenuState.Lobby
+
+  void OnReadyPressed()
+    @pre: state == MenuState.Lobby
+    @post: A ready signal is sent to the server. (when the server has ready signals of all users the server sends a signal to all clients to start the game, this is all done automatically)
+
+  void OnOptionsPressed()
+    @pre: state == MenuState.MainMenu
+    @post: state == MenuState.Options
+
+  void OnOptionChanged()
+    @pre: The user edited one of the options, and state == MenuState.Options
+    @post: The changed option is saved
+
+  void OnHighscoresPressed()
+    @pre: state == MenuState.MainMenu
+    @post: The highscores are retrieved from the server and state == MenuState.Highscores
+
+  void OnQuitGamePressed()
+    @pre: state == MenuState.MainMenu
+    @post: The game quits
+
+class GameManager
+  void QuitGame()
+    @pre: True
+    @post: The game quits
+
+class Options
+  void SaveOption()
+    @pre: True
+    @post: The option is saved to the config file
+
+  Options GetOptions()
+    @pre: True
+    @post: The options are returned fromt he config file
