@@ -1,8 +1,4 @@
 
-\begin{schema}{Client}
-username: String\\
-players: list String
-\end{schema}
 
 \begin{schema}{Server}
 lobyIPs: list list String\\
@@ -20,12 +16,17 @@ data: String\\
 IP: String
 \end{schema}
 
+handlerequest is the union of all the following server operations
+
 \begin{schema}{Ready}
 \Delta Server\\
-i?: Message
+i?: Message\\
+o!: Message
 \where
 i?.label = "Ready"\\
-\exists[n,j \ in \mathbb{N} \and j < 6 \and i?.IP = lobby[n][j] : ready'[n][j] = true]\\
+\exists[n,j \ in \mathbb{N} \and j < 6 \and i?.IP = lobbyIPs[n][j] : readyList'[n][j] = true]\\
+o!.label = "Ready"
+o!.data = i?.IP
 \end{schema}
 
 \begin{schema}{CreateLobby}
@@ -35,7 +36,7 @@ i?: Message
 i?.label = "CreateLobby"\\
 \forall[j \in \matbb{N} \and j < 6 : lobbyIPs[(int) i?.data][j] = ""]
 lobbyIPs'[(int) i?.data][0] = i?.IP
-ready'[(int) i?.data][0] = false
+readyList'[(int) i?.data][0] = false
 \end{schema}
 
 \begin{schema}{JoinLobby}
@@ -43,7 +44,7 @@ ready'[(int) i?.data][0] = false
 i?: Message
 \where
 i?.label = "JoinLobby"\\
-\exists[j \in \mathbb{N} \and j < 6 \and lobbyIPs[(int) i?.data][j] = "" : lobbyIPs'[(int) i?.data][j] = i?.IP \and ready'[(int) i?.data][j] = false]\\
+\exists[j \in \mathbb{N} \and j < 6 \and lobbyIPs[(int) i?.data][j] = "" : lobbyIPs'[(int) i?.data][j] = i?.IP \and readyList'[(int) i?.data][j] = false]\\
 \end{schema}
 
 \begin{schema}{LeaveLobby}
@@ -51,7 +52,7 @@ i?.label = "JoinLobby"\\
 i?: Message
 \where
 i?.label = "LeaveLobby"
-\exists[n,j \in \matbb{N} \and j < 6 \and lobbyIPs[n][j] = i?.IP : lobbyIPs'[n][j] = "" \and ready'[n][j] = true]
+\exists[n,j \in \matbb{N} \and j < 6 \and lobbyIPs[n][j] = i?.IP : lobbyIPs'[n][j] = "" \and readyList'[n][j] = true]
 \end{schema}
 
 \begin{schema}{Start}
@@ -78,18 +79,61 @@ o!.label = "GetHighscore"
 o!.data = content
 \end{schema}
 
-\begin{schema}{Lobby}
+\begin{schema}{GetLobby}
 \Xi Server\\
 i?: Message\\
 o?: Message
+l: list \matbb{N}
 \where
-i?.label = "Lobby"
-o!.label = "Lobby"
-o!.data = lobbyIPs
+i?.label = "GetLobby"
+o!.label = "GetLobby"
+\forall[n \in \matbb{N} \and n < \# lobbyIPs : l[n] = \#lobbyIPs[n]]
+o!.data = (String) l
 \end{schema}
 
 \begin{schema}{Error}
 \Xi Server\\
 i?: Message\\
+o!: Message\\
 \where
+o!.label = "Error"
 \end{schema}
+informal: i? does not satisfy the conditions for any other handle procedure
+
+\begin{schema}{SetHighscores}
+\Xi Server\\
+\Delta File\\
+i?: Message\\
+\where
+i?.label = "SetHighscores"
+content = i?.data
+\end{schema}
+
+WaitRequest and Connect to be specified informally
+
+
+
+
+\begin{schema}{Client}
+username: String\\
+players: list String
+\end{schema}
+
+\begin{schema}{SendMessage}
+\Xi Client
+i?: Message
+o!: String
+\where
+o! = i?.label + i?.data
+\end{schema}
+
+\begin{schema}{ReceiveMessage}
+\Xi Client
+label?: String
+data?: String
+o!: Message
+\where
+o!.label = label?
+o!.data = data?
+\end{schema}
+
