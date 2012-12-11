@@ -2,8 +2,8 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Networking\netwerken\Server.cs">
     <Files>
-      <File FileName="Networking\netwerken\Client.cs" Line="76" Column="58" />
-      <File FileName="Networking\netwerken\Server.cs" Line="103" Column="5" />
+      <File FileName="Networking\netwerken\Client.cs" Line="127" Column="4" />
+      <File FileName="Networking\netwerken\Server.cs" Line="29" Column="6" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
