@@ -33,7 +33,9 @@ i?.label = "Ready"\\
 i?: Message
 \where
 i?.label = "CreateLobby"\\
+\forall[j \in \matbb{N} \and j < 6 : lobbyIPs[(int) i?.data][j] = ""]
 lobbyIPs'[(int) i?.data][0] = i?.IP
+ready'[(int) i?.data][0] = false
 \end{schema}
 
 \begin{schema}{JoinLobby}
@@ -41,7 +43,7 @@ lobbyIPs'[(int) i?.data][0] = i?.IP
 i?: Message
 \where
 i?.label = "JoinLobby"\\
-\exists[j \in \mathbb{N} \and j < 6 \and lobbyIPs[(int) i?.data][j] = "" : lobbyIPs'[(int) i?.data][j] = i?.IP]\\
+\exists[j \in \mathbb{N} \and j < 6 \and lobbyIPs[(int) i?.data][j] = "" : lobbyIPs'[(int) i?.data][j] = i?.IP \and ready'[(int) i?.data][j] = false]\\
 \end{schema}
 
 \begin{schema}{LeaveLobby}
@@ -49,7 +51,7 @@ i?.label = "JoinLobby"\\
 i?: Message
 \where
 i?.label = "LeaveLobby"
-\exists[n,j \in \matbb{N} \and j < 6 \and lobbyIPs[n][j] = i?.IP : lobbyIPs'[n][j] = ""]
+\exists[n,j \in \matbb{N} \and j < 6 \and lobbyIPs[n][j] = i?.IP : lobbyIPs'[n][j] = "" \and ready'[n][j] = true]
 \end{schema}
 
 \begin{schema}{Start}
@@ -58,21 +60,21 @@ i?.label = "LeaveLobby"
 o!: Message
 \where
 \exists[n \in \matbb{N} :\\
-\forall[j \in \matbb{N} \and j < 6 \and lobbyIPs[n][j] \neq "" : readyList[n][j] = true] \and
-\forall[j \in \matbb{N} \and j < 6 : lobbyIPs[n][j] = "" \and readyList'[n][j] = false] \and
+\forall[j \in \matbb{N} \and j < 6 : readyList[n][j] = true] \and
+\forall[j \in \matbb{N} \and j < 6 : lobbyIPs[n][j] = "" \and readyList'[n][j] = true] \and
 o!.data = lobbyIPs[n]]\\
 o!.label = "Start"
 \end{schema}
 
-\begin{schema}{Highscore}
+\begin{schema}{GetHighscore}
 \Xi Server\\
 \Xi File\\
 i?: Message\\
 o?: Message
 \where
-title = "Highscores"
-i?.label = "Highscores"
-o!.label = "Highscores"
+title = "GetHighscore"
+i?.label = "GetHighscore"
+o!.label = "GetHighscore"
 o!.data = content
 \end{schema}
 
