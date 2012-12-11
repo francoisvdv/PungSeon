@@ -85,7 +85,7 @@ class Menu
 
   void OnOptionChanged()
     @pre: The user edited one of the options, and state == MenuState.Options
-    @post: The option is changed in the client configuration.
+    @post: The changed option is saved
 
   void OnHighscoresPressed()
     @pre: state == MenuState.MainMenu
@@ -93,9 +93,18 @@ class Menu
 
   void OnQuitGamePressed()
     @pre: state == MenuState.MainMenu
-    @post: GameManager's method QuitGame()
+    @post: The game quits
 
 class GameManager
   void QuitGame()
     @pre: True
     @post: The game quits
+
+class Options
+  void SaveOption()
+    @pre: True
+    @post: The option is saved to the config file
+
+  Options GetOptions()
+    @pre: True
+    @post: The options are returned fromt he config file
