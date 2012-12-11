@@ -1,0 +1,33 @@
+Class Server
+	Connect:
+	@pre: a client attempts to connect to a server
+	@post: a tcp connection is established between the client and the server
+	
+	Start
+	@pre: the number of players in lobby is greater than 1 and all players in the lobby are ready.
+	@post: the server sends the IP adresses of the players in the lobby to all the players in the lobby and clears the lobby.
+	
+	WaitRequest
+	@pre: At least one client is connected
+	@post: a message was received from the client
+	
+	HandleRequest
+	@pre: WaitRequest postcondition satisfied
+	@post: a message was sent to the client depending on the content of the received message.
+
+Class Client
+	Connect
+	@pre: the IP adress you need to connect to is known or given
+	@post: a tcp connection is established between the client and the server or peers.
+
+	SendMessageServer
+	@pre: not ingame
+	@post: message sent to server
+
+	SendMessageClient
+	@pre: ingame
+	@post: message sent to peers
+	
+	ReceiveMessage
+	@pre: message was sent by the server
+	@post: message was received
