@@ -48,6 +48,8 @@ public class BotControlScript : MonoBehaviour
 	
 	void FixedUpdate ()
 	{
+
+		
 		float h = Input.GetAxis("Horizontal");				// setup h variable as our horizontal input axis
 		float v = Input.GetAxis("Vertical");				// setup v variables as our vertical input axis		
 		anim.SetFloat("Speed", v);							// set our animator's float parameter 'Speed' equal to the vertical input axis				
