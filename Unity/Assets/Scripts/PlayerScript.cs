@@ -1,8 +1,17 @@
 using UnityEngine;
+using System;
 using System.Collections;
 
 public class PlayerScript : MonoBehaviour
 {
+	public bool IsControlled = false;
+	public bool AlwaysFireLaserBeams = false;
+	
+	[NonSerialized]
+	public int Health;
+	
+	
+	
 	Transform laserTarget;
 	
 	Transform eyesL;
@@ -10,9 +19,11 @@ public class PlayerScript : MonoBehaviour
 	
 	Transform laserBeamL;
 	Transform laserBeamR;
-
-	public bool IsControlled = false;
-	public bool AlwaysFireLaserBeams = false;
+	
+	bool hit;
+	RaycastHit hitInfo; //updated once per Update(), containing hitInfo about what the laser target has hit
+	
+	bool firing = false;
 	
 	// Use this for initialization
 	void Start ()
@@ -47,12 +58,9 @@ public class PlayerScript : MonoBehaviour
 		//direction is (pointB - pointA).normalized
 		Vector3 start = calculateCentroid(eyesL.position, eyesR.position);
 		Ray r = new Ray(start, (laserTarget.position - start).normalized);
-		RaycastHit hitInfo;
-		if(Physics.Raycast(r, out hitInfo, Settings.LaserTargetDistance))
-		{
+		hit = Physics.Raycast(r, out hitInfo, Settings.LaserTargetDistance);
+		if(hit)
 			laserTarget.localPosition = new Vector3(laserTarget.localPosition.x, laserTarget.localPosition.y, hitInfo.distance);
-			OnCollision(hitInfo);
-		}
 		else
 			laserTarget.localPosition = new Vector3(laserTarget.localPosition.x, laserTarget.localPosition.y, Settings.LaserTargetDistance);
 		
@@ -61,13 +69,8 @@ public class PlayerScript : MonoBehaviour
 		
 		if(IsControlled)
 		{
-			if(Input.GetKeyDown(Settings.Controls.Fire))
-				SetLasersEnabled(true);
-			else if(Input.GetKeyUp (Settings.Controls.Fire))
-				SetLasersEnabled(false);
+			HandleFiring();
 		}
-		
-		print("CRAP: " + IsControlled);
 	}
 	
 	ParticleRenderer GetParticleRenderer(Transform t)
@@ -85,8 +88,26 @@ public class PlayerScript : MonoBehaviour
 			r2.enabled = enable;
 	}
 	
-	void OnCollision(RaycastHit hitInfo)
-	{
+	void HandleFiring()
+	{	
+		if(Input.GetKeyDown(Settings.Controls.Fire))
+		{
+			SetLasersEnabled(true);
+			firing = true;
+		}
+		else if(Input.GetKeyUp (Settings.Controls.Fire))
+		{
+			SetLasersEnabled(false);
+			firing = false;
+		}
 		
+		if(!firing || !hit)
+			return;
+		
+		PlayerScript otherPlayer = hitInfo.transform.GetComponent<PlayerScript>();
+		if(otherPlayer == null)
+			return;
+		
+		print ("other player hit");
 	}
 }
