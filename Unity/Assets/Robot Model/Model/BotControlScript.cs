@@ -10,8 +10,7 @@ public class BotControlScript : MonoBehaviour
 	[System.NonSerialized]					
 	public float lookWeight;					// the amount to transition when using head look
 	
-	[System.NonSerialized]
-	public Transform enemy;						// a transform to Lerp the camera to during head look
+	public Transform HeadTarget;				// a transform to Lerp the camera to during head look
 	
 	public float animSpeed = 1.5f;				// a public setting for overall animator animation speed
 	public float lookSmoother = 3f;				// a smoothing setting for camera motion
@@ -38,9 +37,9 @@ public class BotControlScript : MonoBehaviour
 		// initialising reference variables
 		anim = GetComponent<Animator>();					  
 		col = GetComponent<CapsuleCollider>();
-		var enemyGameObject = GameObject.Find ("Enemy");
-		if(enemyGameObject != null)
-			enemy = enemyGameObject.transform;	
+		
+		lookWeight = 1;
+		
 		if(anim.layerCount ==2)
 			anim.SetLayerWeight(1, 1);
 	}
@@ -55,17 +54,15 @@ public class BotControlScript : MonoBehaviour
 		anim.SetLookAtWeight(lookWeight);					// set the Look At Weight - amount to use look at IK vs using the head's animation
 		currentBaseState = anim.GetCurrentAnimatorStateInfo(0);	// set our currentState variable to the current state of the Base Layer (0) of animation
 		
-		if(anim.layerCount ==2)		
+		if(anim.layerCount == 2)
 			layer2CurrentState = anim.GetCurrentAnimatorStateInfo(1);	// set our layer2CurrentState variable to the current state of the second Layer (1) of animation
 		
 		
 		// LOOK AT ENEMY
-		
-		// if we hold Alt..
-		if(Input.GetButton("Fire2"))
+		if(Input.GetKeyDown(KeyCode.V))
 		{
 			// ...set a position to look at with the head, and use Lerp to smooth the look weight from animation to IK (see line 54)
-			anim.SetLookAtPosition(enemy.position);
+			anim.SetLookAtPosition(HeadTarget.position);
 			lookWeight = Mathf.Lerp(lookWeight,1f,Time.deltaTime*lookSmoother);
 		}
 		// else, return to using animation for the head by lerping back to 0 for look at weight
