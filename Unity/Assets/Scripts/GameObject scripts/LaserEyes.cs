@@ -21,9 +21,9 @@ public class LaserEyes : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
-		if(FireAlways || Input.GetKeyDown(KeyCode.V))
+		if(FireAlways || Input.GetKeyDown(Controls.Fire))
 			SetEnableParticles(true);
-		else if(Input.GetKeyUp (KeyCode.V))
+		else if(Input.GetKeyUp (Controls.Fire))
 			SetEnableParticles(false);
 	}
 	
