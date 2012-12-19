@@ -17,21 +17,19 @@ public class LaserEyes : MonoBehaviour
 		
 		FireAlways = false;
 	}
-	
+
 	// Update is called once per frame
 	void Update ()
 	{
-		if(FireAlways || Input.GetKeyDown(Settings.Controls.Fire))
-			SetEnableParticles(true);
-		else if(Input.GetKeyUp (Settings.Controls.Fire))
-			SetEnableParticles(false);
+		if(FireAlways)
+			SetLasersEnabled(true);
 	}
 	
 	ParticleRenderer GetParticleRenderer(Transform t)
 	{
 		return t.GetComponent(typeof(ParticleRenderer)) as ParticleRenderer;
 	}
-	void SetEnableParticles(bool enable)
+	public void SetLasersEnabled(bool enable)
 	{
 		GetParticleRenderer(particlesL).enabled = enable;
 		GetParticleRenderer(particlesR).enabled = enable;
