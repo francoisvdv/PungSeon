@@ -28,6 +28,8 @@ public class PlayerScript : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{	
+		Health = Options.StartingHealth;
+		
 		laserTarget = transform.Search("LaserTarget");
 
 		eyesL = transform.Search("EyeL");
@@ -36,7 +38,29 @@ public class PlayerScript : MonoBehaviour
 		laserBeamL = eyesL.Find("LaserParticles");
 		laserBeamR = eyesR.Find("LaserParticles");
 	}
-	
+
+	// Update is called once per frame
+	void Update ()
+	{
+		//direction is (pointB - pointA).normalized
+		Vector3 start = calculateCentroid(eyesL.position, eyesR.position);
+		Ray r = new Ray(start, (laserTarget.position - start).normalized);
+		hit = Physics.Raycast(r, out hitInfo, Options.LaserTargetDistance);
+		if(hit)
+			laserTarget.localPosition = new Vector3(laserTarget.localPosition.x, laserTarget.localPosition.y, hitInfo.distance);
+		else
+			laserTarget.localPosition = new Vector3(laserTarget.localPosition.x, laserTarget.localPosition.y, Options.LaserTargetDistance);
+		
+		if(AlwaysFireLaserBeams)
+			SetLasersEnabled(true);
+		
+		if(IsControlled)
+		{
+			HandleFiring();
+			HandleFlagPickup();
+		}
+	}
+		
 	Vector3 calculateCentroid(params Vector3[] centerPoints)
 	{
 		var centroid = new Vector3(0,0,0);
@@ -50,27 +74,6 @@ public class PlayerScript : MonoBehaviour
 		centroid /= numPoints;
 
 		return centroid;
-	}
-	
-	// Update is called once per frame
-	void Update ()
-	{
-		//direction is (pointB - pointA).normalized
-		Vector3 start = calculateCentroid(eyesL.position, eyesR.position);
-		Ray r = new Ray(start, (laserTarget.position - start).normalized);
-		hit = Physics.Raycast(r, out hitInfo, Settings.LaserTargetDistance);
-		if(hit)
-			laserTarget.localPosition = new Vector3(laserTarget.localPosition.x, laserTarget.localPosition.y, hitInfo.distance);
-		else
-			laserTarget.localPosition = new Vector3(laserTarget.localPosition.x, laserTarget.localPosition.y, Settings.LaserTargetDistance);
-		
-		if(AlwaysFireLaserBeams)
-			SetLasersEnabled(true);
-		
-		if(IsControlled)
-		{
-			HandleFiring();
-		}
 	}
 	
 	ParticleRenderer GetParticleRenderer(Transform t)
@@ -90,12 +93,12 @@ public class PlayerScript : MonoBehaviour
 	
 	void HandleFiring()
 	{	
-		if(Input.GetKeyDown(Settings.Controls.Fire))
+		if(Input.GetKeyDown(Options.Controls.Fire))
 		{
 			SetLasersEnabled(true);
 			firing = true;
 		}
-		else if(Input.GetKeyUp (Settings.Controls.Fire))
+		else if(Input.GetKeyUp (Options.Controls.Fire))
 		{
 			SetLasersEnabled(false);
 			firing = false;
@@ -104,10 +107,34 @@ public class PlayerScript : MonoBehaviour
 		if(!firing || !hit)
 			return;
 		
+		Fire();
+	}
+	void HandleFlagPickup()
+	{
+		PickUpFlag();
+	}
+	
+	void Die()
+	{
+		GameObject.Destroy(this.gameObject);
+	}
+	
+	void Fire()
+	{
 		PlayerScript otherPlayer = hitInfo.transform.GetComponent<PlayerScript>();
 		if(otherPlayer == null)
 			return;
 		
-		print ("other player hit");
+		otherPlayer.UpdateHealth(otherPlayer.Health - 1);
+	}
+	public void UpdateHealth(int newAmount)
+	{
+		Health = newAmount;
+		
+		if(Health <= 0)
+			Die();
+	}
+	void PickUpFlag()	
+	{
 	}
 }

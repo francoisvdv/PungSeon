@@ -3,12 +3,12 @@ using System.Collections;
 
 public class ControlSettings
 {
-	public readonly KeyCode Fire = KeyCode.V;
+	public KeyCode Fire = KeyCode.V;
 }
 
-public static class Settings
+public static class Options
 {
 	public static ControlSettings Controls = new ControlSettings();
-	
 	public static int LaserTargetDistance = 5;
+	public static int StartingHealth = 100;
 }
