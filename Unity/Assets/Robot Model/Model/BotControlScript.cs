@@ -59,7 +59,7 @@ public class BotControlScript : MonoBehaviour
 		
 		
 		// LOOK AT ENEMY
-		if(Input.GetKeyDown(Controls.Fire))
+		if(Input.GetKeyDown(Settings.Controls.Fire))
 		{
 			// ...set a position to look at with the head, and use Lerp to smooth the look weight from animation to IK (see line 54)
 			anim.SetLookAtPosition(HeadTarget.position);
