@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public abstract class DataPackageFactory
 {
-	public static List<DataPackageFactory> Factories;
+	public static List<DataPackageFactory> Factories = new List<DataPackageFactory>();
 	public static DataPackageFactory GetFactory(int id)
 	{
 		foreach(DataPackageFactory dpf in Factories)
@@ -25,13 +25,15 @@ public abstract class DataPackage
 	public abstract string Body { get; }
 	public abstract DataPackageFactory Factory { get; }
 	
-	public string ToString()
+	public override string ToString()
 	{
 		return Id + "," + Body;
 	}
+	
+	static readonly char[] delimiter = new char[]{','};
 	public static DataPackage FromString(string s)
 	{
-		string[] split = s.Split(',');
+		string[] split = s.Split(delimiter, 2);
 		int id;
 		if(!int.TryParse(split[0], out id))
 			return null;
@@ -40,10 +42,7 @@ public abstract class DataPackage
 		if(factory == null)
 			return null;
 		
-		string body = "";
-		for(int i = 1; i < split.Length; i++)
-			body += split[i];
-		return factory.CreateFromBody(body);
+		return factory.CreateFromBody(split[1]);
 	}
 }
 
@@ -65,6 +64,10 @@ public class TokenChangePackage : DataPackage
 		}
 	}
 	static TokenChangeFactory factory = new TokenChangeFactory();
+	public static void RegisterFactory()
+	{
+		DataPackageFactory.Factories.Add(factory);
+	}
 	
 	public override int Id
 	{
@@ -77,5 +80,49 @@ public class TokenChangePackage : DataPackage
 	public override DataPackageFactory Factory
 	{
 		get { return factory; }
+	}
+}
+
+public class ChatMessagePackage : DataPackage
+{
+	class ChatMessageFactory : DataPackageFactory
+	{
+		public override int Id
+		{
+			get
+			{
+				return 1;
+			}
+		}
+		
+		public override DataPackage CreateFromBody(string b)
+		{
+			return new ChatMessagePackage(b);
+		}
+	}
+	static ChatMessageFactory factory = new ChatMessageFactory();
+	public static void RegisterFactory()
+	{
+		DataPackageFactory.Factories.Add(factory);
+	}
+	
+	public override int Id
+	{
+		get { return factory.Id; }
+	}
+	public override string Body
+	{
+		get { return message; }
+	}
+	public override DataPackageFactory Factory
+	{
+		get { return factory; }
+	}
+	
+	string message;
+	
+	public ChatMessagePackage(string message)
+	{
+		this.message = message;
 	}
 }

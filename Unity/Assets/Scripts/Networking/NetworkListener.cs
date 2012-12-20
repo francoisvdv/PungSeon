@@ -1,6 +1,6 @@
 using System;
 
-public abstract class NetworkListener
+public interface INetworkListener
 {
-	public abstract void OnDataReceived(DataPackage dp);
+	void OnDataReceived(DataPackage dp);
 }

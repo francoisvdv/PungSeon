@@ -8,6 +8,13 @@ using System.Text;
 
 public class Client
 {
+	class RemoteClient
+	{
+		public string username;
+		public byte[] readBuffer;
+		public StringBuilder receiveBuffer = new StringBuilder();
+	}
+	
 	private static Client instance;
 	public static Client Instance
 	{
@@ -24,16 +31,14 @@ public class Client
 	
 	
 	TcpListener tcpListener;
-	Dictionary<TcpClient, string> clients = new Dictionary<TcpClient, string>(); //string contains the client's 'username'
+	Dictionary<TcpClient, RemoteClient> clients = new Dictionary<TcpClient, RemoteClient>(); //string contains the client's 'username'
 	Queue<DataPackage> queue = new Queue<DataPackage>();
-	List<NetworkListener> networkListeners = new List<NetworkListener>();
+	List<INetworkListener> networkListeners = new List<INetworkListener>();
 	
 	string username;
 	bool hasToken = false;
 	TcpClient nextClient = null;
-	
-	byte[] readBuffer;
-	StringBuilder receiveBuffer = new StringBuilder();
+
 	Encoding encoding = Encoding.UTF8;
 	
 	
@@ -41,18 +46,21 @@ public class Client
 	private Client()
 	{
 		username = GenerateUniqueUsername();
+		
+		TokenChangePackage.RegisterFactory();
+		ChatMessagePackage.RegisterFactory();
 	}
 	
 	string GenerateUniqueUsername()
 	{
-		return "John Doe " + DateTime.Now.Ticks;
+		return "John Doe " + DateTime.Now.Hour + "." + DateTime.Now.Minute + "." + DateTime.Now.Second + "." + DateTime.Now.Millisecond;
 	}
 	
-	public void AddListener(NetworkListener l)
+	public void AddListener(INetworkListener l)
 	{
 		networkListeners.Add(l);
 	}
-	public void RemoveListener(NetworkListener l)
+	public void RemoveListener(INetworkListener l)
 	{
 		if(networkListeners.Contains(l))
 			networkListeners.Remove(l);
@@ -102,9 +110,7 @@ public class Client
 		
 		if(c != null && c.Connected)
 		{
-			clients.Add(c, GenerateUniqueUsername());
-			readBuffer = new byte[c.ReceiveBufferSize];
-			c.GetStream().BeginRead(readBuffer, 0, readBuffer.Length, ReceiveCallback, c);
+			AddClient(c);
 			
 			if(OnLog != null)
 				OnLog("Connected: " + c.Connected + " | " + clients[c] + " | Total connections: " + clients.Count);
@@ -113,6 +119,7 @@ public class Client
 	void ReceiveCallback(IAsyncResult iar)
 	{
 		TcpClient c = (TcpClient)iar.AsyncState;
+		RemoteClient rc = clients[c];
 		
 		int read;
 		NetworkStream networkStream;
@@ -128,22 +135,22 @@ public class Client
 		}
 		
 		//TCP is a protocol that might split messages. We store our incoming message chunks and split on newlines.
-		receiveBuffer.Append(encoding.GetString(readBuffer, 0, read));
-		for(int i = 0; i < receiveBuffer.Length; i++)
+		rc.receiveBuffer.Append(encoding.GetString(rc.readBuffer, 0, read));
+		for(int i = 0; i < rc.receiveBuffer.Length; i++)
 		{
-			char character = receiveBuffer[i];
-			if(character != Options.NewLineChar)
-				continue;
-			
-			string data = receiveBuffer.ToString(0, i-1);
-			receiveBuffer.Remove(0, i);
-			i = 0;
-			
-			if(!string.IsNullOrEmpty(data))
-				ReceiveData(data);
+			char character = rc.receiveBuffer[i];
+			if(character == Options.NewLineChar)
+			{
+				string data = rc.receiveBuffer.ToString(0, i);
+				rc.receiveBuffer.Remove(0, i+1);
+				i = -1;
+				
+				if(!string.IsNullOrEmpty(data))
+					ReceiveData(data);
+			}
 		}
 
-		networkStream.BeginRead(readBuffer, 0, readBuffer.Length, ReceiveCallback, c);
+		networkStream.BeginRead(rc.readBuffer, 0, rc.readBuffer.Length, ReceiveCallback, c);
 	}
 	void WriteCallback(IAsyncResult iar)
 	{
@@ -153,35 +160,45 @@ public class Client
 		networkStream.EndWrite(iar);
 	}
 	
-	void Write(TcpClient client, DataPackage data)
+	void AddClient(TcpClient c)
 	{
-		Write(client, data.ToString());
+		RemoteClient rc = new RemoteClient();
+		rc.username = GenerateUniqueUsername();
+		rc.readBuffer = new byte[c.ReceiveBufferSize];
+		clients.Add(c, rc);
+		
+		c.GetStream().BeginRead(rc.readBuffer, 0, rc.readBuffer.Length, ReceiveCallback, c);
 	}
-	void Write(TcpClient client, string data)
+	
+	public void Write(TcpClient client, DataPackage data)
+	{
+		Write(client, data.ToString() + Options.NewLineChar);
+	}
+	public void Write(TcpClient client, string data)
 	{
 		byte[] bytes = encoding.GetBytes(data);
 		Write(client, bytes);
 	}
-	void Write(TcpClient client, byte[] data)
+	public void Write(TcpClient client, byte[] data)
 	{
 		NetworkStream networkStream = client.GetStream();
 		networkStream.BeginWrite(data, 0, data.Length, WriteCallback, client);
 	}
-	void WriteAll(DataPackage data)
+	public void WriteAll(DataPackage data)
 	{	
 		foreach(var kvp in clients)
 		{
 			Write(kvp.Key, data);
 		}
 	}
-	void WriteAll(string data)
+	public void WriteAll(string data)
 	{
 		foreach(var kvp in clients)
 		{
 			Write(kvp.Key, data);
 		}
 	}
-	void WriteAll(byte[] data)
+	public void WriteAll(byte[] data)
 	{
 		foreach(var kvp in clients)
 		{
@@ -193,7 +210,7 @@ public class Client
 	{
 		TcpClient tcpClient = new TcpClient();
 		tcpClient.Connect(ip, 4550);
-		clients.Add(tcpClient, GenerateUniqueUsername());
+		AddClient(tcpClient);
 	}
 	public void SendData(DataPackage dp)
 	{
@@ -202,7 +219,7 @@ public class Client
 	void ReceiveData(string data)
 	{
 		DataPackage dp = DataPackage.FromString(data);
-		foreach(NetworkListener nl in networkListeners)
+		foreach(INetworkListener nl in networkListeners)
 		{
 			nl.OnDataReceived(dp);
 		}
