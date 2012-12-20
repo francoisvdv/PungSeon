@@ -113,6 +113,14 @@ public class PlayerScript : MonoBehaviour
 	{
 		PickUpFlag();
 	}
+	void HandleFlagDelivery()
+	{
+		DeliverFlag();
+	}
+	void HandleBlockEffectApplication()
+	{
+		ApplyBlockEffect(0);
+	}
 	
 	void Die()
 	{
@@ -125,6 +133,12 @@ public class PlayerScript : MonoBehaviour
 		if(otherPlayer == null)
 			return;
 		
+		//apparantly there's a hit
+		
+		ParticleSystem ps = laserTarget.GetComponent<ParticleSystem>();
+		//if(!ps.isPlaying)
+			ps.Play();
+		
 		otherPlayer.UpdateHealth(otherPlayer.Health - 1);
 	}
 	public void UpdateHealth(int newAmount)
@@ -135,6 +149,12 @@ public class PlayerScript : MonoBehaviour
 			Die();
 	}
 	void PickUpFlag()	
+	{
+	}
+	void DeliverFlag()
+	{
+	}
+	void ApplyBlockEffect(int id)
 	{
 	}
 }
