@@ -14,7 +14,8 @@ public class Client
 		public byte[] readBuffer;
 		public StringBuilder receiveBuffer = new StringBuilder();
 	}
-	
+    public enum Mode { ClientServer, ClientClient }
+
 	private static Client instance;
 	public static Client Instance
 	{
@@ -46,16 +47,36 @@ public class Client
 	private Client()
 	{
 		username = GenerateUniqueUsername();
-		
-		TokenChangePackage.RegisterFactory();
-		ChatMessagePackage.RegisterFactory();
+        SetMode(Mode.ClientServer);
 	}
 	
 	string GenerateUniqueUsername()
 	{
 		return "John Doe " + DateTime.Now.Hour + "." + DateTime.Now.Minute + "." + DateTime.Now.Second + "." + DateTime.Now.Millisecond;
 	}
-	
+
+    public void SetMode(Mode m)
+    {
+        DataPackageFactory.Factories.Clear();
+
+        if (m == Mode.ClientClient)
+        {
+            TokenChangePackage.RegisterFactory();
+            ChatMessagePackage.RegisterFactory();
+        }
+        else if (m == Mode.ClientServer)
+        {
+            CreateLobbyPackage.RegisterFactory();
+            GameInfoPackage.RegisterFactory();
+            GameStartPackage.RegisterFactory();
+            JoinLobbyPackage.RegisterFactory();
+            PlayerReadyPackage.RegisterFactory();
+            RequestHighscorePackage.RegisterFactory();
+            RequestLobbyListPackage.RegisterFactory();
+            SetHighscorePackage.RegisterFactory();
+        }
+    }
+
 	public void AddListener(INetworkListener l)
 	{
 		networkListeners.Add(l);
