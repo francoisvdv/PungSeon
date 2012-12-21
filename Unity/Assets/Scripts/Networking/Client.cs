@@ -67,7 +67,6 @@ public class Client
         else if (m == Mode.ClientServer)
         {
             CreateLobbyPackage.RegisterFactory();
-            GameInfoPackage.RegisterFactory();
             GameStartPackage.RegisterFactory();
             JoinLobbyPackage.RegisterFactory();
             PlayerReadyPackage.RegisterFactory();
@@ -141,7 +140,7 @@ public class Client
 	{
 		TcpClient c = (TcpClient)iar.AsyncState;
 		RemoteClient rc = clients[c];
-		
+	    
 		int read;
 		NetworkStream networkStream;
 		try
@@ -167,7 +166,7 @@ public class Client
 				i = -1;
 				
 				if(!string.IsNullOrEmpty(data))
-					ReceiveData(data);
+					ReceiveData(c, data);
 			}
 		}
 
@@ -237,9 +236,10 @@ public class Client
 	{
 		queue.Enqueue(dp);
 	}
-	void ReceiveData(string data)
+	void ReceiveData(TcpClient sender, string data)
 	{
 		DataPackage dp = DataPackage.FromString(data);
+        dp.SenderTcpClient = sender;
 		foreach(INetworkListener nl in networkListeners)
 		{
 			nl.OnDataReceived(dp);

@@ -12,6 +12,8 @@ namespace QQServer
 {
     public partial class MainForm : Form
     {
+        Server server = new Server();
+
         public MainForm()
         {
             InitializeComponent();
@@ -28,6 +30,8 @@ namespace QQServer
         {
             Client.Instance.SetMode(Client.Mode.ClientServer);
             Client.Instance.StartTcpListener();
+
+            Client.Instance.AddListener(server);
         }
     }
 }

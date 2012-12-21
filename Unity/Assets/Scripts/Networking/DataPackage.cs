@@ -1,13 +1,27 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
 
 public abstract class DataPackage
 {
 	public abstract int Id { get; }
 	public abstract string Body { get; }
 	public abstract DataPackageFactory Factory { get; }
-	
+
+    public TcpClient SenderTcpClient { get; set; }
+    public IPEndPoint SenderIPEndpoint
+    {
+        get
+        {
+            if (SenderTcpClient == null)
+                return null;
+
+            return (IPEndPoint)SenderTcpClient.Client.RemoteEndPoint;
+        }
+    }
+
 	public override string ToString()
 	{
 		return Id + "," + Body;
