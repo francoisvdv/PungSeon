@@ -34,7 +34,7 @@ public class Client
 	TcpListener tcpListener;
 	Dictionary<TcpClient, RemoteClient> clients = new Dictionary<TcpClient, RemoteClient>(); //string contains the client's 'username'
 	Queue<DataPackage> queue = new Queue<DataPackage>();
-	List<INetworkListener> networkListeners = new List<INetworkListener>();
+	List<WeakReference> networkListeners = new List<WeakReference>();
 	
 	string username;
 	bool hasToken = false;
@@ -78,12 +78,19 @@ public class Client
 
 	public void AddListener(INetworkListener l)
 	{
-		networkListeners.Add(l);
+		networkListeners.Add(new WeakReference(l));
 	}
 	public void RemoveListener(INetworkListener l)
 	{
-		if(networkListeners.Contains(l))
-			networkListeners.Remove(l);
+        for (int i = 0; i < networkListeners.Count; i++)
+        {
+            INetworkListener nl = networkListeners[i].Target as INetworkListener;
+            if (nl != l)
+                continue;
+
+            networkListeners.RemoveAt(i);
+            i--;
+        }
 	}
 	
 	public void StartTcpListener()
@@ -240,9 +247,16 @@ public class Client
 	{
 		DataPackage dp = DataPackage.FromString(data);
         dp.SenderTcpClient = sender;
-		foreach(INetworkListener nl in networkListeners)
+        for(int i = 0; i < networkListeners.Count; i++)
 		{
-			nl.OnDataReceived(dp);
+            INetworkListener nl = networkListeners[i].Target as INetworkListener;
+            if (nl == null)
+            {
+                networkListeners.RemoveAt(i);
+                i--;
+            }
+            else
+			    nl.OnDataReceived(dp);
 		}
 	}
 	
