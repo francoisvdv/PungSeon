@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,7 +27,7 @@ namespace QQServer
         void OnCreateLobby(CreateLobbyPackage dp)
         {
             Lobby l = new Lobby();
-            l.Members.Add(dp.SenderTcpClient);
+            //l.Members.Add(dp.SenderTcpClient);
             lobbies.Add(l);
 
             ResponsePackage rp = new ResponsePackage();
@@ -39,7 +41,19 @@ namespace QQServer
         }
         void OnRequestLobbyList(RequestLobbyListPackage dp)
         {
+            const char lobbySeperator = '|';
+            const char lobbyEntrySeperator = ',';
 
+            string response = string.Empty;
+            foreach (Lobby l in lobbies)
+            {
+                string part = l.LobbyId.ToString() + lobbyEntrySeperator;
+                //foreach (TcpClient t in l.Members)
+                {
+                   // string address = ((IPEndPoint)t.Client.RemoteEndPoint).Address.ToString();
+                    //part += address + lobbyEntrySeperator + l.Equals
+                }
+            }
         }
         void OnSetHighscore(SetHighscorePackage dp)
         {

@@ -12,7 +12,7 @@ namespace QQServer
         static int lobbyId = 0;
         public int LobbyId { get; private set; }
 
-        public List<TcpClient> Members = new List<TcpClient>();
+        public Dictionary<TcpClient, bool> Members = new Dictionary<TcpClient, bool>();
 
         public Lobby()
         {

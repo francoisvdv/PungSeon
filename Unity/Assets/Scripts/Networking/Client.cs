@@ -21,12 +21,18 @@ public class Client
 	{
 		get
 		{
-			if(instance == null)
-				instance = new Client();
-			
-			return instance;
+            if (instance == null)
+                instance = new Client();
+
+            return instance;
 		}
 	}
+    public static Client Create()
+    {
+        return new Client();
+    }
+
+
 
 	public Action<string> OnLog;
 	
@@ -196,7 +202,11 @@ public class Client
 		
 		c.GetStream().BeginRead(rc.readBuffer, 0, rc.readBuffer.Length, ReceiveCallback, c);
 	}
-	
+    public int GetConnectionCount()
+    {
+        return clients.Count;
+    }
+
 	public void Write(TcpClient client, DataPackage data)
 	{
 		Write(client, data.ToString() + Options.NewLineChar);

@@ -1,9 +1,15 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
-public class Menu : MonoBehaviour
+public class Menu : MonoBehaviour, INetworkListener
 {
+    class Lobby
+    {
+        public Dictionary<string, bool> clients = new Dictionary<string, bool>();
+    }
+
 	const int mainMenuWidth = 230;
 	const int mainMenuHeight = 443;
 	const int lobbyListWidth = 460;
@@ -16,7 +22,9 @@ public class Menu : MonoBehaviour
 	const int howToHeight = 443;
 	const int highScoresWidth = 460;
 	const int highScoresHeight = 443;
-	
+
+    Client c2s = Client.Create();
+
 	int boxWidth;
 	int boxHeight;
 	int sourceBoxWidth;
@@ -38,7 +46,13 @@ public class Menu : MonoBehaviour
 	public GUISkin LobbyItemSkin;
 
 	Vector2 lobbyListScrollPosition = Vector2.zero;
-	
+
+    Dictionary<int, Action<ResponsePackage>> waitForResponse = new Dictionary<int, Action<ResponsePackage>>();
+
+    Dictionary<int, Lobby> lobbies = new Dictionary<int, Lobby>();
+
+
+
 	// Use this for initialization
 	void Start ()
 	{
@@ -66,7 +80,7 @@ public class Menu : MonoBehaviour
 			}
 		}
 	}
-	
+
 	void AnimateBackground(int targetWidth, int targetHeight)
 	{
 		animating = true;
@@ -77,7 +91,17 @@ public class Menu : MonoBehaviour
 		targetBoxWidth = targetWidth;
 		targetBoxHeight = targetHeight;
 	}
-	
+    void WaitForResponse(int responseId, Action<ResponsePackage> a)
+    {
+        GUI.enabled = false;
+        waitForResponse.Add(responseId, a);
+    }
+    void ResponseReceived(int responseId, ResponsePackage rp)
+    {
+        GUI.enabled = true;
+        waitForResponse[responseId](rp);
+    }
+
 	void OnGUI()
 	{		
 		GUISkin oldSkin = GUI.skin;
@@ -164,8 +188,7 @@ public class Menu : MonoBehaviour
 		
 		if(GUI.Button(new Rect(x, y, buttonWidth, buttonHeight), "Play"))
 		{
-			AnimateBackground(lobbyListWidth, lobbyListHeight);
-			State = MenuState.LobbyList;
+            OnPlayPressed();
 		}
 		if(GUI.Button(new Rect(x, y += buttonHeight + gap, buttonWidth, buttonHeight), "How to Play"))
 		{
@@ -293,12 +316,72 @@ public class Menu : MonoBehaviour
 	{
 		return GUI.Button(new Rect(100, boxHeight-80, 70, 30), "Back");
 	}
-	
-	void OnJoinLobbyPressed()
-	{
-	}
+
+    void OnPlayPressed()
+    {
+        if(c2s.GetConnectionCount() == 0)
+            c2s.Connect("131.155.243.155");
+
+        c2s.SendData(new RequestLobbyListPackage());
+        WaitForResponse(RequestLobbyListPackage.factory.Id,
+        x =>
+        {
+            string body = x.ResponseMessage;
+            const char lobbySeperator = '|';
+            const char lobbyEntrySeperator = ',';
+
+            string[] newLobbies = body.Split(lobbySeperator);
+            foreach (string l in newLobbies)
+            {
+                Lobby newLobby = new Lobby();
+                string[] entries = l.Split(lobbyEntrySeperator);
+                if(entries.Length == 0)
+                    continue;
+
+                int lobbyId;
+                if (!int.TryParse(entries[0], out lobbyId))
+                    continue;
+
+                for (int i = 1; i < entries.Length; i += 2)
+                {
+                    bool ready;
+                    if(!bool.TryParse(entries[i + 1], out ready))
+                        break;
+                    newLobby.clients.Add(entries[i], ready);
+                }
+
+                lobbies.Add(lobbyId, newLobby);
+            }
+
+            AnimateBackground(lobbyListWidth, lobbyListHeight);
+            State = MenuState.LobbyList;
+        });
+    }
 	void OnCreateLobbyPressed()
 	{
 		print ("IK BEN BEDRUKT!");
 	}
+    void OnJoinLobbyPressed()
+    {
+    }
+
+    public void OnDataReceived(DataPackage dp)
+    {
+        ResponsePackage rp = dp as ResponsePackage;
+        if (rp == null)
+            return;
+
+        int remove = -1;
+        foreach (var v in waitForResponse)
+        {
+            if (rp.ResponseId == v.Key)
+            {
+                ResponseReceived(v.Key, rp);
+                remove = v.Key;
+            }
+        }
+
+        if (remove != -1)
+            waitForResponse.Remove(-1);
+    }
 }
