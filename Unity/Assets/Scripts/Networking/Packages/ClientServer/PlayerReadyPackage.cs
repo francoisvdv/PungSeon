@@ -5,7 +5,7 @@ using System.Text;
 
 public class PlayerReadyPackage : DataPackage
 {
-    class PlayerReadyFactory : DataPackageFactory
+    public class PlayerReadyFactory : DataPackageFactory
     {
         public override int Id
         {
@@ -17,16 +17,21 @@ public class PlayerReadyPackage : DataPackage
 
         public override DataPackage CreateFromBody(string b)
         {
+            string[] split = b.Split(Seperator);
+
             PlayerReadyPackage prp = new PlayerReadyPackage();
-            prp.LobbyId = int.Parse(b);
+            prp.LobbyId = int.Parse(split[0]);
+            prp.Ready = bool.Parse(split[1]);
             return prp;
         }
     }
-    static PlayerReadyFactory factory = new PlayerReadyFactory();
+    public static PlayerReadyFactory factory = new PlayerReadyFactory();
     public static void RegisterFactory()
     {
         DataPackageFactory.Factories.Add(factory);
     }
+
+    const char Seperator = '|';
 
     public override int Id
     {
@@ -34,7 +39,7 @@ public class PlayerReadyPackage : DataPackage
     }
     public override string Body
     {
-        get { return ""; }
+        get { return LobbyId.ToString() + Seperator + Ready.ToString(); }
     }
     public override DataPackageFactory Factory
     {
@@ -42,4 +47,5 @@ public class PlayerReadyPackage : DataPackage
     }
 
     public int LobbyId { get; set; }
+    public bool Ready { get; set; }
 }

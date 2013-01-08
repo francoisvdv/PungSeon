@@ -53,6 +53,7 @@ public class Menu : MonoBehaviour, INetworkListener
 
     Dictionary<int, Lobby> lobbies = new Dictionary<int, Lobby>();
     Lobby currentLobby;
+    bool ready = false;
 
 	// Use this for initialization
 	void Start ()
@@ -193,6 +194,20 @@ public class Menu : MonoBehaviour, INetworkListener
         x =>
         {
             currentLobby = l;
+            if (onReceive != null)
+                onReceive();
+        });
+    }
+    void UpdateReadyState(Action onReceive)
+    {
+        PlayerReadyPackage prp = new PlayerReadyPackage();
+        prp.LobbyId = GetLobbyId(currentLobby);
+        prp.Ready = ready;
+        c2s.WriteAll(prp);
+        
+        WaitForResponse(PlayerReadyPackage.factory.Id,
+        x =>
+        {
             if (onReceive != null)
                 onReceive();
         });
@@ -392,6 +407,9 @@ public class Menu : MonoBehaviour, INetworkListener
 			AnimateBackground(mainMenuWidth, mainMenuHeight);
 			State = MenuState.MainMenu;
 		}
+
+        if (GUI.Button(new Rect(boxWidth - 180, boxHeight - 80, 70, 30), "Toggle Ready"))
+            OnReadyPressed();	
 	}
 	void GuiHowTo()
 	{
@@ -465,6 +483,11 @@ public class Menu : MonoBehaviour, INetworkListener
                 AnimateBackground(lobbyWidth, lobbyHeight);
                 State = MenuState.Lobby;
             });
+    }
+    void OnReadyPressed()
+    {
+        ready = !ready;
+        UpdateReadyState(null);
     }
 
     public void OnDataReceived(DataPackage dp)
