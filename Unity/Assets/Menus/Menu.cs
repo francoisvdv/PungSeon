@@ -346,7 +346,7 @@ public class Menu : MonoBehaviour, INetworkListener
 				if(GUI.Button(new Rect(0, 0, rowWidth, rowHeight), "", LobbyItemSkin.button))
 					OnJoinLobbyPressed(l);
 				
-				GUI.Label(new Rect(0, 0, rowWidth - 20, 30), i.ToString());
+				GUI.Label(new Rect(0, 0, rowWidth - 40, 30), i.ToString());
 				GUI.Label(new Rect(rowWidth - 30, 0, 30, 30), l.clients.Count.ToString() + "/6");
 				
 				GUI.EndGroup();
@@ -393,8 +393,8 @@ public class Menu : MonoBehaviour, INetworkListener
         {
             GUI.BeginGroup(new Rect(0, y, rowWidth, rowHeight));
 
-            GUI.Label(new Rect(0, 0, rowWidth - 20, 30), v.Key);
-            GUI.Label(new Rect(rowWidth - 30, 0, 30, 30), v.Value ? "Ready" : "Not ready");
+            GUI.Label(new Rect(0, 0, rowWidth - 70, 30), v.Key);
+            GUI.Label(new Rect(rowWidth - 60, 0, 60, 30), v.Value ? "Ready" : "Unready");
 
             GUI.EndGroup();
             y += rowHeight + rowGap;
@@ -408,7 +408,7 @@ public class Menu : MonoBehaviour, INetworkListener
 			State = MenuState.MainMenu;
 		}
 
-        if (GUI.Button(new Rect(boxWidth - 180, boxHeight - 80, 70, 30), "Toggle Ready"))
+        if (GUI.Button(new Rect(150, boxHeight - 80, boxWidth - 300, 30), "Ready"))
             OnReadyPressed();	
 	}
 	void GuiHowTo()
