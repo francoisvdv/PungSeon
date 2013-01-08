@@ -8,43 +8,40 @@ namespace QQServer
 {
     public class Server : INetworkListener
     {
+        List<Lobby> lobbies = new List<Lobby>();
+
         public void OnDataReceived(DataPackage dp)
         {
             if (dp is CreateLobbyPackage)
-                CreateLobby((CreateLobbyPackage)dp);
-            else if (dp is JoinLobbyPackage)
-                JoinLobby((JoinLobbyPackage)dp);
-            else if (dp is PlayerReadyPackage)
-                PlayerReady((PlayerReadyPackage)dp);
+                OnCreateLobby((CreateLobbyPackage)dp);
             else if (dp is RequestHighscorePackage)
-                RequestHighscore((RequestHighscorePackage)dp);
+                OnRequestHighscore((RequestHighscorePackage)dp);
             else if (dp is RequestLobbyListPackage)
-                RequestLobbyList((RequestLobbyListPackage)dp);
+                OnRequestLobbyList((RequestLobbyListPackage)dp);
             else if (dp is SetHighscorePackage)
-                SetHighscore((SetHighscorePackage)dp);
+                OnSetHighscore((SetHighscorePackage)dp);
         }
 
-        void CreateLobby(CreateLobbyPackage dp)
+        void OnCreateLobby(CreateLobbyPackage dp)
         {
-            
-        }
-        void JoinLobby(JoinLobbyPackage dp)
-        {
+            Lobby l = new Lobby();
+            l.Members.Add(dp.SenderTcpClient);
+            lobbies.Add(l);
 
+            ResponsePackage rp = new ResponsePackage();
+            rp.ResponseId = dp.Id;
+            rp.ResponseMessage = l.LobbyId.ToString();
+            Client.Instance.Write(dp.SenderTcpClient, rp);
         }
-        void PlayerReady(PlayerReadyPackage dp)
-        {
-
-        }
-        void RequestHighscore(RequestHighscorePackage dp)
-        {
-
-        }
-        void RequestLobbyList(RequestLobbyListPackage dp)
+        void OnRequestHighscore(RequestHighscorePackage dp)
         {
 
         }
-        void SetHighscore(SetHighscorePackage dp)
+        void OnRequestLobbyList(RequestLobbyListPackage dp)
+        {
+
+        }
+        void OnSetHighscore(SetHighscorePackage dp)
         {
 
         }
