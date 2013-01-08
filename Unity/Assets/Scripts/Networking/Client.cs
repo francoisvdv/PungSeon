@@ -75,6 +75,7 @@ public class Client
             CreateLobbyPackage.RegisterFactory();
             GameStartPackage.RegisterFactory();
             JoinLobbyPackage.RegisterFactory();
+            LobbyUpdatePackage.RegisterFactory();
             PlayerReadyPackage.RegisterFactory();
             RequestHighscorePackage.RegisterFactory();
             RequestLobbyListPackage.RegisterFactory();

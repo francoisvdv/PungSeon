@@ -46,12 +46,13 @@ public class Menu : MonoBehaviour, INetworkListener
 	public GUISkin LobbyItemSkin;
 
 	Vector2 lobbyListScrollPosition = Vector2.zero;
+    Vector2 lobbyScrollPosition = Vector2.zero;
 
     Dictionary<int, Action<ResponsePackage>> waitForResponse = new Dictionary<int, Action<ResponsePackage>>();
     List<Action> syncQueue = new List<Action>();
 
     Dictionary<int, Lobby> lobbies = new Dictionary<int, Lobby>();
-
+    Lobby currentLobby;
 
 	// Use this for initialization
 	void Start ()
@@ -63,7 +64,7 @@ public class Menu : MonoBehaviour, INetworkListener
 	}
 	
 	// Update is called once per frame
-	void Update ()
+	void Update()
 	{
 		if(animating)
 		{
@@ -115,6 +116,16 @@ public class Menu : MonoBehaviour, INetworkListener
             waitForResponse[responseId](rp);
     }
 
+    int GetLobbyId(Lobby l)
+    {
+        foreach (var v in lobbies)
+        {
+            if (v.Value == l)
+                return v.Key;
+        }
+        return -1;
+    }
+
     void ConnectToServer()
     {
         if (c2s.GetConnectionCount() == 0)
@@ -159,19 +170,32 @@ public class Menu : MonoBehaviour, INetworkListener
                 onReceive();
         });
     }
-    void CreateLobby(Action onReceive)
+    void CreateLobby(Action<int> onReceive)
     {
         c2s.WriteAll(new CreateLobbyPackage());
         WaitForResponse(CreateLobbyPackage.factory.Id,
         x =>
         {
+            int newLobbyId = -1;
+            int.TryParse(x.ResponseMessage, out newLobbyId);
+
+            if (onReceive != null)
+                onReceive(newLobbyId);
+        });
+    }
+    void JoinLobby(Lobby l, Action onReceive)
+    {
+        JoinLobbyPackage jlp = new JoinLobbyPackage();
+        jlp.LobbyId = GetLobbyId(l);
+        c2s.WriteAll(jlp);
+
+        WaitForResponse(JoinLobbyPackage.factory.Id,
+        x =>
+        {
+            currentLobby = l;
             if (onReceive != null)
                 onReceive();
         });
-    }
-    void JoinLobby()
-    {
-
     }
 
 	void OnGUI()
@@ -292,12 +316,10 @@ public class Menu : MonoBehaviour, INetworkListener
 				
 		//table box
 		{
-            int lobbyCount = 40;
-			
 			lobbyListScrollPosition = GUI.BeginScrollView(
 				new Rect(50, 150, boxWidth - 100, boxHeight - 250),
 				lobbyListScrollPosition,
-				new Rect(0,0, rowWidth, lobbyCount * rowHeight + (lobbyCount - 1) * rowGap));
+				new Rect(0,0, rowWidth, lobbies.Count * rowHeight + (lobbies.Count - 1) * rowGap));
 			
 			int y = 0;
 			for(int i = 0; i < lobbies.Count; i++)
@@ -307,7 +329,7 @@ public class Menu : MonoBehaviour, INetworkListener
 				GUI.BeginGroup(new Rect(0, y, rowWidth, rowHeight));
 				
 				if(GUI.Button(new Rect(0, 0, rowWidth, rowHeight), "", LobbyItemSkin.button))
-					OnJoinLobbyPressed();
+					OnJoinLobbyPressed(l);
 				
 				GUI.Label(new Rect(0, 0, rowWidth - 20, 30), i.ToString());
 				GUI.Label(new Rect(rowWidth - 30, 0, 30, 30), l.clients.Count.ToString() + "/6");
@@ -326,11 +348,7 @@ public class Menu : MonoBehaviour, INetworkListener
 		}
 		
 		if(GUI.Button(new Rect(boxWidth-180, boxHeight-80, 70, 30), "Create"))
-		{
-            OnCreateLobbyPressed();
-			//AnimateBackground(createLobbyWidth, createLobbyHeight);
-			///State = MenuState.CreateLobby;
-		}
+            OnCreateLobbyPressed();	
 	}
 	void GuiCreateLobby()
 	{
@@ -346,7 +364,30 @@ public class Menu : MonoBehaviour, INetworkListener
 	{	
 		GuiTitle("Lobby");
 
-		if(GuiBackButton())
+        int rowWidth = boxWidth - 120;
+        int rowHeight = 30;
+        int rowGap = 3;
+		
+        lobbyScrollPosition = GUI.BeginScrollView(
+            new Rect(50, 150, boxWidth - 100, boxHeight - 250),
+            lobbyScrollPosition,
+            new Rect(0, 0, rowWidth, currentLobby != null ? currentLobby.clients.Count * rowHeight + (currentLobby.clients.Count - 1) * rowGap : 0));
+
+        int y = 0;
+        foreach(var v in currentLobby.clients)
+        {
+            GUI.BeginGroup(new Rect(0, y, rowWidth, rowHeight));
+
+            GUI.Label(new Rect(0, 0, rowWidth - 20, 30), v.Key);
+            GUI.Label(new Rect(rowWidth - 30, 0, 30, 30), v.Value ? "Ready" : "Not ready");
+
+            GUI.EndGroup();
+            y += rowHeight + rowGap;
+        }
+
+        GUI.EndScrollView();
+
+		if(1 == 2 && GuiBackButton())
 		{
 			AnimateBackground(mainMenuWidth, mainMenuHeight);
 			State = MenuState.MainMenu;
@@ -404,28 +445,57 @@ public class Menu : MonoBehaviour, INetworkListener
     }
 	void OnCreateLobbyPressed()
 	{
-        CreateLobby(() =>
+        CreateLobby(x =>
             {
-                RequestLobbyList(null);
+                RequestLobbyList(() =>
+                    {
+                        if (lobbies.ContainsKey(x))
+                            JoinLobby(lobbies[x], () =>
+                                {
+                                    AnimateBackground(lobbyWidth, lobbyHeight);
+                                    State = MenuState.Lobby;
+                                });
+                    });
             });
 	}
-    void OnJoinLobbyPressed()
+    void OnJoinLobbyPressed(Lobby l)
     {
+        JoinLobby(l, () =>
+            {
+                AnimateBackground(lobbyWidth, lobbyHeight);
+                State = MenuState.Lobby;
+            });
     }
 
     public void OnDataReceived(DataPackage dp)
     {
-        ResponsePackage rp = dp as ResponsePackage;
-        if (rp == null)
-            return;
-
-        lock (syncQueue)
+        if (dp is ResponsePackage)
         {
-            syncQueue.Add(() =>
+            ResponsePackage rp = (ResponsePackage)dp;
+
+            lock (syncQueue)
             {
-				ResponseReceived(rp.ResponseId, rp);
-				waitForResponse.Remove(rp.ResponseId);
-            });
+                syncQueue.Add(() =>
+                {
+                    ResponseReceived(rp.ResponseId, rp);
+                    waitForResponse.Remove(rp.ResponseId);
+                });
+            }
+        }
+        else if (dp is LobbyUpdatePackage)
+        {
+            LobbyUpdatePackage lup = (LobbyUpdatePackage)dp;
+            if (GetLobbyId(currentLobby) != lup.LobbyId)
+                return;
+
+            lock (syncQueue)
+            {
+                syncQueue.Add(() =>
+                {
+                    currentLobby.clients.Clear();
+                    currentLobby.clients = lup.Members;
+                });
+            }
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Text;
 
 public class JoinLobbyPackage : DataPackage
 {
-    class JoinLobbyFactory : DataPackageFactory
+    public class JoinLobbyFactory : DataPackageFactory
     {
         public override int Id
         {
@@ -22,7 +22,7 @@ public class JoinLobbyPackage : DataPackage
             return jlp;
         }
     }
-    static JoinLobbyFactory factory = new JoinLobbyFactory();
+    public static JoinLobbyFactory factory = new JoinLobbyFactory();
     public static void RegisterFactory()
     {
         DataPackageFactory.Factories.Add(factory);
