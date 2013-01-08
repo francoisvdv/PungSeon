@@ -78,6 +78,7 @@ public class Client
             PlayerReadyPackage.RegisterFactory();
             RequestHighscorePackage.RegisterFactory();
             RequestLobbyListPackage.RegisterFactory();
+			ResponsePackage.RegisterFactory();
             SetHighscorePackage.RegisterFactory();
         }
     }

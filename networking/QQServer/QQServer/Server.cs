@@ -27,7 +27,7 @@ namespace QQServer
         void OnCreateLobby(CreateLobbyPackage dp)
         {
             Lobby l = new Lobby();
-            //l.Members.Add(dp.SenderTcpClient);
+            l.Members.Add(dp.SenderTcpClient, false);
             lobbies.Add(l);
 
             ResponsePackage rp = new ResponsePackage();
@@ -42,18 +42,31 @@ namespace QQServer
         void OnRequestLobbyList(RequestLobbyListPackage dp)
         {
             const char lobbySeperator = '|';
-            const char lobbyEntrySeperator = ',';
+            const char lobbyEntrySeperator = ';';
 
             string response = string.Empty;
-            foreach (Lobby l in lobbies)
+            for(int i = 0; i < lobbies.Count; i++)
             {
+                Lobby l = lobbies[i];
+
                 string part = l.LobbyId.ToString() + lobbyEntrySeperator;
-                //foreach (TcpClient t in l.Members)
+                foreach (var v in l.Members)
                 {
-                   // string address = ((IPEndPoint)t.Client.RemoteEndPoint).Address.ToString();
-                    //part += address + lobbyEntrySeperator + l.Equals
+                    string address = ((IPEndPoint)v.Key.Client.RemoteEndPoint).Address.ToString();
+                    part += address + lobbyEntrySeperator + v.Value.ToString();
                 }
+                response += part;
+
+                if (i != lobbies.Count - 1)
+                    response += lobbySeperator;
             }
+
+            ResponsePackage rp = new ResponsePackage();
+            rp.ResponseId = dp.Id;
+            rp.ResponseMessage = response;
+            Client.Instance.Write(dp.SenderTcpClient, rp);
+
+            Console.WriteLine("Lobby list sent to " + dp.SenderIPEndpoint.ToString());
         }
         void OnSetHighscore(SetHighscorePackage dp)
         {

@@ -40,7 +40,7 @@ public class ResponsePackage : DataPackage
     }
     public override string Body
     {
-        get { return ResponseId + ResponseFactory.delimiter[0] + ResponseMessage; }
+        get { return ResponseId.ToString() + ResponseFactory.delimiter[0] + ResponseMessage; }
     }
     public override DataPackageFactory Factory
     {

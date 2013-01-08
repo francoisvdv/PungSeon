@@ -47,15 +47,18 @@ public class Menu : MonoBehaviour, INetworkListener
 
 	Vector2 lobbyListScrollPosition = Vector2.zero;
 
-    Dictionary<int, Action<ResponsePackage>> waitForResponse = new Dictionary<int, Action<ResponsePackage>>();
-
     Dictionary<int, Lobby> lobbies = new Dictionary<int, Lobby>();
+
+    Dictionary<int, Action<ResponsePackage>> waitForResponse = new Dictionary<int, Action<ResponsePackage>>();
+    List<Action> syncQueue = new List<Action>();
 
 
 
 	// Use this for initialization
 	void Start ()
 	{
+        c2s.AddListener(this);
+		
 		boxWidth = mainMenuWidth;
 		boxHeight = mainMenuHeight;
 	}
@@ -79,6 +82,15 @@ public class Menu : MonoBehaviour, INetworkListener
 				boxHeight = Mathf.RoundToInt(Mathf.SmoothStep(sourceBoxHeight, targetBoxHeight, animationTimer / AnimationDuration));
 			}
 		}
+
+        lock (syncQueue)
+        {
+            while (syncQueue.Count != 0)
+            {
+                syncQueue[0]();
+                syncQueue.RemoveAt(0);
+            }
+        }
 	}
 
 	void AnimateBackground(int targetWidth, int targetHeight)
@@ -94,7 +106,8 @@ public class Menu : MonoBehaviour, INetworkListener
     void WaitForResponse(int responseId, Action<ResponsePackage> a)
     {
         GUI.enabled = false;
-        waitForResponse.Add(responseId, a);
+        if (!waitForResponse.ContainsKey(responseId))
+            waitForResponse.Add(responseId, a);
     }
     void ResponseReceived(int responseId, ResponsePackage rp)
     {
@@ -220,7 +233,7 @@ public class Menu : MonoBehaviour, INetworkListener
 				
 		//table box
 		{
-			int lobbyCount = 40;
+            int lobbyCount = 40;
 			
 			lobbyListScrollPosition = GUI.BeginScrollView(
 				new Rect(50, 150, boxWidth - 100, boxHeight - 250),
@@ -228,15 +241,17 @@ public class Menu : MonoBehaviour, INetworkListener
 				new Rect(0,0, rowWidth, lobbyCount * rowHeight + (lobbyCount - 1) * rowGap));
 			
 			int y = 0;
-			for(int i = 0; i < lobbyCount; i++)
+			for(int i = 0; i < lobbies.Count; i++)
 			{
+                Lobby l = lobbies[i];
+
 				GUI.BeginGroup(new Rect(0, y, rowWidth, rowHeight));
 				
 				if(GUI.Button(new Rect(0, 0, rowWidth, rowHeight), "", LobbyItemSkin.button))
 					OnJoinLobbyPressed();
 				
-				GUI.Label(new Rect(0, 0, rowWidth - 20, 30), "Yo Momma's Server");
-				GUI.Label(new Rect(rowWidth - 30, 0, 30, 30), "2/6");
+				GUI.Label(new Rect(0, 0, rowWidth - 20, 30), i.ToString());
+				GUI.Label(new Rect(rowWidth - 30, 0, 30, 30), l.clients.Count.ToString() + "/6");
 				
 				GUI.EndGroup();
 				y += rowHeight + rowGap;
@@ -319,23 +334,25 @@ public class Menu : MonoBehaviour, INetworkListener
 
     void OnPlayPressed()
     {
-        if(c2s.GetConnectionCount() == 0)
+        if (c2s.GetConnectionCount() == 0)
             c2s.Connect("131.155.243.155");
-
-        c2s.SendData(new RequestLobbyListPackage());
+        
+        c2s.WriteAll(new RequestLobbyListPackage());
         WaitForResponse(RequestLobbyListPackage.factory.Id,
         x =>
         {
+            lobbies.Clear();
+
             string body = x.ResponseMessage;
             const char lobbySeperator = '|';
-            const char lobbyEntrySeperator = ',';
+            const char lobbyEntrySeperator = ';';
 
             string[] newLobbies = body.Split(lobbySeperator);
             foreach (string l in newLobbies)
             {
                 Lobby newLobby = new Lobby();
                 string[] entries = l.Split(lobbyEntrySeperator);
-                if(entries.Length == 0)
+                if (entries.Length == 0)
                     continue;
 
                 int lobbyId;
@@ -345,7 +362,7 @@ public class Menu : MonoBehaviour, INetworkListener
                 for (int i = 1; i < entries.Length; i += 2)
                 {
                     bool ready;
-                    if(!bool.TryParse(entries[i + 1], out ready))
+                    if (!bool.TryParse(entries[i + 1], out ready))
                         break;
                     newLobby.clients.Add(entries[i], ready);
                 }
@@ -371,17 +388,23 @@ public class Menu : MonoBehaviour, INetworkListener
         if (rp == null)
             return;
 
-        int remove = -1;
-        foreach (var v in waitForResponse)
+        lock (syncQueue)
         {
-            if (rp.ResponseId == v.Key)
+            syncQueue.Add(() =>
             {
-                ResponseReceived(v.Key, rp);
-                remove = v.Key;
-            }
-        }
+                int rem = -1;
+                foreach (var v in waitForResponse)
+                {
+                    if (rp.ResponseId == v.Key)
+                    {
+                        ResponseReceived(v.Key, rp);
+                        rem = v.Key;
+                    }
+                }
 
-        if (remove != -1)
-            waitForResponse.Remove(-1);
+                if (rem != -1)
+                    waitForResponse.Remove(rem);
+            });
+        }
     }
 }
