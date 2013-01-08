@@ -47,11 +47,10 @@ public class Menu : MonoBehaviour, INetworkListener
 
 	Vector2 lobbyListScrollPosition = Vector2.zero;
 
-    Dictionary<int, Lobby> lobbies = new Dictionary<int, Lobby>();
-
     Dictionary<int, Action<ResponsePackage>> waitForResponse = new Dictionary<int, Action<ResponsePackage>>();
     List<Action> syncQueue = new List<Action>();
 
+    Dictionary<int, Lobby> lobbies = new Dictionary<int, Lobby>();
 
 
 	// Use this for initialization
@@ -112,7 +111,67 @@ public class Menu : MonoBehaviour, INetworkListener
     void ResponseReceived(int responseId, ResponsePackage rp)
     {
         GUI.enabled = true;
-        waitForResponse[responseId](rp);
+        if(waitForResponse.ContainsKey(responseId))
+            waitForResponse[responseId](rp);
+    }
+
+    void ConnectToServer()
+    {
+        if (c2s.GetConnectionCount() == 0)
+            c2s.Connect("192.168.1.69");
+    }
+    void RequestLobbyList(Action onReceive)
+    {
+        c2s.WriteAll(new RequestLobbyListPackage());
+        WaitForResponse(RequestLobbyListPackage.factory.Id,
+        x =>
+        {
+            lobbies.Clear();
+
+            string body = x.ResponseMessage;
+            const char lobbySeperator = '|';
+            const char lobbyEntrySeperator = ';';
+
+            string[] newLobbies = body.Split(lobbySeperator);
+            foreach (string l in newLobbies)
+            {
+                Lobby newLobby = new Lobby();
+                string[] entries = l.Split(lobbyEntrySeperator);
+                if (entries.Length == 0)
+                    continue;
+
+                int lobbyId;
+                if (!int.TryParse(entries[0], out lobbyId))
+                    continue;
+
+                for (int i = 1; i < entries.Length; i += 2)
+                {
+                    bool ready;
+                    if (!bool.TryParse(entries[i + 1], out ready))
+                        break;
+                    newLobby.clients.Add(entries[i], ready);
+                }
+
+                lobbies.Add(lobbyId, newLobby);
+            }
+
+            if(onReceive != null)
+                onReceive();
+        });
+    }
+    void CreateLobby(Action onReceive)
+    {
+        c2s.WriteAll(new CreateLobbyPackage());
+        WaitForResponse(CreateLobbyPackage.factory.Id,
+        x =>
+        {
+            if (onReceive != null)
+                onReceive();
+        });
+    }
+    void JoinLobby()
+    {
+
     }
 
 	void OnGUI()
@@ -268,8 +327,9 @@ public class Menu : MonoBehaviour, INetworkListener
 		
 		if(GUI.Button(new Rect(boxWidth-180, boxHeight-80, 70, 30), "Create"))
 		{
-			AnimateBackground(createLobbyWidth, createLobbyHeight);
-			State = MenuState.CreateLobby;
+            OnCreateLobbyPressed();
+			//AnimateBackground(createLobbyWidth, createLobbyHeight);
+			///State = MenuState.CreateLobby;
 		}
 	}
 	void GuiCreateLobby()
@@ -334,49 +394,20 @@ public class Menu : MonoBehaviour, INetworkListener
 
     void OnPlayPressed()
     {
-        if (c2s.GetConnectionCount() == 0)
-            c2s.Connect("131.155.243.155");
-        
-        c2s.WriteAll(new RequestLobbyListPackage());
-        WaitForResponse(RequestLobbyListPackage.factory.Id,
-        x =>
-        {
-            lobbies.Clear();
+        ConnectToServer();
 
-            string body = x.ResponseMessage;
-            const char lobbySeperator = '|';
-            const char lobbyEntrySeperator = ';';
-
-            string[] newLobbies = body.Split(lobbySeperator);
-            foreach (string l in newLobbies)
+        RequestLobbyList(() =>
             {
-                Lobby newLobby = new Lobby();
-                string[] entries = l.Split(lobbyEntrySeperator);
-                if (entries.Length == 0)
-                    continue;
-
-                int lobbyId;
-                if (!int.TryParse(entries[0], out lobbyId))
-                    continue;
-
-                for (int i = 1; i < entries.Length; i += 2)
-                {
-                    bool ready;
-                    if (!bool.TryParse(entries[i + 1], out ready))
-                        break;
-                    newLobby.clients.Add(entries[i], ready);
-                }
-
-                lobbies.Add(lobbyId, newLobby);
-            }
-
-            AnimateBackground(lobbyListWidth, lobbyListHeight);
-            State = MenuState.LobbyList;
-        });
+                AnimateBackground(lobbyListWidth, lobbyListHeight);
+                State = MenuState.LobbyList;
+            });
     }
 	void OnCreateLobbyPressed()
 	{
-		print ("IK BEN BEDRUKT!");
+        CreateLobby(() =>
+            {
+                RequestLobbyList(null);
+            });
 	}
     void OnJoinLobbyPressed()
     {
@@ -392,18 +423,8 @@ public class Menu : MonoBehaviour, INetworkListener
         {
             syncQueue.Add(() =>
             {
-                int rem = -1;
-                foreach (var v in waitForResponse)
-                {
-                    if (rp.ResponseId == v.Key)
-                    {
-                        ResponseReceived(v.Key, rp);
-                        rem = v.Key;
-                    }
-                }
-
-                if (rem != -1)
-                    waitForResponse.Remove(rem);
+				ResponseReceived(rp.ResponseId, rp);
+				waitForResponse.Remove(rp.ResponseId);
             });
         }
     }

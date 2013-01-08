@@ -5,7 +5,7 @@ using System.Text;
 
 public class CreateLobbyPackage : DataPackage
 {
-    class CreateLobbyFactory : DataPackageFactory
+    public class CreateLobbyFactory : DataPackageFactory
     {
         public override int Id
         {
@@ -20,7 +20,7 @@ public class CreateLobbyPackage : DataPackage
             return new CreateLobbyPackage();
         }
     }
-    static CreateLobbyFactory factory = new CreateLobbyFactory();
+    public static CreateLobbyFactory factory = new CreateLobbyFactory();
     public static void RegisterFactory()
     {
         DataPackageFactory.Factories.Add(factory);

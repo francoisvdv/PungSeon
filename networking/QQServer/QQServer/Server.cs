@@ -27,13 +27,14 @@ namespace QQServer
         void OnCreateLobby(CreateLobbyPackage dp)
         {
             Lobby l = new Lobby();
-            l.Members.Add(dp.SenderTcpClient, false);
             lobbies.Add(l);
 
             ResponsePackage rp = new ResponsePackage();
             rp.ResponseId = dp.Id;
             rp.ResponseMessage = l.LobbyId.ToString();
             Client.Instance.Write(dp.SenderTcpClient, rp);
+
+            Console.WriteLine("Created lobby");
         }
         void OnRequestHighscore(RequestHighscorePackage dp)
         {
@@ -49,7 +50,10 @@ namespace QQServer
             {
                 Lobby l = lobbies[i];
 
-                string part = l.LobbyId.ToString() + lobbyEntrySeperator;
+                string part = l.LobbyId.ToString();
+                if (l.Members.Count != 0)
+                    part += lobbyEntrySeperator;
+
                 foreach (var v in l.Members)
                 {
                     string address = ((IPEndPoint)v.Key.Client.RemoteEndPoint).Address.ToString();
