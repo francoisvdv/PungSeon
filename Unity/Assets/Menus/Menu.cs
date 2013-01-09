@@ -130,7 +130,7 @@ public class Menu : MonoBehaviour, INetworkListener
     void ConnectToServer()
     {
         if (c2s.GetConnectionCount() == 0)
-            c2s.Connect("192.168.1.69");
+            c2s.Connect("131.155.242.225");
     }
     void RequestLobbyList(Action onReceive)
     {

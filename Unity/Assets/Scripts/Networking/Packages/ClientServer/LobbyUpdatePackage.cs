@@ -56,9 +56,16 @@ public class LobbyUpdatePackage : DataPackage
             string body = LobbyId.ToString();
             if (Members.Count > 0)
                 body += IdSeperator;
+
+            int i = 0;
             foreach (var v in Members)
             {
-                body += v.Key + EntrySeperator + v.Value;
+                body += v.Key + EntrySeperator + v.Value.ToString();
+
+                if (i != Members.Count - 1)
+                    body += EntrySeperator;
+
+                i++;
             }
             return body;
         }

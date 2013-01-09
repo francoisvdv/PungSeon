@@ -43,6 +43,7 @@ namespace QQServer
             foreach (var v in Members)
             {
                 Client.Instance.Write(v.Key, lup);
+                Console.WriteLine("Sent lobby update to " + ((IPEndPoint)v.Key.Client.RemoteEndPoint).Address.ToString());
             }
         }
 
