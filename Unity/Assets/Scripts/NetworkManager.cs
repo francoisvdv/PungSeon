@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class GameManager : MonoBehaviour
+public class NetworkManager : MonoBehaviour
 {
     static bool added;
 
@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
         }
 
 		Client.Instance.OnLog = x => print (x);
-        Client.Instance.ConnectBack = false;
+        //Client.Instance.SetMode(Client.Mode.ClientClient);
 		Client.Instance.StartConnectionListener();
 	}
 	

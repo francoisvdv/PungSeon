@@ -4,6 +4,10 @@ using System.Collections;
 public class ControlSettings
 {
 	public KeyCode Fire = KeyCode.V;
+    public KeyCode Forward = KeyCode.W;
+    public KeyCode Backward = KeyCode.S;
+    public KeyCode StrafeLeft = KeyCode.A;
+    public KeyCode StrafeRight = KeyCode.D;
 }
 
 public static class Options

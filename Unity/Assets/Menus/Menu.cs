@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.Net.Sockets;
 
 public class Menu : MonoBehaviour, INetworkListener
 {
@@ -54,6 +55,7 @@ public class Menu : MonoBehaviour, INetworkListener
     Dictionary<int, Lobby> lobbies = new Dictionary<int, Lobby>();
     Lobby currentLobby;
     bool ready = false;
+
 
 	// Use this for initialization
 	void Start ()
@@ -534,9 +536,28 @@ public class Menu : MonoBehaviour, INetworkListener
                     {
                         c2s.Dispose();
 
+                        List<TcpClient> clients = new List<TcpClient>();
                         foreach (var v in currentLobby.clients)
                         {
-                            Client.Instance.Connect(v.Key);
+                            clients.Add(Client.Instance.Connect(v.Key));
+                        }
+                        for (int i = 0; i < clients.Count; i++)
+                        {
+                            if (clients[i].GetIPEndPoint().Address.ToString() == Client.GetLocalIPAddress())
+                            {
+                                if(i == 0)
+                                    Client.Instance.SetHasToken(true);
+
+                                TcpClient next = null;
+                                if (i != clients.Count - 1)
+                                    next = clients[i + 1];
+                                else
+                                    next = clients[0];
+
+                                Client.Instance.SetNextTokenClient(next);
+
+                                break;
+                            }
                         }
 
                         Application.LoadLevel("GameWorld");

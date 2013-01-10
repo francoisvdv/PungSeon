@@ -1,17 +1,8 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Networking\Client.cs">
-    <Files>
-      <File FileName="Assets\Menus\Menu.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Networking\Client.cs" Line="108" Column="14" />
-      <File FileName="Assets\Scripts\Networking\NetworkTest.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\GameManager.cs" Line="1" Column="1" />
-    </Files>
-  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workbench />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore>
-      <Breakpoint file="D:\University\Repos\2IO23\Unity\Assets\Menus\Menu.cs" line="539" />
-    </BreakpointStore>
+    <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches>
     <Watch file="Assets\Menus\Menu.cs" line="540" offsetX="266" offsetY="1830" expression="Instance" liveUpdate="False" />

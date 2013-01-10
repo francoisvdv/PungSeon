@@ -6,7 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-public class Client : IDisposable
+public class Client : IDisposable, INetworkListener
 {
 	class RemoteClient
 	{
@@ -34,7 +34,6 @@ public class Client : IDisposable
 
 
 	public Action<string> OnLog;
-    public bool ConnectBack = true; //on incoming connection, connect back
 
 
 	TcpListener tcpListener;
@@ -54,6 +53,8 @@ public class Client : IDisposable
 	{
 		username = GenerateUniqueUsername();
         SetMode(Mode.ClientServer);
+
+        AddListener(this);
 	}
     public void Dispose()
     {
@@ -64,10 +65,24 @@ public class Client : IDisposable
         }
     }
 
-	string GenerateUniqueUsername()
+	public static string GenerateUniqueUsername()
 	{
 		return "John Doe " + DateTime.Now.Hour + "." + DateTime.Now.Minute + "." + DateTime.Now.Second + "." + DateTime.Now.Millisecond;
 	}
+    public static string GetLocalIPAddress()
+    {
+        IPHostEntry host;
+        string localIP = "";
+        host = Dns.GetHostEntry(Dns.GetHostName());
+        foreach (IPAddress ip in host.AddressList)
+        {
+            if (ip.AddressFamily == AddressFamily.InterNetwork)
+            {
+                localIP = ip.ToString();
+            }
+        }
+        return localIP;
+    }
 
     public void SetMode(Mode m)
     {
@@ -77,6 +92,7 @@ public class Client : IDisposable
         {
             TokenChangePackage.RegisterFactory();
             ChatMessagePackage.RegisterFactory();
+            PlayerMovePackage.RegisterFactory();
         }
         else if (m == Mode.ClientServer)
         {
@@ -89,6 +105,14 @@ public class Client : IDisposable
 			ResponsePackage.RegisterFactory();
             SetHighscorePackage.RegisterFactory();
         }
+    }
+    public void SetHasToken(bool hasToken)
+    {
+        this.hasToken = hasToken;
+    }
+    public void SetNextTokenClient(TcpClient nextClient)
+    {
+        this.nextClient = nextClient;
     }
 
 	public void AddListener(INetworkListener l)
@@ -155,13 +179,12 @@ public class Client : IDisposable
 
         if (c != null && c.Connected)
         {
-            if (ConnectBack)
-                AddClient(c);
+            AddClient(c);
 
             if (OnLog != null)
             {
                 OnLog("Connected (incoming): " + c.Connected + " | " + ((IPEndPoint)c.Client.RemoteEndPoint).ToString() +
-                    " | Total outgoing connections: " + clients.Count);
+                    " | Total connections: " + clients.Count);
             }
         }
     }
@@ -215,8 +238,8 @@ public class Client : IDisposable
 		rc.username = GenerateUniqueUsername();
 		rc.readBuffer = new byte[c.ReceiveBufferSize];
 		clients.Add(c, rc);
-		
-		c.GetStream().BeginRead(rc.readBuffer, 0, rc.readBuffer.Length, ReceiveCallback, c);
+
+        c.GetStream().BeginRead(rc.readBuffer, 0, rc.readBuffer.Length, ReceiveCallback, c);
 	}
     public int GetConnectionCount()
     {
@@ -259,7 +282,7 @@ public class Client : IDisposable
 		}
 	}
 	
-	public void Connect(string ip, int port = 4550)
+	public TcpClient Connect(string ip, int port = 4550)
 	{
 		TcpClient tcpClient = new TcpClient();
 		tcpClient.Connect(ip, port);
@@ -269,8 +292,10 @@ public class Client : IDisposable
         if (OnLog != null)
         {
             OnLog("Connected (outgoing): " + tcpClient.Connected + " | " + ((IPEndPoint)tcpClient.Client.RemoteEndPoint).ToString() +
-                " | Total outgoing connections: " + clients.Count);
+                " | Total connections: " + clients.Count);
         }
+
+        return tcpClient;
 	}
 	public void SendData(DataPackage dp)
 	{
@@ -292,7 +317,7 @@ public class Client : IDisposable
 			    nl.OnDataReceived(dp);
 		}
 	}
-	
+
 	public void Update()
 	{
 		if(!hasToken)
@@ -303,7 +328,17 @@ public class Client : IDisposable
 			DataPackage dp = queue.Dequeue();
 			WriteAll(dp.ToString());
 		}
-		
+
+        hasToken = false;
 		Write(nextClient, new TokenChangePackage());
 	}
+
+    public void OnDataReceived(DataPackage dp)
+    {
+        TokenChangePackage tcp = dp as TokenChangePackage;
+        if (tcp == null)
+            return;
+
+        hasToken = true;
+    }
 }
