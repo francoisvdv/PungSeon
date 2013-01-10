@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
 
 public static class Extensions
 {
@@ -45,5 +47,10 @@ public static class Extensions
         }
         key = default(K);
         return false;
+    }
+
+    public static IPEndPoint GetIPEndPoint(this TcpClient instance)
+    {
+        return (IPEndPoint)instance.Client.RemoteEndPoint;
     }
 }

@@ -43,7 +43,7 @@ namespace QQServer
         void StartServer()
         {
             Client.Instance.SetMode(Client.Mode.ClientServer);
-            Client.Instance.StartTcpListener();
+            Client.Instance.StartConnectionListener(4551);
 
             Client.Instance.AddListener(server);
         }

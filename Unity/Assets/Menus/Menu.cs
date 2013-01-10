@@ -58,6 +58,7 @@ public class Menu : MonoBehaviour, INetworkListener
 	// Use this for initialization
 	void Start ()
 	{
+		c2s.OnLog += x => print (x);
         c2s.AddListener(this);
 		
 		boxWidth = mainMenuWidth;
@@ -130,7 +131,7 @@ public class Menu : MonoBehaviour, INetworkListener
     void ConnectToServer()
     {
         if (c2s.GetConnectionCount() == 0)
-            c2s.Connect("131.155.242.225");
+            c2s.Connect("131.155.240.244", 4551);
     }
     void RequestLobbyList(Action onReceive)
     {
@@ -184,7 +185,7 @@ public class Menu : MonoBehaviour, INetworkListener
                 onReceive(newLobbyId);
         });
     }
-    void JoinLobby(Lobby l, Action onReceive)
+    void JoinLobby(Lobby l, Action<bool> onReceive)
     {
         JoinLobbyPackage jlp = new JoinLobbyPackage();
         jlp.LobbyId = GetLobbyId(l);
@@ -193,9 +194,14 @@ public class Menu : MonoBehaviour, INetworkListener
         WaitForResponse(JoinLobbyPackage.factory.Id,
         x =>
         {
-            currentLobby = l;
+            bool success = false;
+            bool.TryParse(x.ResponseMessage, out success);
+
+            if(success)
+                currentLobby = l;
+
             if (onReceive != null)
-                onReceive();
+                onReceive(success);
         });
     }
     void UpdateReadyState(Action onReceive)
@@ -468,8 +474,11 @@ public class Menu : MonoBehaviour, INetworkListener
                 RequestLobbyList(() =>
                     {
                         if (lobbies.ContainsKey(x))
-                            JoinLobby(lobbies[x], () =>
+                            JoinLobby(lobbies[x], y =>
                                 {
+                                    if (!y)
+                                        return;
+
                                     AnimateBackground(lobbyWidth, lobbyHeight);
                                     State = MenuState.Lobby;
                                 });
@@ -478,8 +487,11 @@ public class Menu : MonoBehaviour, INetworkListener
 	}
     void OnJoinLobbyPressed(Lobby l)
     {
-        JoinLobby(l, () =>
+        JoinLobby(l, x =>
             {
+                if (!x)
+                    return;
+
                 AnimateBackground(lobbyWidth, lobbyHeight);
                 State = MenuState.Lobby;
             });
@@ -517,6 +529,18 @@ public class Menu : MonoBehaviour, INetworkListener
                 {
                     currentLobby.clients.Clear();
                     currentLobby.clients = lup.Members;
+
+                    if (lup.Start)
+                    {
+                        c2s.Dispose();
+
+                        foreach (var v in currentLobby.clients)
+                        {
+                            Client.Instance.Connect(v.Key);
+                        }
+
+                        Application.LoadLevel("GameWorld");
+                    }
                 });
             }
         }

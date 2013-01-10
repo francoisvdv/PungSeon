@@ -15,6 +15,8 @@ namespace QQServer
         public int LobbyId { get; private set; }
 
         public Dictionary<TcpClient, bool> Members = new Dictionary<TcpClient, bool>();
+        bool freeze = false;
+
 
         public Lobby()
         {
@@ -23,7 +25,7 @@ namespace QQServer
             Client.Instance.AddListener(this);
         }
 
-        void UpdateClients()
+        void UpdateClients(bool startGame = false)
         {
             var remove = Members.Where(x => x.Key.Connected == false);
             foreach (var v in remove)
@@ -33,6 +35,7 @@ namespace QQServer
 
             LobbyUpdatePackage lup = new LobbyUpdatePackage();
             lup.LobbyId = LobbyId;
+            lup.Start = startGame;
             foreach (var v in Members)
             {
                 string address = ((IPEndPoint)v.Key.Client.RemoteEndPoint).Address.ToString();
@@ -80,6 +83,7 @@ namespace QQServer
 
             ResponsePackage rp = new ResponsePackage();
             rp.ResponseId = dp.Id;
+            rp.ResponseMessage = (!freeze).ToString();
             Client.Instance.Write(dp.SenderTcpClient, rp);
 
             UpdateClients();
@@ -99,6 +103,21 @@ namespace QQServer
             UpdateClients();
 
             Console.WriteLine(dp.SenderIPEndpoint.ToString() + " ready status changed: " + dp.Ready);
+
+            int ready = 0;
+            foreach (var v in Members)
+            {
+                if (v.Value)
+                    ready++;
+            }
+            if (ready != Members.Count)
+                return;
+
+            freeze = true;
+
+            UpdateClients(true);
+
+            Console.WriteLine("GAME START MESSAGE SENT!");
         }
     }
 }

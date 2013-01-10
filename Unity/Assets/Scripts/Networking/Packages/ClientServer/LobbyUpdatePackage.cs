@@ -19,12 +19,14 @@ public class LobbyUpdatePackage : DataPackage
         {
             string[] split = b.Split(IdSeperator);
             int id = int.Parse(split[0]);
+            bool start = bool.Parse(split[1]);
 
             LobbyUpdatePackage prp = new LobbyUpdatePackage();
             prp.LobbyId = id;
-            if (split.Length > 1)
+            prp.Start = start;
+            if (split.Length > 2)
             {
-                string[] entries = split[1].Split(EntrySeperator);
+                string[] entries = split[2].Split(EntrySeperator);
                 for (int i = 0; i < entries.Length; i += 2)
                 {
                     string ip = entries[i];
@@ -53,7 +55,7 @@ public class LobbyUpdatePackage : DataPackage
     {
         get
         {
-            string body = LobbyId.ToString();
+            string body = LobbyId.ToString() + IdSeperator + Start.ToString();
             if (Members.Count > 0)
                 body += IdSeperator;
 
@@ -77,4 +79,5 @@ public class LobbyUpdatePackage : DataPackage
 
     public int LobbyId { get; set; }
     public Dictionary<string, bool> Members = new Dictionary<string, bool>();
+    public bool Start { get; set; }
 }

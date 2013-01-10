@@ -6,7 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-public class Client
+public class Client : IDisposable
 {
 	class RemoteClient
 	{
@@ -21,7 +21,7 @@ public class Client
 	{
 		get
 		{
-            if (instance == null)
+            if (instance == null)            
                 instance = new Client();
 
             return instance;
@@ -33,10 +33,10 @@ public class Client
     }
 
 
-
 	public Action<string> OnLog;
-	
-	
+    public bool ConnectBack = true; //on incoming connection, connect back
+
+
 	TcpListener tcpListener;
 	Dictionary<TcpClient, RemoteClient> clients = new Dictionary<TcpClient, RemoteClient>(); //string contains the client's 'username'
 	Queue<DataPackage> queue = new Queue<DataPackage>();
@@ -55,7 +55,15 @@ public class Client
 		username = GenerateUniqueUsername();
         SetMode(Mode.ClientServer);
 	}
-	
+    public void Dispose()
+    {
+        StopConnectionListener();
+        foreach (var v in clients)
+        {
+            v.Key.Close();
+        }
+    }
+
 	string GenerateUniqueUsername()
 	{
 		return "John Doe " + DateTime.Now.Hour + "." + DateTime.Now.Minute + "." + DateTime.Now.Second + "." + DateTime.Now.Millisecond;
@@ -73,7 +81,6 @@ public class Client
         else if (m == Mode.ClientServer)
         {
             CreateLobbyPackage.RegisterFactory();
-            GameStartPackage.RegisterFactory();
             JoinLobbyPackage.RegisterFactory();
             LobbyUpdatePackage.RegisterFactory();
             PlayerReadyPackage.RegisterFactory();
@@ -101,17 +108,20 @@ public class Client
         }
 	}
 	
-	public void StartTcpListener()
+	public void StartConnectionListener(int port = 4550)
 	{
-		tcpListener = new TcpListener(IPAddress.Any, 4550);
+        OnLog("Starting TCP listening...");
+
+		tcpListener = new TcpListener(IPAddress.Any, port);
 		tcpListener.Start();
 		tcpListener.BeginAcceptTcpClient(ConnectCallback, tcpListener);
 		
 		OnLog("Started TCP listening");
 	}
-	public void StopTcpListener()
+	public void StopConnectionListener()
 	{
-		tcpListener.Stop();
+        if(tcpListener != null)
+		    tcpListener.Stop();
 		
 		OnLog("Stopped TCP listening");
 	}
@@ -142,14 +152,18 @@ public class Client
 			
             return;
         }
-		
-		if(c != null && c.Connected)
-		{
-			AddClient(c);
-			
-			if(OnLog != null)
-				OnLog("Connected: " + c.Connected + " | " + clients[c] + " | Total connections: " + clients.Count);
-		}
+
+        if (c != null && c.Connected)
+        {
+            if (ConnectBack)
+                AddClient(c);
+
+            if (OnLog != null)
+            {
+                OnLog("Connected (incoming): " + c.Connected + " | " + ((IPEndPoint)c.Client.RemoteEndPoint).ToString() +
+                    " | Total outgoing connections: " + clients.Count);
+            }
+        }
     }
 	void ReceiveCallback(IAsyncResult iar)
 	{
@@ -245,11 +259,18 @@ public class Client
 		}
 	}
 	
-	public void Connect(string ip)
+	public void Connect(string ip, int port = 4550)
 	{
 		TcpClient tcpClient = new TcpClient();
-		tcpClient.Connect(ip, 4550);
+		tcpClient.Connect(ip, port);
 		AddClient(tcpClient);
+
+        //imde.co.de/pungeson/go.php
+        if (OnLog != null)
+        {
+            OnLog("Connected (outgoing): " + tcpClient.Connected + " | " + ((IPEndPoint)tcpClient.Client.RemoteEndPoint).ToString() +
+                " | Total outgoing connections: " + clients.Count);
+        }
 	}
 	public void SendData(DataPackage dp)
 	{
