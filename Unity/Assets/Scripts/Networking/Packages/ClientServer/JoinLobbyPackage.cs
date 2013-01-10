@@ -23,10 +23,6 @@ public class JoinLobbyPackage : DataPackage
         }
     }
     public static JoinLobbyFactory factory = new JoinLobbyFactory();
-    public static void RegisterFactory()
-    {
-        DataPackageFactory.Factories.Add(factory);
-    }
 
     public override int Id
     {

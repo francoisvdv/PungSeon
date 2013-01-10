@@ -35,6 +35,7 @@ public class Client : IDisposable, INetworkListener
 
 	public Action<string> OnLog;
 
+    public List<DataPackageFactory> Factories = new List<DataPackageFactory>();
 
 	TcpListener tcpListener;
 	Dictionary<TcpClient, RemoteClient> clients = new Dictionary<TcpClient, RemoteClient>(); //string contains the client's 'username'
@@ -86,24 +87,24 @@ public class Client : IDisposable, INetworkListener
 
     public void SetMode(Mode m)
     {
-        DataPackageFactory.Factories.Clear();
+        Factories.Clear();
 
         if (m == Mode.ClientClient)
         {
-            TokenChangePackage.RegisterFactory();
-            ChatMessagePackage.RegisterFactory();
-            PlayerMovePackage.RegisterFactory();
+            Factories.Add(TokenChangePackage.factory);
+            Factories.Add(ChatMessagePackage.factory);
+            Factories.Add(PlayerMovePackage.factory);
         }
         else if (m == Mode.ClientServer)
         {
-            CreateLobbyPackage.RegisterFactory();
-            JoinLobbyPackage.RegisterFactory();
-            LobbyUpdatePackage.RegisterFactory();
-            PlayerReadyPackage.RegisterFactory();
-            RequestHighscorePackage.RegisterFactory();
-            RequestLobbyListPackage.RegisterFactory();
-			ResponsePackage.RegisterFactory();
-            SetHighscorePackage.RegisterFactory();
+            Factories.Add(CreateLobbyPackage.factory);
+            Factories.Add(JoinLobbyPackage.factory);
+            Factories.Add(LobbyUpdatePackage.factory);
+            Factories.Add(PlayerReadyPackage.factory);
+            Factories.Add(RequestHighscorePackage.factory);
+            Factories.Add(RequestLobbyListPackage.factory);
+            Factories.Add(ResponsePackage.factory);
+            Factories.Add(SetHighscorePackage.factory);
         }
     }
     public void SetHasToken(bool hasToken)
@@ -113,6 +114,16 @@ public class Client : IDisposable, INetworkListener
     public void SetNextTokenClient(TcpClient nextClient)
     {
         this.nextClient = nextClient;
+    }
+
+    public DataPackageFactory GetFactory(int id)
+    {
+        foreach (DataPackageFactory dpf in Factories)
+        {
+            if (dpf.Id == id)
+                return dpf;
+        }
+        return null;
     }
 
 	public void AddListener(INetworkListener l)
@@ -303,7 +314,7 @@ public class Client : IDisposable, INetworkListener
 	}
 	void ReceiveData(TcpClient sender, string data)
 	{
-		DataPackage dp = DataPackage.FromString(data);
+		DataPackage dp = DataPackage.FromString(this, data);
         dp.SenderTcpClient = sender;
         for(int i = 0; i < networkListeners.Count; i++)
 		{

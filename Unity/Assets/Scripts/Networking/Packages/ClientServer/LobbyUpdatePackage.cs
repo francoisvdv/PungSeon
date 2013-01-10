@@ -5,7 +5,7 @@ using System.Text;
 
 public class LobbyUpdatePackage : DataPackage
 {
-    class LobbyUpdateFactory : DataPackageFactory
+    public class LobbyUpdateFactory : DataPackageFactory
     {
         public override int Id
         {
@@ -38,11 +38,7 @@ public class LobbyUpdatePackage : DataPackage
             return prp;
         }
     }
-    static LobbyUpdateFactory factory = new LobbyUpdateFactory();
-    public static void RegisterFactory()
-    {
-        DataPackageFactory.Factories.Add(factory);
-    }
+    public static LobbyUpdateFactory factory = new LobbyUpdateFactory();
 
     public const char IdSeperator = '|';
     public const char EntrySeperator = ';';

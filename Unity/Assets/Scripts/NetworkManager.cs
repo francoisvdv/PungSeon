@@ -20,7 +20,7 @@ public class NetworkManager : MonoBehaviour
         }
 
 		Client.Instance.OnLog = x => print (x);
-        //Client.Instance.SetMode(Client.Mode.ClientClient);
+        Client.Instance.SetMode(Client.Mode.ClientClient);
 		Client.Instance.StartConnectionListener();
 	}
 	

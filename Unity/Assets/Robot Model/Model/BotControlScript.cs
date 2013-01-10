@@ -32,7 +32,7 @@ public class BotControlScript : MonoBehaviour, INetworkListener
     PlayerMovePackage.Direction currentDirection = PlayerMovePackage.Direction.Stop;
 
 	void Start ()
-	{
+	{		
 		// initialising reference variables
 		anim = GetComponent<Animator>();					  
 		col = GetComponent<CapsuleCollider>();
@@ -41,24 +41,30 @@ public class BotControlScript : MonoBehaviour, INetworkListener
 		
 		if(anim.layerCount ==2)
 			anim.SetLayerWeight(1, 1);
+		
+		Client.Instance.AddListener(this);
 	}
 
     void FixedUpdate()
     {
         PlayerMovePackage.Direction dir = PlayerMovePackage.Direction.Stop;
-        if (Input.GetKeyDown(Options.Controls.Forward))
-            dir.Add(PlayerMovePackage.Direction.Up);
-        if (Input.GetKeyDown(Options.Controls.Backward))
-            dir.Add(PlayerMovePackage.Direction.Back);
+
+        if (Input.GetKey(Options.Controls.Forward))
+            dir = dir.Add(PlayerMovePackage.Direction.Up);
+        if (Input.GetKey(Options.Controls.Backward))
+            dir = dir.Add(PlayerMovePackage.Direction.Back);
         if (Input.GetKeyDown(Options.Controls.StrafeLeft))
-            dir.Add(PlayerMovePackage.Direction.Left);
+            dir = dir.Add(PlayerMovePackage.Direction.Left);
         if (Input.GetKeyDown(Options.Controls.StrafeRight))
-            dir.Add(PlayerMovePackage.Direction.Right);
+            dir = dir.Add(PlayerMovePackage.Direction.Right);
 
         if (currentDirection != dir)
         {
             PlayerMovePackage pmp = new PlayerMovePackage(transform.root.position, transform.root.rotation.eulerAngles, dir);
             Client.Instance.SendData(pmp);
+			
+			
+			print ("Changed: " + dir);
         }
 
         currentDirection = dir;

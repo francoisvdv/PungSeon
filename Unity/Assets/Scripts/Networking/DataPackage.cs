@@ -28,14 +28,14 @@ public abstract class DataPackage
 	}
 	
 	static readonly char[] delimiter = new char[]{','};
-	public static DataPackage FromString(string s)
+	public static DataPackage FromString(Client c, string s)
 	{
 		string[] split = s.Split(delimiter, 2);
 		int id;
 		if(!int.TryParse(split[0], out id))
 			return null;
 		
-		DataPackageFactory factory = DataPackageFactory.GetFactory(id);
+		DataPackageFactory factory = c.GetFactory(id);
 		if(factory == null)
 			return null;
 		

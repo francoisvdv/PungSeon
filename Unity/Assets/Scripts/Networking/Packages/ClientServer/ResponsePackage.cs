@@ -5,7 +5,7 @@ using System.Text;
 
 public class ResponsePackage : DataPackage
 {
-    class ResponseFactory : DataPackageFactory
+    public class ResponseFactory : DataPackageFactory
     {
         public override int Id
         {
@@ -28,11 +28,7 @@ public class ResponsePackage : DataPackage
             return rp;
         }
     }
-    static ResponseFactory factory = new ResponseFactory();
-    public static void RegisterFactory()
-    {
-        DataPackageFactory.Factories.Add(factory);
-    }
+    public static ResponseFactory factory = new ResponseFactory();
 
     public override int Id
     {

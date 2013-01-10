@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class PlayerMovePackage : DataPackage
 {
-    class PlayerMoveFactory : DataPackageFactory
+    public class PlayerMoveFactory : DataPackageFactory
     {
         public override int Id
         {
@@ -38,11 +38,7 @@ public class PlayerMovePackage : DataPackage
             return new PlayerMovePackage(pos, rot, dir);
         }
     }
-    static PlayerMoveFactory factory = new PlayerMoveFactory();
-    public static void RegisterFactory()
-    {
-        DataPackageFactory.Factories.Add(factory);
-    }
+    public static PlayerMoveFactory factory = new PlayerMoveFactory();
 
     [Flags]
     public enum Direction { Stop, Up, Left, Back, Right }

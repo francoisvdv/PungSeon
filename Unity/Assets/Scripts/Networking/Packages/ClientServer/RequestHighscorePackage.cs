@@ -5,7 +5,7 @@ using System.Text;
 
 public class RequestHighscorePackage : DataPackage
 {
-    class RequestHighscoreFactory : DataPackageFactory
+    public class RequestHighscoreFactory : DataPackageFactory
     {
         public override int Id
         {
@@ -20,11 +20,7 @@ public class RequestHighscorePackage : DataPackage
             return new RequestHighscorePackage();
         }
     }
-    static RequestHighscoreFactory factory = new RequestHighscoreFactory();
-    public static void RegisterFactory()
-    {
-        DataPackageFactory.Factories.Add(factory);
-    }
+    public static RequestHighscoreFactory factory = new RequestHighscoreFactory();
 
     public override int Id
     {

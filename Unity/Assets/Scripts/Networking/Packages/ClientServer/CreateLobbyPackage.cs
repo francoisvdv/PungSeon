@@ -21,10 +21,6 @@ public class CreateLobbyPackage : DataPackage
         }
     }
     public static CreateLobbyFactory factory = new CreateLobbyFactory();
-    public static void RegisterFactory()
-    {
-        DataPackageFactory.Factories.Add(factory);
-    }
 
     public override int Id
     {

@@ -21,10 +21,6 @@ public class RequestLobbyListPackage : DataPackage
         }
     }
     public static RequestLobbyListFactory factory = new RequestLobbyListFactory();
-    public static void RegisterFactory()
-    {
-        DataPackageFactory.Factories.Add(factory);
-    }
 
     public override int Id
     {
