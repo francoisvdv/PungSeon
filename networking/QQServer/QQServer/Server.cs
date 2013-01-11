@@ -70,7 +70,7 @@ namespace QQServer
             rp.ResponseMessage = response;
             Client.Instance.Write(dp.SenderTcpClient, rp);
 
-            Console.WriteLine("Lobby list sent to " + dp.SenderIPEndpoint.ToString());
+            Console.WriteLine("Lobby list sent to " + dp.SenderRemoteIPEndpoint.ToString());
         }
         void OnSetHighscore(SetHighscorePackage dp)
         {

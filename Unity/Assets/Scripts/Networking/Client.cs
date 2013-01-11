@@ -128,34 +128,6 @@ public class Client : IDisposable, INetworkListener
         return null;
     }
 
-    bool ConnectedTo(string ip, int port = 4550)
-    {
-        foreach (var v in clients)
-        {
-            if ((v.Key.GetRemoteIPEndPoint().Address.ToString() == ip && v.Key.GetRemoteIPEndPoint().Port == port) ||
-                (v.Key.GetLocalIPEndPoint().Address.ToString() == ip && v.Key.GetLocalIPEndPoint().Port == port))
-                return true;
-        }
-
-        return false;
-    }
-    bool ConnectedTo(TcpClient c)
-    {
-		return ConnectedTo(c.GetLocalIPEndPoint().Address.ToString(), c.GetLocalIPEndPoint().Port) ||
-			ConnectedTo(c.GetRemoteIPEndPoint().Address.ToString(), c.GetRemoteIPEndPoint().Port);
-    }
-    TcpClient GetTcpClient(string ip, int port = 4550)
-    {
-        foreach (var v in clients)
-        {
-            if ((v.Key.GetLocalIPEndPoint().Address.ToString() == ip && v.Key.GetLocalIPEndPoint().Port == port) ||
-				(v.Key.GetRemoteIPEndPoint().Address.ToString() == ip && v.Key.GetRemoteIPEndPoint().Port == port))
-                return v.Key;
-        }
-
-        return null;
-    }
-
 	public void AddListener(INetworkListener l)
 	{
 		networkListeners.Add(new WeakReference(l));
@@ -222,25 +194,12 @@ public class Client : IDisposable, INetworkListener
         {
             lock (clients)
             {
-                if (!ConnectedTo(c))
-                {
-                    AddClient(c);
+                AddClient(c);
 
-                    if (OnLog != null)
-                    {
-                        OnLog("Connected (incoming): " + c.GetRemoteIPEndPoint().ToString() +
-                            " | Total connections: " + clients.Count);
-                    }
-                }
-                else
+                if (OnLog != null)
                 {
-                    if (OnLog != null)
-                    {
-                        OnLog("Closing new (incoming) duplicate connection: " + c.GetRemoteIPEndPoint().ToString() +
-                            " | Total connections: " + clients.Count);
-                    }
-					
-                    c.Close();
+                    OnLog("Connected (incoming): " + c.GetRemoteIPEndPoint().ToString() +
+                        " | Total connections: " + clients.Count);
                 }
             }
         }
@@ -265,6 +224,9 @@ public class Client : IDisposable, INetworkListener
 			//An error has occured when reading
 			return;
 		}
+		
+		if(read == 0)
+			OnLog("Read 0 bytes!");
 		
 		//TCP is a protocol that might split messages. We store our incoming message chunks and split on newlines.
 		string chunk = encoding.GetString(rc.readBuffer, 0, read);
@@ -350,12 +312,6 @@ public class Client : IDisposable, INetworkListener
 	{
         lock (clients)
         {
-            if (ConnectedTo(ip, port))
-            {
-                OnLog("Connected (existing connection): " + ip + " | " + port.ToString());
-                return GetTcpClient(ip, port);
-            }
-
             TcpClient tcpClient = new TcpClient();
             tcpClient.Connect(ip, port);
             AddClient(tcpClient);
@@ -423,7 +379,7 @@ public class Client : IDisposable, INetworkListener
 		while(queue.Count != 0)
 		{
 			DataPackage dp = queue.Dequeue();
-			WriteAll(dp.ToString());
+			WriteAll(dp);
 		}
 
         hasToken = false;
@@ -439,6 +395,6 @@ public class Client : IDisposable, INetworkListener
         hasToken = true;
 		
 		if(OnLog != null)
-			OnLog("I (" + GetLocalIPAddress() + ") received the token from " + dp.SenderIPEndpoint.ToString());
+			OnLog("I (" + dp.SenderLocalIPEndpoint.ToString() + ") received the token from " + dp.SenderRemoteIPEndpoint.ToString());
     }
 }

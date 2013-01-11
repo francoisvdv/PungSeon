@@ -11,7 +11,7 @@ public abstract class DataPackage
 	public abstract DataPackageFactory Factory { get; }
 
     public TcpClient SenderTcpClient { get; set; }
-    public IPEndPoint SenderIPEndpoint
+    public IPEndPoint SenderRemoteIPEndpoint
     {
         get
         {
@@ -19,6 +19,16 @@ public abstract class DataPackage
                 return null;
 
             return (IPEndPoint)SenderTcpClient.Client.RemoteEndPoint;
+        }
+    }
+	public IPEndPoint SenderLocalIPEndpoint
+    {
+        get
+        {
+            if (SenderTcpClient == null)
+                return null;
+
+            return (IPEndPoint)SenderTcpClient.Client.LocalEndPoint;
         }
     }
 

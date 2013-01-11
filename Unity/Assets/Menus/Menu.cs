@@ -129,7 +129,6 @@ public class Menu : MonoBehaviour, INetworkListener
     }
     void RequestLobbyList(Action onReceive)
     {
-        c2s.WriteAll(new RequestLobbyListPackage());
         WaitForResponse(RequestLobbyListPackage.factory.Id,
         x =>
         {
@@ -165,10 +164,10 @@ public class Menu : MonoBehaviour, INetworkListener
             if(onReceive != null)
                 onReceive();
         });
+        c2s.WriteAll(new RequestLobbyListPackage());
     }
     void CreateLobby(Action<int> onReceive)
     {
-        c2s.WriteAll(new CreateLobbyPackage());
         WaitForResponse(CreateLobbyPackage.factory.Id,
         x =>
         {
@@ -178,39 +177,40 @@ public class Menu : MonoBehaviour, INetworkListener
             if (onReceive != null)
                 onReceive(newLobbyId);
         });
+        c2s.WriteAll(new CreateLobbyPackage());
     }
     void JoinLobby(Lobby l, Action<bool> onReceive)
     {
-        JoinLobbyPackage jlp = new JoinLobbyPackage();
-        jlp.LobbyId = GetLobbyId(l);
-        c2s.WriteAll(jlp);
-
         WaitForResponse(JoinLobbyPackage.factory.Id,
         x =>
         {
             bool success = false;
             bool.TryParse(x.ResponseMessage, out success);
 
-            if(success)
+            if (success)
                 currentLobby = l;
 
             if (onReceive != null)
                 onReceive(success);
         });
+
+        JoinLobbyPackage jlp = new JoinLobbyPackage();
+        jlp.LobbyId = GetLobbyId(l);
+        c2s.WriteAll(jlp);
     }
     void UpdateReadyState(Action onReceive)
     {
-        PlayerReadyPackage prp = new PlayerReadyPackage();
-        prp.LobbyId = GetLobbyId(currentLobby);
-        prp.Ready = ready;
-        c2s.WriteAll(prp);
-        
         WaitForResponse(PlayerReadyPackage.factory.Id,
         x =>
         {
             if (onReceive != null)
                 onReceive();
         });
+
+        PlayerReadyPackage prp = new PlayerReadyPackage();
+        prp.LobbyId = GetLobbyId(currentLobby);
+        prp.Ready = ready;
+        c2s.WriteAll(prp);
     }
 
 	void OnGUI()
@@ -516,8 +516,8 @@ public class Menu : MonoBehaviour, INetworkListener
 
             if (lup.Start)
             {
-                c2s.Dispose();
-
+                //c2s.Dispose();
+				
                 List<TcpClient> clients = new List<TcpClient>();
                 foreach (var v in currentLobby.clients)
                 {
