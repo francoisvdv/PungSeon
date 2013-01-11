@@ -5,7 +5,7 @@ using System.Text;
 
 public class SetHighscorePackage : DataPackage
 {
-    class SetHighscoreFactory : DataPackageFactory
+    public class SetHighscoreFactory : DataPackageFactory
     {
         public override int Id
         {
@@ -20,11 +20,7 @@ public class SetHighscorePackage : DataPackage
             return new SetHighscorePackage();
         }
     }
-    static SetHighscoreFactory factory = new SetHighscoreFactory();
-    public static void RegisterFactory()
-    {
-        DataPackageFactory.Factories.Add(factory);
-    }
+    public static SetHighscoreFactory factory = new SetHighscoreFactory();
 
     public override int Id
     {

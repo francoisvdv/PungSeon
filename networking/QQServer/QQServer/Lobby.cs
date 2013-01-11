@@ -15,6 +15,8 @@ namespace QQServer
         public int LobbyId { get; private set; }
 
         public Dictionary<TcpClient, bool> Members = new Dictionary<TcpClient, bool>();
+        bool freeze = false;
+
 
         public Lobby()
         {
@@ -23,7 +25,7 @@ namespace QQServer
             Client.Instance.AddListener(this);
         }
 
-        void UpdateClients()
+        void UpdateClients(bool startGame = false)
         {
             var remove = Members.Where(x => x.Key.Connected == false);
             foreach (var v in remove)
@@ -33,6 +35,7 @@ namespace QQServer
 
             LobbyUpdatePackage lup = new LobbyUpdatePackage();
             lup.LobbyId = LobbyId;
+            lup.Start = startGame;
             foreach (var v in Members)
             {
                 string address = ((IPEndPoint)v.Key.Client.RemoteEndPoint).Address.ToString();
@@ -63,7 +66,7 @@ namespace QQServer
             TcpClient clientToRemove = null;
             foreach (var v in Members)
             {
-                if (dp.SenderIPEndpoint.Address.ToString() == ((IPEndPoint)v.Key.Client.RemoteEndPoint).Address.ToString())
+                if (dp.SenderRemoteIPEndpoint.Address.ToString() == ((IPEndPoint)v.Key.Client.RemoteEndPoint).Address.ToString())
                 {
                     clientToRemove = v.Key;
                     break;
@@ -73,18 +76,19 @@ namespace QQServer
             {
                 Members.Remove(clientToRemove);
                 Console.WriteLine("Removed " + ((IPEndPoint)clientToRemove.Client.RemoteEndPoint).ToString() + " because joining " +
-                    dp.SenderIPEndpoint.ToString());
+                    dp.SenderRemoteIPEndpoint.ToString());
             }
 
             Members.Add(dp.SenderTcpClient, false);
 
             ResponsePackage rp = new ResponsePackage();
             rp.ResponseId = dp.Id;
+            rp.ResponseMessage = (!freeze).ToString();
             Client.Instance.Write(dp.SenderTcpClient, rp);
 
             UpdateClients();
 
-            Console.WriteLine(dp.SenderIPEndpoint.ToString() + " joined lobby " + LobbyId);
+            Console.WriteLine(dp.SenderRemoteIPEndpoint.ToString() + " joined lobby " + LobbyId);
         }
         void OnPlayerReady(PlayerReadyPackage dp)
         {
@@ -98,7 +102,22 @@ namespace QQServer
 
             UpdateClients();
 
-            Console.WriteLine(dp.SenderIPEndpoint.ToString() + " ready status changed: " + dp.Ready);
+            Console.WriteLine(dp.SenderRemoteIPEndpoint.ToString() + " ready status changed: " + dp.Ready);
+
+            int ready = 0;
+            foreach (var v in Members)
+            {
+                if (v.Value)
+                    ready++;
+            }
+            if (ready != Members.Count)
+                return;
+
+            freeze = true;
+
+            UpdateClients(true);
+
+            Console.WriteLine("GAME START MESSAGE SENT!");
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class ChatMessagePackage : DataPackage
 {
-    class ChatMessageFactory : DataPackageFactory
+    public class ChatMessageFactory : DataPackageFactory
     {
         public override int Id
         {
@@ -19,11 +19,7 @@ public class ChatMessagePackage : DataPackage
             return new ChatMessagePackage(b);
         }
     }
-    static ChatMessageFactory factory = new ChatMessageFactory();
-    public static void RegisterFactory()
-    {
-        DataPackageFactory.Factories.Add(factory);
-    }
+    public static ChatMessageFactory factory = new ChatMessageFactory();
 
     public override int Id
     {

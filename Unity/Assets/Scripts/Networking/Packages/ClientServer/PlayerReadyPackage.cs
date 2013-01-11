@@ -26,10 +26,6 @@ public class PlayerReadyPackage : DataPackage
         }
     }
     public static PlayerReadyFactory factory = new PlayerReadyFactory();
-    public static void RegisterFactory()
-    {
-        DataPackageFactory.Factories.Add(factory);
-    }
 
     const char Seperator = '|';
 

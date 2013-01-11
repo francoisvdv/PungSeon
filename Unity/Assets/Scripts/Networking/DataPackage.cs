@@ -11,7 +11,7 @@ public abstract class DataPackage
 	public abstract DataPackageFactory Factory { get; }
 
     public TcpClient SenderTcpClient { get; set; }
-    public IPEndPoint SenderIPEndpoint
+    public IPEndPoint SenderRemoteIPEndpoint
     {
         get
         {
@@ -21,6 +21,16 @@ public abstract class DataPackage
             return (IPEndPoint)SenderTcpClient.Client.RemoteEndPoint;
         }
     }
+	public IPEndPoint SenderLocalIPEndpoint
+    {
+        get
+        {
+            if (SenderTcpClient == null)
+                return null;
+
+            return (IPEndPoint)SenderTcpClient.Client.LocalEndPoint;
+        }
+    }
 
 	public override string ToString()
 	{
@@ -28,14 +38,14 @@ public abstract class DataPackage
 	}
 	
 	static readonly char[] delimiter = new char[]{','};
-	public static DataPackage FromString(string s)
+	public static DataPackage FromString(Client c, string s)
 	{
 		string[] split = s.Split(delimiter, 2);
 		int id;
 		if(!int.TryParse(split[0], out id))
 			return null;
 		
-		DataPackageFactory factory = DataPackageFactory.GetFactory(id);
+		DataPackageFactory factory = c.GetFactory(id);
 		if(factory == null)
 			return null;
 		

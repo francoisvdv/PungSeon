@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.Net.Sockets;
 
 public class Menu : MonoBehaviour, INetworkListener
 {
@@ -49,15 +50,16 @@ public class Menu : MonoBehaviour, INetworkListener
     Vector2 lobbyScrollPosition = Vector2.zero;
 
     Dictionary<int, Action<ResponsePackage>> waitForResponse = new Dictionary<int, Action<ResponsePackage>>();
-    List<Action> syncQueue = new List<Action>();
 
     Dictionary<int, Lobby> lobbies = new Dictionary<int, Lobby>();
     Lobby currentLobby;
     bool ready = false;
 
+
 	// Use this for initialization
 	void Start ()
 	{
+		c2s.OnLog += x => print (x);
         c2s.AddListener(this);
 		
 		boxWidth = mainMenuWidth;
@@ -67,6 +69,8 @@ public class Menu : MonoBehaviour, INetworkListener
 	// Update is called once per frame
 	void Update()
 	{
+        c2s.Update();
+
 		if(animating)
 		{
 			animationTimer += Time.fixedDeltaTime;
@@ -83,15 +87,6 @@ public class Menu : MonoBehaviour, INetworkListener
 				boxHeight = Mathf.RoundToInt(Mathf.SmoothStep(sourceBoxHeight, targetBoxHeight, animationTimer / AnimationDuration));
 			}
 		}
-
-        lock (syncQueue)
-        {
-            while (syncQueue.Count != 0)
-            {
-                syncQueue[0]();
-                syncQueue.RemoveAt(0);
-            }
-        }
 	}
 
 	void AnimateBackground(int targetWidth, int targetHeight)
@@ -130,11 +125,10 @@ public class Menu : MonoBehaviour, INetworkListener
     void ConnectToServer()
     {
         if (c2s.GetConnectionCount() == 0)
-            c2s.Connect("131.155.242.225");
+            c2s.Connect("131.155.242.96", 4551);
     }
     void RequestLobbyList(Action onReceive)
     {
-        c2s.WriteAll(new RequestLobbyListPackage());
         WaitForResponse(RequestLobbyListPackage.factory.Id,
         x =>
         {
@@ -170,10 +164,10 @@ public class Menu : MonoBehaviour, INetworkListener
             if(onReceive != null)
                 onReceive();
         });
+        c2s.WriteAll(new RequestLobbyListPackage());
     }
     void CreateLobby(Action<int> onReceive)
     {
-        c2s.WriteAll(new CreateLobbyPackage());
         WaitForResponse(CreateLobbyPackage.factory.Id,
         x =>
         {
@@ -183,34 +177,40 @@ public class Menu : MonoBehaviour, INetworkListener
             if (onReceive != null)
                 onReceive(newLobbyId);
         });
+        c2s.WriteAll(new CreateLobbyPackage());
     }
-    void JoinLobby(Lobby l, Action onReceive)
+    void JoinLobby(Lobby l, Action<bool> onReceive)
     {
-        JoinLobbyPackage jlp = new JoinLobbyPackage();
-        jlp.LobbyId = GetLobbyId(l);
-        c2s.WriteAll(jlp);
-
         WaitForResponse(JoinLobbyPackage.factory.Id,
         x =>
         {
-            currentLobby = l;
+            bool success = false;
+            bool.TryParse(x.ResponseMessage, out success);
+
+            if (success)
+                currentLobby = l;
+
             if (onReceive != null)
-                onReceive();
+                onReceive(success);
         });
+
+        JoinLobbyPackage jlp = new JoinLobbyPackage();
+        jlp.LobbyId = GetLobbyId(l);
+        c2s.WriteAll(jlp);
     }
     void UpdateReadyState(Action onReceive)
     {
-        PlayerReadyPackage prp = new PlayerReadyPackage();
-        prp.LobbyId = GetLobbyId(currentLobby);
-        prp.Ready = ready;
-        c2s.WriteAll(prp);
-        
         WaitForResponse(PlayerReadyPackage.factory.Id,
         x =>
         {
             if (onReceive != null)
                 onReceive();
         });
+
+        PlayerReadyPackage prp = new PlayerReadyPackage();
+        prp.LobbyId = GetLobbyId(currentLobby);
+        prp.Ready = ready;
+        c2s.WriteAll(prp);
     }
 
 	void OnGUI()
@@ -468,8 +468,11 @@ public class Menu : MonoBehaviour, INetworkListener
                 RequestLobbyList(() =>
                     {
                         if (lobbies.ContainsKey(x))
-                            JoinLobby(lobbies[x], () =>
+                            JoinLobby(lobbies[x], y =>
                                 {
+                                    if (!y)
+                                        return;
+
                                     AnimateBackground(lobbyWidth, lobbyHeight);
                                     State = MenuState.Lobby;
                                 });
@@ -478,8 +481,11 @@ public class Menu : MonoBehaviour, INetworkListener
 	}
     void OnJoinLobbyPressed(Lobby l)
     {
-        JoinLobby(l, () =>
+        JoinLobby(l, x =>
             {
+                if (!x)
+                    return;
+
                 AnimateBackground(lobbyWidth, lobbyHeight);
                 State = MenuState.Lobby;
             });
@@ -496,14 +502,8 @@ public class Menu : MonoBehaviour, INetworkListener
         {
             ResponsePackage rp = (ResponsePackage)dp;
 
-            lock (syncQueue)
-            {
-                syncQueue.Add(() =>
-                {
-                    ResponseReceived(rp.ResponseId, rp);
-                    waitForResponse.Remove(rp.ResponseId);
-                });
-            }
+            ResponseReceived(rp.ResponseId, rp);
+            waitForResponse.Remove(rp.ResponseId);
         }
         else if (dp is LobbyUpdatePackage)
         {
@@ -511,13 +511,44 @@ public class Menu : MonoBehaviour, INetworkListener
             if (GetLobbyId(currentLobby) != lup.LobbyId)
                 return;
 
-            lock (syncQueue)
+            currentLobby.clients.Clear();
+            currentLobby.clients = lup.Members;
+
+            if (lup.Start)
             {
-                syncQueue.Add(() =>
+                c2s.Dispose();
+				
+                List<TcpClient> clients = new List<TcpClient>();
+                foreach (var v in currentLobby.clients)
                 {
-                    currentLobby.clients.Clear();
-                    currentLobby.clients = lup.Members;
-                });
+                    clients.Add(Client.Instance.Connect(v.Key));
+                }
+                for (int i = 0; i < clients.Count; i++)
+                {
+                    if (clients[i].GetRemoteIPEndPoint().Address.ToString() == Client.GetLocalIPAddress())
+                    {
+                        if (i == 0)
+                            Client.Instance.SetHasToken(true);
+
+                        TcpClient next = null;
+                        if (i != clients.Count - 1)
+                            next = clients[i + 1];
+                        else
+                            next = clients[0];
+
+                        if (Client.Instance.OnLog != null)
+                        {
+                            Client.Instance.OnLog("Token ring: I am ip " + Client.GetLocalIPAddress() + ", number " + i +
+                                " in the token ring and next in the ring is " + next.GetRemoteIPEndPoint().Address.ToString());
+                        }
+
+                        Client.Instance.SetNextTokenClient(next);
+
+                        break;
+                    }
+                }
+
+                Application.LoadLevel("GameWorld");
             }
         }
     }

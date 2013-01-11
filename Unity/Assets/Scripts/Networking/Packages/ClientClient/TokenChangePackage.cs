@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class TokenChangePackage : DataPackage
 {
-	class TokenChangeFactory : DataPackageFactory
+	public class TokenChangeFactory : DataPackageFactory
 	{
 		public override int Id
 		{
@@ -19,11 +19,7 @@ public class TokenChangePackage : DataPackage
 			return new TokenChangePackage();
 		}
 	}
-	static TokenChangeFactory factory = new TokenChangeFactory();
-	public static void RegisterFactory()
-	{
-		DataPackageFactory.Factories.Add(factory);
-	}
+	public static TokenChangeFactory factory = new TokenChangeFactory();
 	
 	public override int Id
 	{
