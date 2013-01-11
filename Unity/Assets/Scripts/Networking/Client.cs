@@ -41,7 +41,9 @@ public class Client : IDisposable, INetworkListener
 	Dictionary<TcpClient, RemoteClient> clients = new Dictionary<TcpClient, RemoteClient>(); //string contains the client's 'username'
 	Queue<DataPackage> queue = new Queue<DataPackage>();
 	List<WeakReference> networkListeners = new List<WeakReference>();
-	
+
+    List<DataPackage> receiveBuffer = new List<DataPackage>();
+
 	string username;
 	bool hasToken = false;
 	TcpClient nextClient = null;
@@ -54,8 +56,8 @@ public class Client : IDisposable, INetworkListener
 	{
 		username = GenerateUniqueUsername();
         SetMode(Mode.ClientServer);
-
-        AddListener(this);
+		
+		AddListener(this);
 	}
     public void Dispose()
     {
@@ -126,6 +128,34 @@ public class Client : IDisposable, INetworkListener
         return null;
     }
 
+    bool ConnectedTo(string ip, int port = 4550)
+    {
+        foreach (var v in clients)
+        {
+            if ((v.Key.GetRemoteIPEndPoint().Address.ToString() == ip && v.Key.GetRemoteIPEndPoint().Port == port) ||
+                (v.Key.GetLocalIPEndPoint().Address.ToString() == ip && v.Key.GetLocalIPEndPoint().Port == port))
+                return true;
+        }
+
+        return false;
+    }
+    bool ConnectedTo(TcpClient c)
+    {
+		return ConnectedTo(c.GetLocalIPEndPoint().Address.ToString(), c.GetLocalIPEndPoint().Port) ||
+			ConnectedTo(c.GetRemoteIPEndPoint().Address.ToString(), c.GetRemoteIPEndPoint().Port);
+    }
+    TcpClient GetTcpClient(string ip, int port = 4550)
+    {
+        foreach (var v in clients)
+        {
+            if ((v.Key.GetLocalIPEndPoint().Address.ToString() == ip && v.Key.GetLocalIPEndPoint().Port == port) ||
+				(v.Key.GetRemoteIPEndPoint().Address.ToString() == ip && v.Key.GetRemoteIPEndPoint().Port == port))
+                return v.Key;
+        }
+
+        return null;
+    }
+
 	public void AddListener(INetworkListener l)
 	{
 		networkListeners.Add(new WeakReference(l));
@@ -190,12 +220,28 @@ public class Client : IDisposable, INetworkListener
 
         if (c != null && c.Connected)
         {
-            AddClient(c);
-
-            if (OnLog != null)
+            lock (clients)
             {
-                OnLog("Connected (incoming): " + c.Connected + " | " + ((IPEndPoint)c.Client.RemoteEndPoint).ToString() +
-                    " | Total connections: " + clients.Count);
+                if (!ConnectedTo(c))
+                {
+                    AddClient(c);
+
+                    if (OnLog != null)
+                    {
+                        OnLog("Connected (incoming): " + c.GetRemoteIPEndPoint().ToString() +
+                            " | Total connections: " + clients.Count);
+                    }
+                }
+                else
+                {
+                    if (OnLog != null)
+                    {
+                        OnLog("Closing new (incoming) duplicate connection: " + c.GetRemoteIPEndPoint().ToString() +
+                            " | Total connections: " + clients.Count);
+                    }
+					
+                    c.Close();
+                }
             }
         }
     }
@@ -211,14 +257,18 @@ public class Client : IDisposable, INetworkListener
 			networkStream = c.GetStream();
 			read = networkStream.EndRead(iar);
 		}
-		catch
+		catch(Exception exc)
 		{
+			if(OnLog != null)
+				OnLog(exc.ToString());
+			
 			//An error has occured when reading
 			return;
 		}
 		
 		//TCP is a protocol that might split messages. We store our incoming message chunks and split on newlines.
-		rc.receiveBuffer.Append(encoding.GetString(rc.readBuffer, 0, read));
+		string chunk = encoding.GetString(rc.readBuffer, 0, read);
+		rc.receiveBuffer.Append(chunk);
 		for(int i = 0; i < rc.receiveBuffer.Length; i++)
 		{
 			char character = rc.receiveBuffer[i];
@@ -232,7 +282,10 @@ public class Client : IDisposable, INetworkListener
 					ReceiveData(c, data);
 			}
 		}
-
+		
+		if(rc.receiveBuffer.Length != 0)
+			OnLog("ReceiveBuffer not empty");
+		
 		networkStream.BeginRead(rc.readBuffer, 0, rc.readBuffer.Length, ReceiveCallback, c);
 	}
 	void WriteCallback(IAsyncResult iar)
@@ -295,18 +348,26 @@ public class Client : IDisposable, INetworkListener
 	
 	public TcpClient Connect(string ip, int port = 4550)
 	{
-		TcpClient tcpClient = new TcpClient();
-		tcpClient.Connect(ip, port);
-		AddClient(tcpClient);
-
-        //imde.co.de/pungeson/go.php
-        if (OnLog != null)
+        lock (clients)
         {
-            OnLog("Connected (outgoing): " + tcpClient.Connected + " | " + ((IPEndPoint)tcpClient.Client.RemoteEndPoint).ToString() +
-                " | Total connections: " + clients.Count);
-        }
+            if (ConnectedTo(ip, port))
+            {
+                OnLog("Connected (existing connection): " + ip + " | " + port.ToString());
+                return GetTcpClient(ip, port);
+            }
 
-        return tcpClient;
+            TcpClient tcpClient = new TcpClient();
+            tcpClient.Connect(ip, port);
+            AddClient(tcpClient);
+
+            if (OnLog != null)
+            {
+                OnLog("Connected (outgoing): " + tcpClient.GetRemoteIPEndPoint().ToString() +
+                    " | Total connections: " + clients.Count);
+            }
+
+            return tcpClient;
+        }
 	}
 	public void SendData(DataPackage dp)
 	{
@@ -316,21 +377,46 @@ public class Client : IDisposable, INetworkListener
 	{
 		DataPackage dp = DataPackage.FromString(this, data);
         dp.SenderTcpClient = sender;
-        for(int i = 0; i < networkListeners.Count; i++)
+		lock (receiveBuffer)
 		{
-            INetworkListener nl = networkListeners[i].Target as INetworkListener;
-            if (nl == null)
-            {
-                networkListeners.RemoveAt(i);
-                i--;
-            }
-            else
-			    nl.OnDataReceived(dp);
+			receiveBuffer.Add(dp);
 		}
 	}
 
 	public void Update()
 	{
+		//process received messages
+		{
+	        List<DataPackage> received = null;
+	        lock (receiveBuffer)
+	        {
+	            received = new List<DataPackage>(receiveBuffer);
+	            receiveBuffer.Clear();
+	        }
+			
+	    	for (int i = 0; i < networkListeners.Count; i++)
+	        {
+	            INetworkListener nl = networkListeners[i].Target as INetworkListener;
+		        if (nl == null)
+		        {
+		            networkListeners.RemoveAt(i);
+		            i--;
+		        }
+	            else
+				{
+					foreach(DataPackage dp in received)
+					{
+						nl.OnDataReceived(dp);
+					}
+				}
+	        }
+		}
+		
+		foreach(var v in clients)
+		{
+			string s = v.Value.receiveBuffer.ToString();
+		}
+		
 		if(!hasToken)
 			return;
 		
@@ -348,8 +434,11 @@ public class Client : IDisposable, INetworkListener
     {
         TokenChangePackage tcp = dp as TokenChangePackage;
         if (tcp == null)
-            return;
-
+			return;
+		
         hasToken = true;
+		
+		if(OnLog != null)
+			OnLog("I (" + GetLocalIPAddress() + ") received the token from " + dp.SenderIPEndpoint.ToString());
     }
 }

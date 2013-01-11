@@ -75,7 +75,10 @@ public class BotControlScript : MonoBehaviour, INetworkListener
         PlayerMovePackage pmp = dp as PlayerMovePackage;
         if(pmp == null)
             return;
-
+		
+		if(transform.root == transform)
+			print ("YEP");
+		
         //set position
         transform.root.position = pmp.Position;
 

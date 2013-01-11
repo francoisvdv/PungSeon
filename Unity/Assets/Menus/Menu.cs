@@ -50,7 +50,6 @@ public class Menu : MonoBehaviour, INetworkListener
     Vector2 lobbyScrollPosition = Vector2.zero;
 
     Dictionary<int, Action<ResponsePackage>> waitForResponse = new Dictionary<int, Action<ResponsePackage>>();
-    List<Action> syncQueue = new List<Action>();
 
     Dictionary<int, Lobby> lobbies = new Dictionary<int, Lobby>();
     Lobby currentLobby;
@@ -70,6 +69,8 @@ public class Menu : MonoBehaviour, INetworkListener
 	// Update is called once per frame
 	void Update()
 	{
+        c2s.Update();
+
 		if(animating)
 		{
 			animationTimer += Time.fixedDeltaTime;
@@ -86,15 +87,6 @@ public class Menu : MonoBehaviour, INetworkListener
 				boxHeight = Mathf.RoundToInt(Mathf.SmoothStep(sourceBoxHeight, targetBoxHeight, animationTimer / AnimationDuration));
 			}
 		}
-
-        lock (syncQueue)
-        {
-            while (syncQueue.Count != 0)
-            {
-                syncQueue[0]();
-                syncQueue.RemoveAt(0);
-            }
-        }
 	}
 
 	void AnimateBackground(int targetWidth, int targetHeight)
@@ -133,7 +125,7 @@ public class Menu : MonoBehaviour, INetworkListener
     void ConnectToServer()
     {
         if (c2s.GetConnectionCount() == 0)
-            c2s.Connect("131.155.240.244", 4551);
+            c2s.Connect("131.155.242.96", 4551);
     }
     void RequestLobbyList(Action onReceive)
     {
@@ -510,14 +502,8 @@ public class Menu : MonoBehaviour, INetworkListener
         {
             ResponsePackage rp = (ResponsePackage)dp;
 
-            lock (syncQueue)
-            {
-                syncQueue.Add(() =>
-                {
-                    ResponseReceived(rp.ResponseId, rp);
-                    waitForResponse.Remove(rp.ResponseId);
-                });
-            }
+            ResponseReceived(rp.ResponseId, rp);
+            waitForResponse.Remove(rp.ResponseId);
         }
         else if (dp is LobbyUpdatePackage)
         {
@@ -525,44 +511,39 @@ public class Menu : MonoBehaviour, INetworkListener
             if (GetLobbyId(currentLobby) != lup.LobbyId)
                 return;
 
-            lock (syncQueue)
+            currentLobby.clients.Clear();
+            currentLobby.clients = lup.Members;
+
+            if (lup.Start)
             {
-                syncQueue.Add(() =>
+                c2s.Dispose();
+
+                List<TcpClient> clients = new List<TcpClient>();
+                foreach (var v in currentLobby.clients)
                 {
-                    currentLobby.clients.Clear();
-                    currentLobby.clients = lup.Members;
-
-                    if (lup.Start)
+                    clients.Add(Client.Instance.Connect(v.Key));
+                }
+                for (int i = 0; i < clients.Count; i++)
+                {
+                    if (clients[i].GetLocalIPEndPoint().Address.ToString() == Client.GetLocalIPAddress() || 
+						clients[i].GetRemoteIPEndPoint().Address.ToString() == Client.GetLocalIPAddress())
                     {
-                        c2s.Dispose();
+                        if (i == 0)
+                            Client.Instance.SetHasToken(true);
 
-                        List<TcpClient> clients = new List<TcpClient>();
-                        foreach (var v in currentLobby.clients)
-                        {
-                            clients.Add(Client.Instance.Connect(v.Key));
-                        }
-                        for (int i = 0; i < clients.Count; i++)
-                        {
-                            if (clients[i].GetIPEndPoint().Address.ToString() == Client.GetLocalIPAddress())
-                            {
-                                if(i == 0)
-                                    Client.Instance.SetHasToken(true);
+                        TcpClient next = null;
+                        if (i != clients.Count - 1)
+                            next = clients[i + 1];
+                        else
+                            next = clients[0];
 
-                                TcpClient next = null;
-                                if (i != clients.Count - 1)
-                                    next = clients[i + 1];
-                                else
-                                    next = clients[0];
+                        Client.Instance.SetNextTokenClient(next);
 
-                                Client.Instance.SetNextTokenClient(next);
-
-                                break;
-                            }
-                        }
-
-                        Application.LoadLevel("GameWorld");
+                        break;
                     }
-                });
+                }
+
+                Application.LoadLevel("GameWorld");
             }
         }
     }

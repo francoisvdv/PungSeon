@@ -50,7 +50,11 @@ public static class Extensions
         return false;
     }
 
-    public static IPEndPoint GetIPEndPoint(this TcpClient instance)
+    public static IPEndPoint GetLocalIPEndPoint(this TcpClient instance)
+    {
+        return (IPEndPoint)instance.Client.LocalEndPoint;
+    }
+    public static IPEndPoint GetRemoteIPEndPoint(this TcpClient instance)
     {
         return (IPEndPoint)instance.Client.RemoteEndPoint;
     }

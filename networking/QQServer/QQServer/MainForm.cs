@@ -9,11 +9,14 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace QQServer
 {
     public partial class MainForm : Form
     {
+        volatile bool stop = false;
+        Thread serverThread;
         Server server = new Server();
 
         public MainForm()
@@ -46,6 +49,21 @@ namespace QQServer
             Client.Instance.StartConnectionListener(4551);
 
             Client.Instance.AddListener(server);
+
+            Action a = () =>
+                {
+                    while (!stop)
+                    {
+                        Thread.Sleep(1000 / 10);
+                        Client.Instance.Update();
+                    }
+                };
+            serverThread = new Thread(new ThreadStart(a));
+            serverThread.Start();
+        }
+        void StopServer()
+        {
+            stop = true;
         }
     }
 }
