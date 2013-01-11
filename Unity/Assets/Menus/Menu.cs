@@ -45,6 +45,8 @@ public class Menu : MonoBehaviour, INetworkListener
 	public Texture RightTexture;
 	public GUISkin Skin;
 	public GUISkin LobbyItemSkin;
+    public MovieTexture backgroundVideo;
+
 
 	Vector2 lobbyListScrollPosition = Vector2.zero;
     Vector2 lobbyScrollPosition = Vector2.zero;
@@ -64,6 +66,9 @@ public class Menu : MonoBehaviour, INetworkListener
 		
 		boxWidth = mainMenuWidth;
 		boxHeight = mainMenuHeight;
+
+        backgroundVideo.Play();
+        this.audio.Play();
 	}
 	
 	// Update is called once per frame
@@ -217,7 +222,9 @@ public class Menu : MonoBehaviour, INetworkListener
 	{		
 		GUISkin oldSkin = GUI.skin;
 		GUI.skin = Skin;
-		
+
+        GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), backgroundVideo, ScaleMode.StretchToFill);
+
 		Rect backgroundBounds = new Rect((Screen.width - boxWidth) / 2, (Screen.height - boxHeight) / 2, boxWidth, boxHeight);
 		
 		if(LeftTexture != null && CenterTexture != null && RightTexture != null)
