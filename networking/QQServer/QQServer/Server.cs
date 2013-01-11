@@ -54,10 +54,16 @@ namespace QQServer
                 if (l.Members.Count != 0)
                     part += lobbyEntrySeperator;
 
+                int j = 0;
                 foreach (var v in l.Members)
                 {
                     string address = ((IPEndPoint)v.Key.Client.RemoteEndPoint).Address.ToString();
                     part += address + lobbyEntrySeperator + v.Value.ToString();
+
+                    if (j != l.Members.Count - 1)
+                        part += lobbyEntrySeperator;
+
+                    j++;
                 }
                 response += part;
 

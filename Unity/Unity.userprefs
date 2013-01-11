@@ -2,11 +2,7 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.Workbench />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore>
-      <Breakpoint file="D:\University\Repos\2IO23\Unity\Assets\Robot Model\Model\BotControlScript.cs" line="64" />
-      <Breakpoint file="d:\University\Repos\2IO23\Unity\Assets\Scripts\Networking\Client.cs" line="228" />
-      <Breakpoint file="d:\University\Repos\2IO23\Unity\Assets\Scripts\Networking\Client.cs" line="233" />
-    </BreakpointStore>
+    <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
 </Properties>

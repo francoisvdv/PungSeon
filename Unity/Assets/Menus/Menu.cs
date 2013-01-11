@@ -516,7 +516,7 @@ public class Menu : MonoBehaviour, INetworkListener
 
             if (lup.Start)
             {
-                //c2s.Dispose();
+                c2s.Dispose();
 				
                 List<TcpClient> clients = new List<TcpClient>();
                 foreach (var v in currentLobby.clients)
@@ -525,8 +525,7 @@ public class Menu : MonoBehaviour, INetworkListener
                 }
                 for (int i = 0; i < clients.Count; i++)
                 {
-                    if (clients[i].GetLocalIPEndPoint().Address.ToString() == Client.GetLocalIPAddress() || 
-						clients[i].GetRemoteIPEndPoint().Address.ToString() == Client.GetLocalIPAddress())
+                    if (clients[i].GetRemoteIPEndPoint().Address.ToString() == Client.GetLocalIPAddress())
                     {
                         if (i == 0)
                             Client.Instance.SetHasToken(true);
@@ -536,6 +535,12 @@ public class Menu : MonoBehaviour, INetworkListener
                             next = clients[i + 1];
                         else
                             next = clients[0];
+
+                        if (Client.Instance.OnLog != null)
+                        {
+                            Client.Instance.OnLog("Token ring: I am ip " + Client.GetLocalIPAddress() + ", number " + i +
+                                " in the token ring and next in the ring is " + next.GetRemoteIPEndPoint().Address.ToString());
+                        }
 
                         Client.Instance.SetNextTokenClient(next);
 
