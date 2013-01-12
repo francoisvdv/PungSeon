@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Net.Sockets;
 
 public class NetworkManager : MonoBehaviour
 {
@@ -26,7 +27,11 @@ public class NetworkManager : MonoBehaviour
 		Client.Instance.StartConnectionListener();
 		
 		if(ConnectToSelf)
-			Client.Instance.Connect(Client.GetLocalIPAddress());
+		{
+			TcpClient c = Client.Instance.Connect(Client.GetLocalIPAddress());
+			Client.Instance.SetHasToken(true);
+			Client.Instance.SetNextTokenClient(c);
+		}
 	}
 	
 	// Update is called once per frame

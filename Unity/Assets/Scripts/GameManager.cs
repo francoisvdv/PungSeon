@@ -1,14 +1,18 @@
 using UnityEngine;
 using System.Collections;
 
-public class GameManager : MonoBehaviour {
+public class GameManager : MonoBehaviour
+{
+    public int BlockSpawnStartY = 100;
+    public int BlockSpawnMinX = 0, BlockSpawnMaxX = 150;
+    public int BlockSpawnMinZ = 0, BlockSpawnMaxZ = 150;
 	public GameObject[] blocks;
 	public GameObject terrain;
 	public GameObject[] bases;
-	
+
 	// Use this for initialization
 	void Start () {	
-		spawnBlocks ();
+		spawnBlocks();
 	}
 	
 	// Update is called once per frame
@@ -25,26 +29,29 @@ public class GameManager : MonoBehaviour {
 	}
 	
 	void spawnBlock(int id)
-    {		
-		GameObject blockObject = (GameObject)Instantiate(blocks[id], new Vector3(Random.Range(-50, 50), 10, Random.Range(-50, 50)), Quaternion.identity);		
+    {
+        GameObject blockObject = (GameObject)Instantiate(blocks[id], new Vector3(Random.Range(BlockSpawnMinX, BlockSpawnMaxX),
+            BlockSpawnStartY, Random.Range(BlockSpawnMinZ, BlockSpawnMaxZ)), Quaternion.identity);		
 		
 		blockObject.AddComponent<BoxCollider>().isTrigger = true;
 		blockObject.AddComponent("BoxCollision");
 		blockObject.AddComponent("Light");
 		
 		RaycastHit hit;
-	    Physics.Raycast(blockObject.transform.position, -Vector3.up, out hit);
-		
-		if ( hit.collider.gameObject.Equals(terrain) ){
+
+		if(Physics.Raycast(blockObject.transform.position, -Vector3.up, out hit) && hit.collider.gameObject.Equals(terrain))
+        {
 			var distanceToGround = hit.distance;
-			Vector3 dist = new Vector3(0, -distanceToGround+1, 0);
+			Vector3 dist = new Vector3(0, -distanceToGround + 1, 0);
 			blockObject.transform.position += dist;
 			print("Spawned a block with id: "+id+" distance to ground: "+distanceToGround);
-		} else {
+		}
+        else
+        {
 			Destroy(blockObject);
 			print ("No block spawned, another object was in the way!");
 			spawnBlock (id);
-		}		
+		}
 	}	
 	
 	void spawnAtRandomPosition( GameObject g ){
