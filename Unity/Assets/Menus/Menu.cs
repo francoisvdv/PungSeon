@@ -532,7 +532,7 @@ public class Menu : MonoBehaviour, INetworkListener
                 }
                 for (int i = 0; i < clients.Count; i++)
                 {
-                    if (clients[i].GetRemoteIPEndPoint().Address.ToString() == Client.GetLocalIPAddress())
+                    if (clients[i].GetRemoteIPEndPoint().Address.Equals(Client.GetLocalIPAddress()))
                     {
                         if (i == 0)
                             Client.Instance.SetHasToken(true);

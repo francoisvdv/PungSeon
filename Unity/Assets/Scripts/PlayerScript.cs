@@ -2,16 +2,20 @@ using UnityEngine;
 using System;
 using System.Collections;
 
-public class PlayerScript : MonoBehaviour
+[RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(CapsuleCollider))]
+[RequireComponent(typeof(Rigidbody))]
+public class PlayerScript : MonoBehaviour, INetworkListener
 {
-	public bool IsControlled = false;
+    public float animSpeed = 1.5f;				// a public setting for overall animator animation speed
+
+    public System.Net.IPAddress PlayerIP = Client.GetLocalIPAddress();
+    public bool IsControlled { get { return PlayerIP.Equals(Client.GetLocalIPAddress()); } }
 	public bool AlwaysFireLaserBeams = false;
-	
+
 	[NonSerialized]
 	public int Health;
-	
-	
-	
+
 	Transform laserTarget;
 	
 	Transform eyesL;
@@ -19,12 +23,24 @@ public class PlayerScript : MonoBehaviour
 	
 	Transform laserBeamL;
 	Transform laserBeamR;
-	
-	bool hit;
-	RaycastHit hitInfo; //updated once per Update(), containing hitInfo about what the laser target has hit
-	
-	bool firing = false;
-	
+
+    private Animator anim;							                                // a reference to the animator on the character
+    private CapsuleCollider col;					                                // a reference to the capsule collider of the character
+    static int idleState = Animator.StringToHash("Base Layer.Idle");
+    static int locoState = Animator.StringToHash("Base Layer.Locomotion");			// these integers are references to our animator's states
+    static int jumpState = Animator.StringToHash("Base Layer.Jump");				// and are used to check state for various actions to occur
+    static int jumpDownState = Animator.StringToHash("Base Layer.JumpDown");		// within our FixedUpdate() function below
+    static int fallState = Animator.StringToHash("Base Layer.Fall");
+    static int rollState = Animator.StringToHash("Base Layer.Roll");
+    static int waveState = Animator.StringToHash("Layer2.Wave");
+
+    bool hit;
+    RaycastHit hitInfo; //updated once per Update(), containing hitInfo about what the laser target has hit
+
+    PlayerMovePackage.Direction currentDirection = PlayerMovePackage.Direction.Stop;
+    bool firing = false;
+
+
 	// Use this for initialization
 	void Start ()
 	{	
@@ -37,9 +53,18 @@ public class PlayerScript : MonoBehaviour
 		
 		laserBeamL = eyesL.Find("LaserParticles");
 		laserBeamR = eyesR.Find("LaserParticles");
+
+        // initialising reference variables
+        anim = GetComponent<Animator>();
+        col = GetComponent<CapsuleCollider>();
+
+        anim.SetLookAtWeight(1);
+        if (anim.layerCount == 2)
+            anim.SetLayerWeight(1, 1);
+
+        Client.Instance.AddListener(this);
 	}
 
-	// Update is called once per frame
 	void Update ()
 	{
 		//direction is (pointB - pointA).normalized
@@ -53,14 +78,17 @@ public class PlayerScript : MonoBehaviour
 		
 		if(AlwaysFireLaserBeams)
 			SetLasersEnabled(true);
-		
-		if(IsControlled)
-		{
-			HandleFiring();
-			HandleFlagPickup();
-		}
 	}
-		
+    void FixedUpdate()
+    {
+        if (!IsControlled)
+            return;
+
+        HandleMovement();
+        HandleFiring();
+        HandleFlagPickup();
+    }
+
 	Vector3 calculateCentroid(params Vector3[] centerPoints)
 	{
 		var centroid = new Vector3(0,0,0);
@@ -90,7 +118,30 @@ public class PlayerScript : MonoBehaviour
 		if(r2 != null)
 			r2.enabled = enable;
 	}
-	
+
+    void HandleMovement()
+    {
+        PlayerMovePackage.Direction dir = PlayerMovePackage.Direction.Stop;
+
+        if (Input.GetKey(Options.Controls.Forward))
+            dir = dir.Add(PlayerMovePackage.Direction.Up);
+        if (Input.GetKey(Options.Controls.Backward))
+            dir = dir.Add(PlayerMovePackage.Direction.Back);
+        if (Input.GetKeyDown(Options.Controls.StrafeLeft))
+            dir = dir.Add(PlayerMovePackage.Direction.Left);
+        if (Input.GetKeyDown(Options.Controls.StrafeRight))
+            dir = dir.Add(PlayerMovePackage.Direction.Right);
+
+        if (currentDirection != dir)
+        {
+            PlayerMovePackage pmp = new PlayerMovePackage(transform.root.position, transform.root.rotation.eulerAngles, dir);
+            Client.Instance.SendData(pmp);
+
+            print("Changed: " + dir);
+        }
+
+        currentDirection = dir;
+    }
 	void HandleFiring()
 	{	
 		if(Input.GetKeyDown(Options.Controls.Fire))
@@ -157,4 +208,41 @@ public class PlayerScript : MonoBehaviour
 	void ApplyBlockEffect(int id)
 	{
 	}
+
+    public void OnDataReceived(DataPackage dp)
+    {
+        PlayerMovePackage pmp = dp as PlayerMovePackage;
+        if (pmp == null)
+            return;
+
+        if (transform.root == transform)
+            print("YEP");
+
+        //set position
+        transform.root.position = pmp.Position;
+
+        //set rotation
+        float newRotX = pmp.Rotation.x - transform.root.rotation.eulerAngles.x;
+        float newRotY = pmp.Rotation.y - transform.root.rotation.eulerAngles.y;
+        float newRotZ = pmp.Rotation.z - transform.root.rotation.eulerAngles.z;
+        transform.root.Rotate(newRotX, newRotY, newRotZ);
+
+        //set direction
+        if (pmp.Dir.Has(PlayerMovePackage.Direction.Stop))
+            anim.SetFloat("Speed", 0);
+        if (pmp.Dir.Has(PlayerMovePackage.Direction.Up))
+            anim.SetFloat("Speed", 1);
+        if (pmp.Dir.Has(PlayerMovePackage.Direction.Back))
+            anim.SetFloat("Speed", -1);
+
+        anim.speed = animSpeed;
+
+        //float h = Input.GetAxis("Horizontal");				// setup h variable as our horizontal input axis
+        //float v = Input.GetAxis("Vertical");				// setup v variables as our vertical input axis		
+        //print(h + " | " + v);
+        //anim.SetFloat("Speed", v);							// set our animator's float parameter 'Speed' equal to the vertical input axis				
+        //anim.SetFloat("Direction", h); 						// set our animator's float parameter 'Direction' equal to the horizontal input axis		
+        //anim.speed = animSpeed;								// set the speed of our animator to the public variable 'animSpeed'
+        //anim.SetLookAtWeight(lookWeight);					// set the Look At Weight - amount to use look at IK vs using the head's animation	}
+    }
 }

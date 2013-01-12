@@ -72,17 +72,15 @@ public class Client : IDisposable, INetworkListener
     {
         return "John Doe " + DateTime.Now.Hour + "." + DateTime.Now.Minute + "." + DateTime.Now.Second + "." + DateTime.Now.Millisecond;
     }
-    public static string GetLocalIPAddress()
+    public static IPAddress GetLocalIPAddress()
     {
-        IPHostEntry host;
-        string localIP = "";
-        host = Dns.GetHostEntry(Dns.GetHostName());
+        IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
+
+        IPAddress localIP = null;
         foreach (IPAddress ip in host.AddressList)
         {
             if (ip.AddressFamily == AddressFamily.InterNetwork)
-            {
-                localIP = ip.ToString();
-            }
+                localIP = ip;
         }
         return localIP;
     }

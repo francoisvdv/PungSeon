@@ -8,8 +8,7 @@ public class NetworkManager : MonoBehaviour
 	
 	public bool ConnectToSelf = false;
 	
-	// Use this for initialization
-	void Start ()
+	void Start()
 	{
         if (added)
         {
@@ -28,14 +27,13 @@ public class NetworkManager : MonoBehaviour
 		
 		if(ConnectToSelf)
 		{
-			TcpClient c = Client.Instance.Connect(Client.GetLocalIPAddress());
+			TcpClient c = Client.Instance.Connect(Client.GetLocalIPAddress().ToString());
 			Client.Instance.SetHasToken(true);
 			Client.Instance.SetNextTokenClient(c);
 		}
 	}
 	
-	// Update is called once per frame
-	void Update ()
+	void FixedUpdate()
 	{
 		Client.Instance.Update();
 	}
