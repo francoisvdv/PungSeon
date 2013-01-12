@@ -4,23 +4,10 @@ using System.Net.Sockets;
 
 public class NetworkManager : MonoBehaviour
 {
-    static bool added;
-	
 	public bool ConnectToSelf = false;
 	
 	void Start()
 	{
-        if (added)
-        {
-            Destroy(this.gameObject);
-            return;
-        }
-        else
-        {
-            DontDestroyOnLoad(this.gameObject);
-            added = true;
-        }
-
 		Client.Instance.OnLog = x => print (x);
         Client.Instance.SetMode(Client.Mode.ClientClient);
 		Client.Instance.StartConnectionListener();

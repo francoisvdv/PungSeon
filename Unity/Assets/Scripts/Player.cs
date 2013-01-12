@@ -5,7 +5,7 @@ using System.Collections;
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(CapsuleCollider))]
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerScript : MonoBehaviour, INetworkListener
+public class Player : MonoBehaviour, INetworkListener
 {
     public float animSpeed = 1.5f;				// a public setting for overall animator animation speed
 
@@ -24,8 +24,8 @@ public class PlayerScript : MonoBehaviour, INetworkListener
 	Transform laserBeamL;
 	Transform laserBeamR;
 
-    private Animator anim;							                                // a reference to the animator on the character
-    private CapsuleCollider col;					                                // a reference to the capsule collider of the character
+    Animator anim;							                                // a reference to the animator on the character
+    CapsuleCollider col;					                                // a reference to the capsule collider of the character
     static int idleState = Animator.StringToHash("Base Layer.Idle");
     static int locoState = Animator.StringToHash("Base Layer.Locomotion");			// these integers are references to our animator's states
     static int jumpState = Animator.StringToHash("Base Layer.Jump");				// and are used to check state for various actions to occur
@@ -180,7 +180,7 @@ public class PlayerScript : MonoBehaviour, INetworkListener
 	
 	void Fire()
 	{
-		PlayerScript otherPlayer = hitInfo.transform.GetComponent<PlayerScript>();
+        Player otherPlayer = hitInfo.transform.GetComponent<Player>();
 		if(otherPlayer == null)
 			return;
 		

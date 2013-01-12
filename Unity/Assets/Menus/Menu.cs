@@ -555,7 +555,7 @@ public class Menu : MonoBehaviour, INetworkListener
                     }
                 }
 
-                Application.LoadLevel("GameWorld");
+                Application.LoadLevel("TerrainMap");
             }
         }
     }

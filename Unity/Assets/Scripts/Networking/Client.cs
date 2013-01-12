@@ -39,6 +39,8 @@ public class Client : IDisposable, INetworkListener
 
     TcpListener tcpListener;
     Dictionary<TcpClient, RemoteClient> clients = new Dictionary<TcpClient, RemoteClient>(); //string contains the client's 'username'
+    List<TcpClient> outgoing = new List<TcpClient>();
+
     Queue<DataPackage> queue = new Queue<DataPackage>();
     List<WeakReference> networkListeners = new List<WeakReference>();
 
@@ -188,15 +190,12 @@ public class Client : IDisposable, INetworkListener
 
         if (c != null && c.Connected)
         {
-            lock (clients)
-            {
-                AddClient(c);
+            AddClient(c);
 
-                if (OnLog != null)
-                {
-                    OnLog("Connected (incoming): " + c.GetRemoteIPEndPoint().ToString() +
-                        " | Total connections: " + clients.Count);
-                }
+            if (OnLog != null)
+            {
+                OnLog("Connected (incoming): " + c.GetRemoteIPEndPoint().ToString() +
+                    " | Total connections: " + clients.Count);
             }
         }
     }
@@ -262,13 +261,25 @@ public class Client : IDisposable, INetworkListener
         RemoteClient rc = new RemoteClient();
         rc.username = GenerateUniqueUsername();
         rc.readBuffer = new byte[c.ReceiveBufferSize];
-        clients.Add(c, rc);
+        lock (clients)
+        {
+            clients.Add(c, rc);
+        }
 
         c.GetStream().BeginRead(rc.readBuffer, 0, rc.readBuffer.Length, ReceiveCallback, c);
     }
     public int GetConnectionCount()
     {
         return clients.Count;
+    }
+    public List<IPAddress> GetOutgoingAddresses()
+    {
+        List<IPAddress> r = new List<IPAddress>();
+        foreach (var v in outgoing)
+        {
+            r.Add(v.GetRemoteIPEndPoint().Address);
+        }
+        return r;
     }
 
     public void Write(TcpClient client, DataPackage data)
@@ -312,20 +323,19 @@ public class Client : IDisposable, INetworkListener
 
     public TcpClient Connect(string ip, int port = 4550)
     {
-        lock (clients)
+        TcpClient tcpClient = new TcpClient();
+        tcpClient.Connect(ip, port);
+        AddClient(tcpClient);
+
+        outgoing.Add(tcpClient);
+
+        if (OnLog != null)
         {
-            TcpClient tcpClient = new TcpClient();
-            tcpClient.Connect(ip, port);
-            AddClient(tcpClient);
-
-            if (OnLog != null)
-            {
-                OnLog("Connected (outgoing): " + tcpClient.GetRemoteIPEndPoint().ToString() +
-                    " | Total connections: " + clients.Count);
-            }
-
-            return tcpClient;
+            OnLog("Connected (outgoing): " + tcpClient.GetRemoteIPEndPoint().ToString() +
+                " | Total connections: " + clients.Count);
         }
+
+        return tcpClient;
     }
     public void SendData(DataPackage dp)
     {
