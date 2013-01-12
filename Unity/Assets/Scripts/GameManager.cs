@@ -16,14 +16,17 @@ public class GameManager : MonoBehaviour {
 		
 	}
 	
-	void spawnBlocks(){
-		for ( int i = 0; i < 10; i++ ){
-			spawnBlock(Random.Range (0,7));
+	void spawnBlocks()
+	{
+		for(int i = 0; i < 10; i++)
+		{
+			spawnBlock(Random.Range(0, blocks.Length));
 		}
 	}
 	
-	void spawnBlock( int id ){		
-		GameObject blockObject = (GameObject)Instantiate(blocks[id], new Vector3(Random.Range (-50, 50), 10, Random.Range (-50, 50)), Quaternion.identity);		
+	void spawnBlock(int id)
+    {		
+		GameObject blockObject = (GameObject)Instantiate(blocks[id], new Vector3(Random.Range(-50, 50), 10, Random.Range(-50, 50)), Quaternion.identity);		
 		
 		blockObject.AddComponent<BoxCollider>().isTrigger = true;
 		blockObject.AddComponent("BoxCollision");
