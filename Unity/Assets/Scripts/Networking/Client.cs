@@ -34,7 +34,7 @@ public class Client : IDisposable, INetworkListener
 
 
     public Action<string> OnLog;
-
+    public bool VerboseDebugMessages = false;
     public List<DataPackageFactory> Factories = new List<DataPackageFactory>();
 
     TcpListener tcpListener;
@@ -147,20 +147,18 @@ public class Client : IDisposable, INetworkListener
 
     public void StartConnectionListener(int port = 4550)
     {
-        OnLog("Starting TCP listening...");
-
         tcpListener = new TcpListener(IPAddress.Any, port);
         tcpListener.Start();
         tcpListener.BeginAcceptTcpClient(ConnectCallback, tcpListener);
 
-        OnLog("Started TCP listening");
+        OnLog("Started TCP listening for incoming connections");
     }
     public void StopConnectionListener()
     {
         if (tcpListener != null)
             tcpListener.Stop();
 
-        OnLog("Stopped TCP listening");
+        OnLog("Stopped TCP listening for incoming connections");
     }
 
     void ConnectCallback(IAsyncResult iar)
@@ -230,10 +228,8 @@ public class Client : IDisposable, INetworkListener
 
         //TCP is a protocol that might split messages. We store our incoming message chunks and split on newlines.
         string chunk = encoding.GetString(rc.readBuffer, 0, read);
-        if (OnLog != null)
-        {
+        if (VerboseDebugMessages && OnLog != null)
             OnLog("Received from " + c.GetRemoteIPEndPoint().ToString() + ": " + chunk);
-        }
 
         rc.receiveBuffer.Append(chunk);
         for (int i = 0; i < rc.receiveBuffer.Length; i++)
@@ -250,7 +246,7 @@ public class Client : IDisposable, INetworkListener
             }
         }
 
-        if (rc.receiveBuffer.Length != 0)
+        if (VerboseDebugMessages && rc.receiveBuffer.Length != 0 && OnLog != null)
             OnLog("ReceiveBuffer not empty");
 
         networkStream.BeginRead(rc.readBuffer, 0, rc.readBuffer.Length, ReceiveCallback, c);
@@ -286,10 +282,8 @@ public class Client : IDisposable, INetworkListener
         byte[] bytes = encoding.GetBytes(data);
         Write(client, bytes);
 
-        if (OnLog != null)
-        {
+        if (VerboseDebugMessages && OnLog != null)
             OnLog("Written to " + client.GetRemoteIPEndPoint().ToString() + ":" + data);
-        }
     }
     public void Write(TcpClient client, byte[] data)
     {
@@ -378,11 +372,6 @@ public class Client : IDisposable, INetworkListener
             }
         }
 
-        foreach (var v in clients)
-        {
-            string s = v.Value.receiveBuffer.ToString();
-        }
-
         if (!hasToken)
             return;
 
@@ -404,7 +393,7 @@ public class Client : IDisposable, INetworkListener
 
         hasToken = true;
 
-        if (OnLog != null)
+        if (VerboseDebugMessages && OnLog != null)
             OnLog("I (" + dp.SenderLocalIPEndpoint.ToString() + ") received the token from " + dp.SenderRemoteIPEndpoint.ToString());
     }
 }
