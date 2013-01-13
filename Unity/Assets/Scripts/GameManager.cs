@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-public class GameManager : MonoBehaviour
+public class GameManager : PersistentMonoBehaviour
 {
     public static GameManager Instance;
 
@@ -24,10 +24,15 @@ public class GameManager : MonoBehaviour
 
     List<Player> players = new List<Player>();
 
+    void Awake()
+    {
+        if (IsDuplicate())
+            return;
+
+        Instance = this;
+    }
 	void Start ()
     {
-        Instance = this;
-
         OnLevelWasLoaded(Application.loadedLevel);
 	}
 	
@@ -54,7 +59,7 @@ public class GameManager : MonoBehaviour
         spawnPoints = GameObject.FindGameObjectsWithTag("SpawnPoint");
         spawnBlocks();
 
-        foreach (var v in Client.Instance.GetOutgoingAddresses())
+        foreach (var v in NetworkManager.Instance.Client.GetOutgoingAddresses())
         {
             spawnRobot(v);
         }
@@ -129,4 +134,6 @@ public class GameManager : MonoBehaviour
 	void spawnAtRandomPosition( GameObject g ){
 		
 	}
+
+
 }

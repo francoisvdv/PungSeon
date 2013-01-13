@@ -9,7 +9,7 @@ public class NetworkTest : MonoBehaviour, INetworkListener
 {
 	void Start ()
 	{
-		Client.Instance.AddListener(this);
+        NetworkManager.Instance.Client.AddListener(this);
 	}
 	
 	// Update is called once per frame
@@ -24,11 +24,11 @@ public class NetworkTest : MonoBehaviour, INetworkListener
 	{
 		ip = GUI.TextField(new Rect(0,10,200,30), ip);
 		if(GUI.Button(new Rect(210, 10, 100, 100), "Connect"))
-			Client.Instance.Connect(ip);
+            NetworkManager.Instance.Client.Connect(ip);
 		
 		message = GUI.TextField(new Rect(0, 45, 200, 30), message);
 		if(GUI.Button(new Rect(315, 10, 100, 100), "Send Message"))
-			Client.Instance.WriteAll(new ChatMessagePackage(message));
+            NetworkManager.Instance.Client.WriteAll(new ChatMessagePackage(message));
 	}
 	
 	public void OnDataReceived(DataPackage dp)

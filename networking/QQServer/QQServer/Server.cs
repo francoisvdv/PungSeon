@@ -10,7 +10,37 @@ namespace QQServer
 {
     public class Server : INetworkListener
     {
+        static Server instance;
+        public static Server Instance
+        {
+            get
+            {
+                if (instance == null)
+                    instance = new Server();
+
+                return instance;
+            }
+        }
+
+        public Client Client { get; private set; }
+
         List<Lobby> lobbies = new List<Lobby>();
+
+        private Server()
+        {
+            Client = new Client();
+            Client.AddListener(this);
+            Client.SetMode(Client.Mode.ClientServer);
+        }
+
+        public void Start()
+        {
+            Client.StartConnectionListener(4551);
+        }
+        public void Stop()
+        {
+            Client.StopConnectionListener();
+        }
 
         public void OnDataReceived(DataPackage dp)
         {
@@ -32,7 +62,7 @@ namespace QQServer
             ResponsePackage rp = new ResponsePackage();
             rp.ResponseId = dp.Id;
             rp.ResponseMessage = l.LobbyId.ToString();
-            Client.Instance.Write(dp.SenderTcpClient, rp);
+            Client.Write(dp.SenderTcpClient, rp);
 
             Console.WriteLine("Created lobby");
         }
@@ -74,7 +104,7 @@ namespace QQServer
             ResponsePackage rp = new ResponsePackage();
             rp.ResponseId = dp.Id;
             rp.ResponseMessage = response;
-            Client.Instance.Write(dp.SenderTcpClient, rp);
+            Client.Write(dp.SenderTcpClient, rp);
 
             Console.WriteLine("Lobby list sent to " + dp.SenderRemoteIPEndpoint.ToString());
         }

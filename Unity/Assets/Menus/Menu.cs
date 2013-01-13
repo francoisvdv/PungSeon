@@ -26,7 +26,7 @@ public class Menu : MonoBehaviour, INetworkListener
 	const int highScoresWidth = 460;
 	const int highScoresHeight = 443;
 
-    Client c2s = Client.Create();
+    Client c2s = new Client();
 
 	int boxWidth;
 	int boxHeight;
@@ -548,14 +548,14 @@ public class Menu : MonoBehaviour, INetworkListener
                 List<TcpClient> clients = new List<TcpClient>();
                 foreach (var v in currentLobby.clients)
                 {
-                    clients.Add(Client.Instance.Connect(v.Key));
+                    clients.Add(NetworkManager.Instance.Client.Connect(v.Key));
                 }
                 for (int i = 0; i < clients.Count; i++)
                 {
                     if (clients[i].GetRemoteIPEndPoint().Address.Equals(Client.GetLocalIPAddress()))
                     {
                         if (i == 0)
-                            Client.Instance.SetHasToken(true);
+                            NetworkManager.Instance.Client.SetHasToken(true);
 
                         TcpClient next = null;
                         if (i != clients.Count - 1)
@@ -563,13 +563,13 @@ public class Menu : MonoBehaviour, INetworkListener
                         else
                             next = clients[0];
 
-                        if (Client.Instance.OnLog != null)
+                        if (NetworkManager.Instance.Client.OnLog != null)
                         {
-                            Client.Instance.OnLog("Token ring: I am ip " + Client.GetLocalIPAddress() + ", number " + i +
+                            NetworkManager.Instance.Client.OnLog("Token ring: I am ip " + Client.GetLocalIPAddress() + ", number " + i +
                                 " in the token ring and next in the ring is " + next.GetRemoteIPEndPoint().Address.ToString());
                         }
 
-                        Client.Instance.SetNextTokenClient(next);
+                        NetworkManager.Instance.Client.SetNextTokenClient(next);
 
                         break;
                     }

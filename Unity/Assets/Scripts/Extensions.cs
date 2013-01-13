@@ -4,9 +4,14 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System;
+using System.Linq;
 
 public static class Extensions
 {
+    public static GameObject[] FindAll(this MonoBehaviour target, string name)
+    {
+        return GameObject.FindObjectsOfType(typeof(GameObject)).Where(x => x.name == name).Cast<GameObject>().ToArray();
+    }
     public static Transform Search(this Transform target, string name)
     {
         if (target.name == name) return target;

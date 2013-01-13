@@ -22,7 +22,7 @@ namespace QQServer
         {
             LobbyId = lobbyId++;
 
-            Client.Instance.AddListener(this);
+            Server.Instance.Client.AddListener(this);
         }
 
         void UpdateClients(bool startGame = false)
@@ -45,7 +45,7 @@ namespace QQServer
 
             foreach (var v in Members)
             {
-                Client.Instance.Write(v.Key, lup);
+                Server.Instance.Client.Write(v.Key, lup);
                 Console.WriteLine("Sent lobby update to " + ((IPEndPoint)v.Key.Client.RemoteEndPoint).Address.ToString());
             }
         }
@@ -84,7 +84,7 @@ namespace QQServer
             ResponsePackage rp = new ResponsePackage();
             rp.ResponseId = dp.Id;
             rp.ResponseMessage = (!freeze).ToString();
-            Client.Instance.Write(dp.SenderTcpClient, rp);
+            Server.Instance.Client.Write(dp.SenderTcpClient, rp);
 
             UpdateClients();
 

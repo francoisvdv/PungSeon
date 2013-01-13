@@ -16,23 +16,6 @@ public class Client : IDisposable, INetworkListener
     }
     public enum Mode { ClientServer, ClientClient }
 
-    private static Client instance;
-    public static Client Instance
-    {
-        get
-        {
-            if (instance == null)
-                instance = new Client();
-
-            return instance;
-        }
-    }
-    public static Client Create()
-    {
-        return new Client();
-    }
-
-
     public Action<string> OnLog;
     public bool VerboseDebugMessages = false;
     public List<DataPackageFactory> Factories = new List<DataPackageFactory>();
@@ -54,7 +37,7 @@ public class Client : IDisposable, INetworkListener
 
 
 
-    private Client()
+    public Client()
     {
         username = GenerateUniqueUsername();
         SetMode(Mode.ClientServer);

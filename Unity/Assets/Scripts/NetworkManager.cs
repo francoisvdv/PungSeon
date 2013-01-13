@@ -2,26 +2,36 @@ using UnityEngine;
 using System.Collections;
 using System.Net.Sockets;
 
-public class NetworkManager : MonoBehaviour
+public class NetworkManager : PersistentMonoBehaviour
 {
+    public static NetworkManager Instance;
+
+    public Client Client { get; private set; }
+
 	public bool ConnectToSelf = false;
 
     void Awake()
     {
-        Client.Instance.OnLog = x => print(x);
-        Client.Instance.SetMode(Client.Mode.ClientClient);
-        Client.Instance.StartConnectionListener();
+        if (IsDuplicate())
+            return;
 
+        Instance = this;
+
+        Client = new Client();
+        Client.OnLog = x => print(x);
+        Client.SetMode(Client.Mode.ClientClient);
+        Client.StartConnectionListener();
+        
         if (ConnectToSelf)
         {
-            TcpClient c = Client.Instance.Connect(Client.GetLocalIPAddress());
-            Client.Instance.SetHasToken(true);
-            Client.Instance.SetNextTokenClient(c);
+            TcpClient c = Client.Connect(Client.GetLocalIPAddress());
+            Client.SetHasToken(true);
+            Client.SetNextTokenClient(c);
         }
     }
 
 	void FixedUpdate()
 	{
-		Client.Instance.Update();
+		Client.Update();
 	}
 }

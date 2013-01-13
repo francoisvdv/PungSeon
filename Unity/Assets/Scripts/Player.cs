@@ -62,7 +62,7 @@ public class Player : MonoBehaviour, INetworkListener
         if (anim.layerCount == 2)
             anim.SetLayerWeight(1, 1);
 
-        Client.Instance.AddListener(this);
+        NetworkManager.Instance.Client.AddListener(this);
 	}
 
 	void Update ()
@@ -135,7 +135,7 @@ public class Player : MonoBehaviour, INetworkListener
         if (currentDirection != dir)
         {
             PlayerMovePackage pmp = new PlayerMovePackage(transform.root.position, transform.root.rotation.eulerAngles, dir);
-            Client.Instance.SendData(pmp);
+            NetworkManager.Instance.Client.SendData(pmp);
 
             print("Changed: " + dir);
         }
@@ -214,9 +214,6 @@ public class Player : MonoBehaviour, INetworkListener
         PlayerMovePackage pmp = dp as PlayerMovePackage;
         if (pmp == null)
             return;
-
-        if (transform.root == transform)
-            print("YEP");
 
         //set position
         transform.root.position = pmp.Position;

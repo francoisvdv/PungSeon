@@ -17,13 +17,12 @@ namespace QQServer
     {
         volatile bool stop = false;
         Thread serverThread;
-        Server server = new Server();
 
         public MainForm()
         {
             InitializeComponent();
 
-            Client.Instance.OnLog = x => Console.WriteLine(x);
+            Server.Instance.Client.OnLog = x => Console.WriteLine(x);
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -32,29 +31,6 @@ namespace QQServer
             RegisterOnWeb();
 
             StartServer();
-        }
-
-        void StartServer()
-        {
-            Client.Instance.SetMode(Client.Mode.ClientServer);
-            Client.Instance.StartConnectionListener(4551);
-
-            Client.Instance.AddListener(server);
-
-            Action a = () =>
-                {
-                    while (!stop)
-                    {
-                        Thread.Sleep(1000 / 10);
-                        Client.Instance.Update();
-                    }
-                };
-            serverThread = new Thread(new ThreadStart(a));
-            serverThread.Start();
-        }
-        void StopServer()
-        {
-            stop = true;
         }
 
         void RegisterOnWeb()
@@ -71,6 +47,28 @@ namespace QQServer
             {
                 Console.WriteLine("Exception: " + ex.ToString());
             }
+        }
+
+        void StartServer()
+        {
+            Server.Instance.Start();
+
+            Action a = () =>
+                {
+                    while (!stop)
+                    {
+                        Thread.Sleep(1000 / 10);
+                        Server.Instance.Client.Update();
+                    }
+                };
+            serverThread = new Thread(new ThreadStart(a));
+            serverThread.Start();
+        }
+        void StopServer()
+        {
+            stop = true;
+
+            Server.Instance.Stop();
         }
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
