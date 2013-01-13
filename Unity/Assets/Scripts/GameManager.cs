@@ -126,9 +126,9 @@ public class GameManager : PersistentMonoBehaviour
         Component[] mrs = b.GetComponentsInChildren(typeof(MeshRenderer));
         foreach (MeshRenderer mr in mrs)
         {
-            if (mr.material.name.Contains("Base-Material #4"))
+            if (mr.material.name.Contains("Material #4"))
                 mr.material = baseMaterials[matId];
-            if (mr.material.name.Contains("Base-Material #5"))
+            if (mr.material.name.Contains("Material #5"))
                 mr.material = baseMaterials[matId + 1];
         }
     }

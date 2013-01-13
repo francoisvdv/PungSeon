@@ -1,57 +1,57 @@
 fileFormatVersion: 2
-guid: 0d5b4dead56d1f345941dfec0025313c
+guid: 5c7832a104245694bb9e27a23438dd3f
 ModelImporter:
   serializedVersion: 15
   fileIDToRecycleName:
-    100000: Box001
-    100002: Box002
-    100004: Box003
-    100006: Box004
-    100008: Box005
-    100010: Box006
-    100012: Box007
-    100014: Box008
-    100016: Circle001
-    100018: Cylinder001
-    100020: Cylinder002
-    100022: Cylinder003
-    100024: Cylinder004
-    100026: Cylinder005
-    100028: Cylinder006
-    100030: Cylinder007
-    100032: Cylinder008
-    100034: Cylinder009
-    100036: Cylinder010
-    100038: Cylinder011
-    100040: Cylinder012
-    100042: //RootNode
+    100000: //RootNode
+    100002: Box001
+    100004: Box002
+    100006: Box003
+    100008: Box004
+    100010: Box005
+    100012: Box006
+    100014: Box007
+    100016: Box008
+    100018: Circle001
+    100020: Cylinder001
+    100022: Cylinder002
+    100024: Cylinder003
+    100026: Cylinder004
+    100028: Cylinder005
+    100030: Cylinder006
+    100032: Cylinder007
+    100034: Cylinder008
+    100036: Cylinder009
+    100038: Cylinder010
+    100040: Cylinder011
+    100042: Cylinder012
     100044: Pyramid001
     100046: Pyramid002
     100048: Pyramid003
     100050: Pyramid004
     100052: Wall001
-    400000: Box001
-    400002: Box002
-    400004: Box003
-    400006: Box004
-    400008: Box005
-    400010: Box006
-    400012: Box007
-    400014: Box008
-    400016: Circle001
-    400018: Cylinder001
-    400020: Cylinder002
-    400022: Cylinder003
-    400024: Cylinder004
-    400026: Cylinder005
-    400028: Cylinder006
-    400030: Cylinder007
-    400032: Cylinder008
-    400034: Cylinder009
-    400036: Cylinder010
-    400038: Cylinder011
-    400040: Cylinder012
-    400042: //RootNode
+    400000: //RootNode
+    400002: Box001
+    400004: Box002
+    400006: Box003
+    400008: Box004
+    400010: Box005
+    400012: Box006
+    400014: Box007
+    400016: Box008
+    400018: Circle001
+    400020: Cylinder001
+    400022: Cylinder002
+    400024: Cylinder003
+    400026: Cylinder004
+    400028: Cylinder005
+    400030: Cylinder006
+    400032: Cylinder007
+    400034: Cylinder008
+    400036: Cylinder009
+    400038: Cylinder010
+    400040: Cylinder011
+    400042: Cylinder012
     400044: Pyramid001
     400046: Pyramid002
     400048: Pyramid003
@@ -65,24 +65,24 @@ ModelImporter:
     2300010: Box006
     2300012: Box007
     2300014: Box008
-    2300016: Cylinder001
-    2300018: Cylinder002
-    2300020: Cylinder003
-    2300022: Cylinder004
-    2300024: Cylinder005
-    2300026: Cylinder006
-    2300028: Cylinder007
-    2300030: Cylinder008
-    2300032: Cylinder009
-    2300034: Cylinder010
-    2300036: Cylinder011
-    2300038: Cylinder012
-    2300040: Pyramid001
-    2300042: Pyramid002
-    2300044: Pyramid003
-    2300046: Pyramid004
-    2300048: Wall001
-    2300050: Circle001
+    2300016: Circle001
+    2300018: Cylinder001
+    2300020: Cylinder002
+    2300022: Cylinder003
+    2300024: Cylinder004
+    2300026: Cylinder005
+    2300028: Cylinder006
+    2300030: Cylinder007
+    2300032: Cylinder008
+    2300034: Cylinder009
+    2300036: Cylinder010
+    2300038: Cylinder011
+    2300040: Cylinder012
+    2300042: Pyramid001
+    2300044: Pyramid002
+    2300046: Pyramid003
+    2300048: Pyramid004
+    2300050: Wall001
     3300000: Box001
     3300002: Box002
     3300004: Box003
@@ -91,24 +91,24 @@ ModelImporter:
     3300010: Box006
     3300012: Box007
     3300014: Box008
-    3300016: Cylinder001
-    3300018: Cylinder002
-    3300020: Cylinder003
-    3300022: Cylinder004
-    3300024: Cylinder005
-    3300026: Cylinder006
-    3300028: Cylinder007
-    3300030: Cylinder008
-    3300032: Cylinder009
-    3300034: Cylinder010
-    3300036: Cylinder011
-    3300038: Cylinder012
-    3300040: Pyramid001
-    3300042: Pyramid002
-    3300044: Pyramid003
-    3300046: Pyramid004
-    3300048: Wall001
-    3300050: Circle001
+    3300016: Circle001
+    3300018: Cylinder001
+    3300020: Cylinder002
+    3300022: Cylinder003
+    3300024: Cylinder004
+    3300026: Cylinder005
+    3300028: Cylinder006
+    3300030: Cylinder007
+    3300032: Cylinder008
+    3300034: Cylinder009
+    3300036: Cylinder010
+    3300038: Cylinder011
+    3300040: Cylinder012
+    3300042: Pyramid001
+    3300044: Pyramid002
+    3300046: Pyramid003
+    3300048: Pyramid004
+    3300050: Wall001
     4300000: Wall001
     4300002: Box001
     4300004: Box002
@@ -124,17 +124,17 @@ ModelImporter:
     4300024: Cylinder006
     4300026: Box006
     4300028: Pyramid002
-    4300030: Box007
-    4300032: Pyramid003
-    4300034: Cylinder007
-    4300036: Cylinder008
-    4300038: Cylinder009
-    4300040: Box008
-    4300042: Pyramid004
-    4300044: Cylinder010
-    4300046: Cylinder011
-    4300048: Cylinder012
-    4300050: Circle001
+    4300030: Circle001
+    4300032: Box007
+    4300034: Pyramid003
+    4300036: Cylinder007
+    4300038: Cylinder008
+    4300040: Cylinder009
+    4300042: Box008
+    4300044: Pyramid004
+    4300046: Cylinder010
+    4300048: Cylinder011
+    4300050: Cylinder012
     6400000: Box001
     6400002: Box002
     6400004: Box003
@@ -143,31 +143,31 @@ ModelImporter:
     6400010: Box006
     6400012: Box007
     6400014: Box008
-    6400016: Cylinder001
-    6400018: Cylinder002
-    6400020: Cylinder003
-    6400022: Cylinder004
-    6400024: Cylinder005
-    6400026: Cylinder006
-    6400028: Cylinder007
-    6400030: Cylinder008
-    6400032: Cylinder009
-    6400034: Cylinder010
-    6400036: Cylinder011
-    6400038: Cylinder012
-    6400040: Pyramid001
-    6400042: Pyramid002
-    6400044: Pyramid003
-    6400046: Pyramid004
-    6400048: Wall001
-    6400050: Circle001
-    7400000: Open
-    7400002: Close
+    6400016: Circle001
+    6400018: Cylinder001
+    6400020: Cylinder002
+    6400022: Cylinder003
+    6400024: Cylinder004
+    6400026: Cylinder005
+    6400028: Cylinder006
+    6400030: Cylinder007
+    6400032: Cylinder008
+    6400034: Cylinder009
+    6400036: Cylinder010
+    6400038: Cylinder011
+    6400040: Cylinder012
+    6400042: Pyramid001
+    6400044: Pyramid002
+    6400046: Pyramid003
+    6400048: Pyramid004
+    6400050: Wall001
+    7400000: Close
+    7400002: Open
     9500000: //RootNode
   materials:
     importMaterials: 1
-    materialName: 2
-    materialSearch: 2
+    materialName: 1
+    materialSearch: 1
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0
@@ -177,10 +177,10 @@ ModelImporter:
     animationScaleError: .5
     animationWrapMode: 0
     clipAnimations:
-    - name: Open
+    - name: Close
       takeName: Take 001
-      firstFrame: 0
-      lastFrame: 50
+      firstFrame: 50
+      lastFrame: 100
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -199,10 +199,10 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       skeletonMaskElements: []
-    - name: Close
+    - name: Open
       takeName: Take 001
-      firstFrame: 50
-      lastFrame: 100
+      firstFrame: 0
+      lastFrame: 50
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -253,7 +253,7 @@ ModelImporter:
     armStretch: .0500000007
     legStretch: .0500000007
     feetSpacing: 0
-    rootMotionBoneName: Box003
+    rootMotionBoneName: 
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   additionalBone: 1
   animationType: 2
