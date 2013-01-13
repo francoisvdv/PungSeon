@@ -82,6 +82,7 @@ ModelImporter:
     2300044: Pyramid003
     2300046: Pyramid004
     2300048: Wall001
+    2300050: Circle001
     3300000: Box001
     3300002: Box002
     3300004: Box003
@@ -107,6 +108,7 @@ ModelImporter:
     3300044: Pyramid003
     3300046: Pyramid004
     3300048: Wall001
+    3300050: Circle001
     4300000: Wall001
     4300002: Box001
     4300004: Box002
@@ -132,6 +134,7 @@ ModelImporter:
     4300044: Cylinder010
     4300046: Cylinder011
     4300048: Cylinder012
+    4300050: Circle001
     6400000: Box001
     6400002: Box002
     6400004: Box003
@@ -157,6 +160,7 @@ ModelImporter:
     6400044: Pyramid003
     6400046: Pyramid004
     6400048: Wall001
+    6400050: Circle001
     7400000: Open
     7400002: Close
     9500000: //RootNode
@@ -249,7 +253,7 @@ ModelImporter:
     armStretch: .0500000007
     legStretch: .0500000007
     feetSpacing: 0
-    rootMotionBoneName: 
+    rootMotionBoneName: Box003
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   additionalBone: 1
   animationType: 2
