@@ -28,17 +28,8 @@ namespace QQServer
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            IPHostEntry host;
-            string localIP = "";
-            host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (IPAddress ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    localIP = ip.ToString();
-                }
-            }
-            tbServerIp.Text = localIP.ToString();
+            tbServerIp.Text = Client.GetLocalIPAddress().ToString();
+            RegisterOnWeb();
 
             StartServer();
         }
@@ -64,6 +55,22 @@ namespace QQServer
         void StopServer()
         {
             stop = true;
+        }
+
+        void RegisterOnWeb()
+        {
+            Console.WriteLine("Registering IP with web server...");
+            HttpWebRequest w = HttpWebRequest.CreateHttp("http://iamde.co.de/pungseon.php?set=" + Client.GetLocalIPAddress().ToString());
+            HttpWebResponse r = null;
+            try
+            {
+                r = w.GetResponse() as HttpWebResponse;
+                Console.WriteLine("Done: " + r.StatusCode + " - " + r.StatusDescription);
+            }
+            catch (System.Exception ex)
+            {
+                Console.WriteLine("Exception: " + ex.ToString());
+            }
         }
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)

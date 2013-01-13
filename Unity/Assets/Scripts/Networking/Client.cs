@@ -323,6 +323,10 @@ public class Client : IDisposable, INetworkListener
 
     public TcpClient Connect(string ip, int port = 4550)
     {
+        return Connect(IPAddress.Parse(ip), port);
+    }
+    public TcpClient Connect(IPAddress ip, int port = 4550)
+    {
         TcpClient tcpClient = new TcpClient();
         tcpClient.Connect(ip, port);
         AddClient(tcpClient);

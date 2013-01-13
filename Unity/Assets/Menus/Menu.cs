@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using System.Net.Sockets;
+using System.Net;
+using System.IO;
 
 public class Menu : MonoBehaviour, INetworkListener
 {
@@ -47,12 +49,11 @@ public class Menu : MonoBehaviour, INetworkListener
 	public GUISkin LobbyItemSkin;
     public MovieTexture backgroundVideo;
 
-
+    string message = string.Empty;
 	Vector2 lobbyListScrollPosition = Vector2.zero;
     Vector2 lobbyScrollPosition = Vector2.zero;
 
     Dictionary<int, Action<ResponsePackage>> waitForResponse = new Dictionary<int, Action<ResponsePackage>>();
-
     Dictionary<int, Lobby> lobbies = new Dictionary<int, Lobby>();
     Lobby currentLobby;
     bool ready = false;
@@ -130,7 +131,25 @@ public class Menu : MonoBehaviour, INetworkListener
     void ConnectToServer()
     {
         if (c2s.GetConnectionCount() == 0)
-            c2s.Connect("131.155.242.96", 4551);
+        {
+            try
+            {
+                HttpWebRequest w = (HttpWebRequest)HttpWebRequest.Create("http://iamde.co.de/pungseon.php");
+                HttpWebResponse r = w.GetResponse() as HttpWebResponse;
+                string serverIp = string.Empty;
+                using (StreamReader sr = new StreamReader(r.GetResponseStream()))
+                {
+                    serverIp = sr.ReadToEnd();
+                }
+
+                IPAddress ia = IPAddress.Parse(serverIp);
+                c2s.Connect(ia, 4551);
+            }
+            catch (System.Exception ex)
+            {
+                message = ex.ToString();
+            }
+        }
     }
     void RequestLobbyList(Action onReceive)
     {
@@ -224,6 +243,7 @@ public class Menu : MonoBehaviour, INetworkListener
 		GUI.skin = Skin;
 
         GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), backgroundVideo, ScaleMode.StretchToFill);
+        GUI.Label(new Rect(0, 0, Screen.width, Screen.height), message);
 
 		Rect backgroundBounds = new Rect((Screen.width - boxWidth) / 2, (Screen.height - boxHeight) / 2, boxWidth, boxHeight);
 		
@@ -523,7 +543,7 @@ public class Menu : MonoBehaviour, INetworkListener
 
             if (lup.Start)
             {
-                c2s.Dispose();
+                //c2s.Dispose();
 				
                 List<TcpClient> clients = new List<TcpClient>();
                 foreach (var v in currentLobby.clients)

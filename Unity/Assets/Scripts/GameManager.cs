@@ -17,12 +17,13 @@ public class GameManager : MonoBehaviour
     public GameObject robotPrefab;
     public Material[] robotMaterials;
 
+    int newLevel = -1; //-1 is 'no new level'
+
     GameObject terrain;
     GameObject[] spawnPoints;
 
     List<Player> players = new List<Player>();
 
-	// Use this for initialization
 	void Start ()
     {
         Instance = this;
@@ -30,17 +31,20 @@ public class GameManager : MonoBehaviour
         OnLevelWasLoaded(Application.loadedLevel);
 	}
 	
-	// Update is called once per frame
-	void Update () {
-		
+	void Update ()
+    {
+        if (newLevel != -1)
+        {
+            if (newLevel == 1) //TerrainMap game world
+                SetUpScene();
+
+            newLevel = -1;
+        }
 	}
 
     void OnLevelWasLoaded(int level)
     {
-        if (level != 1) //TerrainMap game world
-            return;
-        
-        SetUpScene();
+        newLevel = level;
     }
 
     void SetUpScene()

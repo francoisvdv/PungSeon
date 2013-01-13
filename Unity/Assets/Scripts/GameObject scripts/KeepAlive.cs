@@ -12,8 +12,7 @@ public class KeepAlive : MonoBehaviour
         set { singleton = value; added = false; }
     }
 
-	// Use this for initialization
-	void Start ()
+    void Awake()
     {
         if (added)
         {
@@ -25,8 +24,8 @@ public class KeepAlive : MonoBehaviour
             DontDestroyOnLoad(this.gameObject);
             added = true;
         }
-	}
-	
+    }
+
 	// Update is called once per frame
 	void Update () {
 	

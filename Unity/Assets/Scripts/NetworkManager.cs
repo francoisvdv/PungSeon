@@ -14,7 +14,7 @@ public class NetworkManager : MonoBehaviour
 
         if (ConnectToSelf)
         {
-            TcpClient c = Client.Instance.Connect(Client.GetLocalIPAddress().ToString());
+            TcpClient c = Client.Instance.Connect(Client.GetLocalIPAddress());
             Client.Instance.SetHasToken(true);
             Client.Instance.SetNextTokenClient(c);
         }
