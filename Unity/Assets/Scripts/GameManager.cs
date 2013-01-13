@@ -71,6 +71,13 @@ public class GameManager : PersistentMonoBehaviour
             baseSpawnPoints.Remove(bsp);
             spawnBase(bsp);
         }
+
+        while(baseSpawnPoints.Count != 0)
+        {
+            GameObject bsp = baseSpawnPoints[Random.Range(0, baseSpawnPoints.Count - 1)];
+            baseSpawnPoints.Remove(bsp);
+            spawnBase(bsp);
+        }
     }
 
     void spawnRobot(System.Net.IPAddress ip, GameObject spawnPoint = null)
@@ -109,9 +116,21 @@ public class GameManager : PersistentMonoBehaviour
     void spawnBase(GameObject baseSpawnPoint = null)
     {
         GameObject b = (GameObject)Instantiate(basePrefab, baseSpawnPoint.transform.position, baseSpawnPoint.transform.rotation);
-
+        
         Base bs = b.GetComponent<Base>();
         bases.Add(bs);
+
+        int matId = Random.Range(0, baseMaterials.Length / 2);
+        matId *= 2;
+        
+        Component[] mrs = b.GetComponentsInChildren(typeof(MeshRenderer));
+        foreach (MeshRenderer mr in mrs)
+        {
+            if (mr.material.name.Contains("Base-Material #4"))
+                mr.material = baseMaterials[matId];
+            if (mr.material.name.Contains("Base-Material #5"))
+                mr.material = baseMaterials[matId + 1];
+        }
     }
 
 	void spawnBlocks()
