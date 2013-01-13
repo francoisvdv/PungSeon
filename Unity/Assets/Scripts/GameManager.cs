@@ -1,5 +1,7 @@
 using UnityEngine;
+using System.Linq;
 using System.Collections;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
@@ -16,13 +18,16 @@ public class GameManager : MonoBehaviour
     public Material[] robotMaterials;
 
     GameObject terrain;
+    GameObject[] spawnPoints;
+
+    List<Player> players = new List<Player>();
 
 	// Use this for initialization
 	void Start ()
     {
-        OnLevelWasLoaded(Application.loadedLevel);
-
         Instance = this;
+
+        OnLevelWasLoaded(Application.loadedLevel);
 	}
 	
 	// Update is called once per frame
@@ -41,12 +46,48 @@ public class GameManager : MonoBehaviour
     void SetUpScene()
     {
         terrain = GameObject.Find("Terrain");
+
+        spawnPoints = GameObject.FindGameObjectsWithTag("SpawnPoint");
         spawnBlocks();
+
+        foreach (var v in Client.Instance.GetOutgoingAddresses())
+        {
+            spawnRobot(v);
+        }
     }
 
-    void spawnRobot()
+    void spawnRobot(System.Net.IPAddress ip, GameObject spawnPoint = null)
     {
+        Player player = null;
+        foreach (Player p in players)
+        {
+            if (p.PlayerIP.Equals(ip))
+            {
+                player = p;
+                break;
+            }
+        }
 
+        if (spawnPoint == null)
+            spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length - 1)];
+
+        GameObject robot = null;
+        if (player == null)
+        {
+            robot = (GameObject)Instantiate(robotPrefab);
+
+            player = robot.GetComponent<Player>();
+            player.PlayerIP = ip;
+            players.Add(player);
+
+            SkinnedMeshRenderer smr = (SkinnedMeshRenderer)robot.GetComponentInChildren(typeof(SkinnedMeshRenderer));
+            smr.material = robotMaterials[players.IndexOf(player)];
+        }
+        else
+            robot = player.gameObject;
+
+        robot.transform.position = spawnPoint.transform.position;
+        robot.transform.rotation = spawnPoint.transform.rotation;
     }
 
 	void spawnBlocks()
