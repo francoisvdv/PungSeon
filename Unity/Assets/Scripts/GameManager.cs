@@ -12,7 +12,7 @@ public class GameManager : PersistentMonoBehaviour
     public int BlockSpawnMinZ = 0, BlockSpawnMaxZ = 150;
 
 	public GameObject[] blockPrefabs;
-	public GameObject[] basePrefabs;
+	public GameObject basePrefab;
     public Material[] baseMaterials;
     public GameObject robotPrefab;
     public Material[] robotMaterials;
@@ -23,6 +23,7 @@ public class GameManager : PersistentMonoBehaviour
     GameObject[] spawnPoints;
 
     List<Player> players = new List<Player>();
+    List<Base> bases = new List<Base>();
 
     void Awake()
     {
@@ -30,7 +31,8 @@ public class GameManager : PersistentMonoBehaviour
             return;
 
         Instance = this;
-    }
+    }
+
 	void Start ()
     {
         OnLevelWasLoaded(Application.loadedLevel);
@@ -57,11 +59,17 @@ public class GameManager : PersistentMonoBehaviour
         terrain = GameObject.Find("Terrain");
 
         spawnPoints = GameObject.FindGameObjectsWithTag("SpawnPoint");
+
         spawnBlocks();
 
+        List<GameObject> baseSpawnPoints = GameObject.FindGameObjectsWithTag("BaseSpawnPoint").ToList();
         foreach (var v in NetworkManager.Instance.Client.GetOutgoingAddresses())
         {
             spawnRobot(v);
+
+            GameObject bsp = baseSpawnPoints[Random.Range(0, baseSpawnPoints.Count - 1)];
+            baseSpawnPoints.Remove(bsp);
+            spawnBase(bsp);
         }
     }
 
@@ -98,6 +106,13 @@ public class GameManager : PersistentMonoBehaviour
         robot.transform.position = spawnPoint.transform.position;
         robot.transform.rotation = spawnPoint.transform.rotation;
     }
+    void spawnBase(GameObject baseSpawnPoint = null)
+    {
+        GameObject b = (GameObject)Instantiate(basePrefab, baseSpawnPoint.transform.position, baseSpawnPoint.transform.rotation);
+
+        Base bs = b.GetComponent<Base>();
+        bases.Add(bs);
+    }
 
 	void spawnBlocks()
 	{
@@ -131,9 +146,4 @@ public class GameManager : PersistentMonoBehaviour
 			spawnBlock (id);
 		}
 	}	
-	void spawnAtRandomPosition( GameObject g ){
-		
-	}
-
-
 }
