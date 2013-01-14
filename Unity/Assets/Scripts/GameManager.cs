@@ -164,12 +164,10 @@ public class GameManager : PersistentMonoBehaviour
 			var distanceToGround = hit.distance;
 			Vector3 dist = new Vector3(0, -distanceToGround + 1, 0);
 			blockObject.transform.position += dist;
-			print("Spawned a block with id: "+id+" distance to ground: "+distanceToGround);
 		}
         else
         {
 			Destroy(blockObject);
-			print ("No block spawned, another object was in the way!");
 			spawnBlock (id);
 		}
 	}	
