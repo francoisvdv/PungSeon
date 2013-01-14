@@ -18,6 +18,7 @@ public class Client : IDisposable, INetworkListener
 
     public Action<string> OnLog;
     public bool VerboseDebugMessages = false;
+    public bool ConnectBack = false;
     public List<DataPackageFactory> Factories = new List<DataPackageFactory>();
 
     TcpListener tcpListener;
@@ -76,12 +77,14 @@ public class Client : IDisposable, INetworkListener
 
         if (m == Mode.ClientClient)
         {
+            ConnectBack = false;
             Factories.Add(TokenChangePackage.factory);
             Factories.Add(ChatMessagePackage.factory);
             Factories.Add(PlayerMovePackage.factory);
         }
         else if (m == Mode.ClientServer)
         {
+            ConnectBack = true;
             Factories.Add(CreateLobbyPackage.factory);
             Factories.Add(JoinLobbyPackage.factory);
             Factories.Add(LobbyUpdatePackage.factory);
@@ -173,7 +176,7 @@ public class Client : IDisposable, INetworkListener
 
         if (c != null && c.Connected)
         {
-            AddClient(c);
+            AddClient(c, true);
 
             if (OnLog != null)
             {
@@ -239,7 +242,7 @@ public class Client : IDisposable, INetworkListener
         networkStream.EndWrite(iar);
     }
 
-    void AddClient(TcpClient c)
+    void AddClient(TcpClient c, bool receive)
     {
         RemoteClient rc = new RemoteClient();
         rc.username = GenerateUniqueUsername();
@@ -249,7 +252,8 @@ public class Client : IDisposable, INetworkListener
             clients.Add(c, rc);
         }
 
-        c.GetStream().BeginRead(rc.readBuffer, 0, rc.readBuffer.Length, ReceiveCallback, c);
+        if(receive || ConnectBack)
+            c.GetStream().BeginRead(rc.readBuffer, 0, rc.readBuffer.Length, ReceiveCallback, c);
     }
     public int GetConnectionCount()
     {
@@ -312,7 +316,7 @@ public class Client : IDisposable, INetworkListener
     {
         TcpClient tcpClient = new TcpClient();
         tcpClient.Connect(ip, port);
-        AddClient(tcpClient);
+        AddClient(tcpClient, false);
 
         outgoing.Add(tcpClient);
 
