@@ -6,6 +6,14 @@ using System.Collections.Generic;
 public class GameManager : PersistentMonoBehaviour
 {
     public static GameManager Instance;
+    public static bool IsMaster()
+    {
+        var v = NetworkManager.Instance.Client.GetOutgoingAddresses();
+        if (v.Count == 0)
+            return false;
+
+        return v[0].Equals(Client.GetLocalIPAddress());
+    }
 
     public int BlockSpawnStartY = 100;
     public int BlockSpawnMinX = 0, BlockSpawnMaxX = 150;
