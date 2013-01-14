@@ -28,7 +28,7 @@ public class GameManager : PersistentMonoBehaviour
     int newLevel = -1; //-1 is 'no new level'
 
     GameObject terrain;
-    GameObject[] spawnPoints;
+    GameObject[] robotSpawnPoints;
 
     List<Player> players = new List<Player>();
     List<Base> bases = new List<Base>();
@@ -75,8 +75,7 @@ public class GameManager : PersistentMonoBehaviour
     void SetUpScene()
     {
         terrain = GameObject.Find("Terrain");
-
-        spawnPoints = GameObject.FindGameObjectsWithTag("SpawnPoint");
+        robotSpawnPoints = GameObject.FindGameObjectsWithTag("RobotSpawnPoint");
 
         spawnBlocks();
 
@@ -111,7 +110,7 @@ public class GameManager : PersistentMonoBehaviour
         }
 
         if (spawnPoint == null)
-            spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length - 1)];
+            spawnPoint = robotSpawnPoints[Random.Range(0, robotSpawnPoints.Length - 1)];
 
         GameObject robot = null;
         if (player == null)
