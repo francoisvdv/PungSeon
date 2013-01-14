@@ -67,9 +67,12 @@ public class Menu : MonoBehaviour, INetworkListener
 		
 		boxWidth = mainMenuWidth;
 		boxHeight = mainMenuHeight;
-
-        backgroundVideo.Play();
-        this.audio.Play();
+		
+		if(backgroundVideo != null)
+		{
+        	backgroundVideo.Play();
+        	this.audio.Play();
+		}
 	}
 	
 	// Update is called once per frame
@@ -241,8 +244,9 @@ public class Menu : MonoBehaviour, INetworkListener
 	{		
 		GUISkin oldSkin = GUI.skin;
 		GUI.skin = Skin;
-
-        GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), backgroundVideo, ScaleMode.StretchToFill);
+		
+		if(backgroundVideo != null)
+        	GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), backgroundVideo, ScaleMode.StretchToFill);
         GUI.Label(new Rect(0, 0, Screen.width, Screen.height), message);
 
 		Rect backgroundBounds = new Rect((Screen.width - boxWidth) / 2, (Screen.height - boxHeight) / 2, boxWidth, boxHeight);

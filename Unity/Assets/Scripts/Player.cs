@@ -212,8 +212,11 @@ public class Player : MonoBehaviour, INetworkListener
     public void OnDataReceived(DataPackage dp)
     {
         PlayerMovePackage pmp = dp as PlayerMovePackage;
-        if (pmp == null)
+        if (pmp == null || !dp.SenderRemoteIPEndpoint.Address.Equals(PlayerIP))
             return;
+        
+        if(!dp.SenderRemoteIPEndpoint.Address.Equals(Client.GetLocalIPAddress()))
+            print("Non-player robot " + PlayerIP.ToString() + " received movement from " + dp.SenderRemoteIPEndpoint.ToString());
 
         //set position
         transform.root.position = pmp.Position;
