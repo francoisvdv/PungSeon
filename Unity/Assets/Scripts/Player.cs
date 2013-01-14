@@ -211,42 +211,52 @@ public class Player : MonoBehaviour, INetworkListener
 
     public void OnDataReceived(DataPackage dp)
     {
-        PlayerMovePackage pmp = dp as PlayerMovePackage;
-        if (pmp == null)
-            return;
+        if (dp is TokenChangePackage)
+        {
+            PlayerMovePackage pmp = new PlayerMovePackage(transform.root.rotation.eulerAngles);
+            NetworkManager.Instance.Client.SendData(pmp);
+        }
+        else if (dp is PlayerMovePackage && dp.SenderRemoteIPEndpoint.Address.Equals(PlayerIP))
+        {
+            PlayerMovePackage pmp = (PlayerMovePackage)dp;
 
-        print("Player robot " + PlayerIP.ToString() + " received movement from " + dp.SenderRemoteIPEndpoint.ToString() + " | " + dp.SenderLocalIPEndpoint.ToString());
+            if (!pmp.RotationOnly)
+            {
+                //set position
+                transform.root.position = pmp.Position;
 
-        if (!dp.SenderRemoteIPEndpoint.Address.Equals(PlayerIP))
-            return;
+                //set rotation
+                float newRotX = pmp.Rotation.x - transform.root.rotation.eulerAngles.x;
+                float newRotY = pmp.Rotation.y - transform.root.rotation.eulerAngles.y;
+                float newRotZ = pmp.Rotation.z - transform.root.rotation.eulerAngles.z;
+                transform.root.Rotate(newRotX, newRotY, newRotZ);
 
-        print("Player robot: " + PlayerIP + " is moving");
+                //set direction
+                if (pmp.Dir.Has(PlayerMovePackage.Direction.Stop))
+                    anim.SetFloat("Speed", 0);
+                if (pmp.Dir.Has(PlayerMovePackage.Direction.Up))
+                    anim.SetFloat("Speed", 1);
+                if (pmp.Dir.Has(PlayerMovePackage.Direction.Back))
+                    anim.SetFloat("Speed", -1);
 
-        //set position
-        transform.root.position = pmp.Position;
+                anim.speed = animSpeed;
 
-        //set rotation
-        float newRotX = pmp.Rotation.x - transform.root.rotation.eulerAngles.x;
-        float newRotY = pmp.Rotation.y - transform.root.rotation.eulerAngles.y;
-        float newRotZ = pmp.Rotation.z - transform.root.rotation.eulerAngles.z;
-        transform.root.Rotate(newRotX, newRotY, newRotZ);
-
-        //set direction
-        if (pmp.Dir.Has(PlayerMovePackage.Direction.Stop))
-            anim.SetFloat("Speed", 0);
-        if (pmp.Dir.Has(PlayerMovePackage.Direction.Up))
-            anim.SetFloat("Speed", 1);
-        if (pmp.Dir.Has(PlayerMovePackage.Direction.Back))
-            anim.SetFloat("Speed", -1);
-
-        anim.speed = animSpeed;
-
-        //float h = Input.GetAxis("Horizontal");				// setup h variable as our horizontal input axis
-        //float v = Input.GetAxis("Vertical");				// setup v variables as our vertical input axis		
-        //print(h + " | " + v);
-        //anim.SetFloat("Speed", v);							// set our animator's float parameter 'Speed' equal to the vertical input axis				
-        //anim.SetFloat("Direction", h); 						// set our animator's float parameter 'Direction' equal to the horizontal input axis		
-        //anim.speed = animSpeed;								// set the speed of our animator to the public variable 'animSpeed'
-        //anim.SetLookAtWeight(lookWeight);					// set the Look At Weight - amount to use look at IK vs using the head's animation	}
+                //float h = Input.GetAxis("Horizontal");				// setup h variable as our horizontal input axis
+                //float v = Input.GetAxis("Vertical");				// setup v variables as our vertical input axis		
+                //print(h + " | " + v);
+                //anim.SetFloat("Speed", v);							// set our animator's float parameter 'Speed' equal to the vertical input axis				
+                //anim.SetFloat("Direction", h); 						// set our animator's float parameter 'Direction' equal to the horizontal input axis		
+                //anim.speed = animSpeed;								// set the speed of our animator to the public variable 'animSpeed'
+                //anim.SetLookAtWeight(lookWeight);					// set the Look At Weight - amount to use look at IK vs using the head's animation	}
+            }
+            else if(!IsControlled)
+            {
+                //set rotation
+                float newRotX = pmp.Rotation.x - transform.root.rotation.eulerAngles.x;
+                float newRotY = pmp.Rotation.y - transform.root.rotation.eulerAngles.y;
+                float newRotZ = pmp.Rotation.z - transform.root.rotation.eulerAngles.z;
+                transform.root.Rotate(newRotX, newRotY, newRotZ);
+            }
+        }
     }
 }

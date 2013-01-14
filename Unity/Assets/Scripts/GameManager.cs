@@ -62,15 +62,15 @@ public class GameManager : PersistentMonoBehaviour
         newLevel = level;
     }
 
-    void OnGUI()
-    {
-        int y = 0;
-        foreach (var v in NetworkManager.Instance.Client.GetOutgoingAddresses())
-        {
-            GUI.Label(new Rect(0, y, Screen.width, Screen.height), v.ToString());
-            y += 15;
-        }
-    }
+    //void OnGUI()
+    //{
+    //    int y = 0;
+    //    foreach (var v in NetworkManager.Instance.Client.GetOutgoingAddresses())
+    //    {
+    //        GUI.Label(new Rect(0, y, Screen.width, Screen.height), v.ToString());
+    //        y += 15;
+    //    }
+    //}
 
     void SetUpScene()
     {
@@ -126,7 +126,13 @@ public class GameManager : PersistentMonoBehaviour
             smr.material = robotMaterials[players.IndexOf(player)];
 
             if (!player.IsControlled)
+            {
                 robot.GetComponentInChildren<Camera>().enabled = false;
+                foreach(var v in robot.GetComponentsInChildren<Light>().Where(x => x.name == "LaserTarget"))
+                    v.enabled = false;
+                foreach(var v in robot.GetComponentsInChildren<MouseLook>())
+                    v.enabled = false;
+            }
         }
         else
             robot = player.gameObject;

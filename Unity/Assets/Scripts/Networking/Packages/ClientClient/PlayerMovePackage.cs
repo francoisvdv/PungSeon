@@ -18,24 +18,36 @@ public class PlayerMovePackage : DataPackage
         public override DataPackage CreateFromBody(string b)
         {
             string[] split = b.Split('|');
-            if (split.Length != 7)
-                throw new Exception("Invalid package");
 
-            Vector3 pos = Vector3.zero;
-            float.TryParse(split[0], out pos.x);
-            float.TryParse(split[1], out pos.y);
-            float.TryParse(split[2], out pos.z);
+            bool rotOnly = false;
+            bool.TryParse(split[0], out rotOnly);
 
-            Vector3 rot = Vector3.zero;
-            float.TryParse(split[3], out rot.x);
-            float.TryParse(split[4], out rot.y);
-            float.TryParse(split[5], out rot.z);
+            if (!rotOnly)
+            {
+                Vector3 pos = Vector3.zero;
+                float.TryParse(split[1], out pos.x);
+                float.TryParse(split[2], out pos.y);
+                float.TryParse(split[3], out pos.z);
 
-            int dirInt;
-            int.TryParse(split[6], out dirInt);
-            Direction dir = (Direction)dirInt;
-            
-            return new PlayerMovePackage(pos, rot, dir);
+                Vector3 rot = Vector3.zero;
+                float.TryParse(split[4], out rot.x);
+                float.TryParse(split[5], out rot.y);
+                float.TryParse(split[6], out rot.z);
+
+                int dirInt;
+                int.TryParse(split[7], out dirInt);
+                Direction dir = (Direction)dirInt;
+
+                return new PlayerMovePackage(pos, rot, dir);
+            }
+            else
+            {
+                Vector3 rot = Vector3.zero;
+                float.TryParse(split[1], out rot.x);
+                float.TryParse(split[2], out rot.y);
+                float.TryParse(split[3], out rot.z);
+                return new PlayerMovePackage(rot);
+            }
         }
     }
     public static PlayerMoveFactory factory = new PlayerMoveFactory();
@@ -51,9 +63,17 @@ public class PlayerMovePackage : DataPackage
     {
         get
         {
-            string result = Position.x.ToString() + "|" + Position.y.ToString() + "|" + Position.z.ToString() + "|";
-            result += Rotation.x.ToString() + "|" + Rotation.y.ToString() + "|" + Rotation.z.ToString() + "|";
-            result += (int)Dir;
+            string result = RotationOnly.ToString() + "|";
+
+            if (!RotationOnly)
+            {
+                result += Position.x.ToString() + "|" + Position.y.ToString() + "|" + Position.z.ToString() + "|";
+                result += Rotation.x.ToString() + "|" + Rotation.y.ToString() + "|" + Rotation.z.ToString() + "|";
+                result += (int)Dir;
+            }
+            else
+                result += Rotation.x.ToString() + "|" + Rotation.y.ToString() + "|" + Rotation.z.ToString();
+
             return result;
         }
     }
@@ -62,12 +82,19 @@ public class PlayerMovePackage : DataPackage
         get { return factory; }
     }
 
+    public bool RotationOnly { get; set; }
     public Vector3 Position { get; set; }
     public Vector3 Rotation { get; set; }
     public Direction Dir { get; set; }
 
+    public PlayerMovePackage(Vector3 rot)
+    {
+        RotationOnly = true;
+        Rotation = rot;
+    }
     public PlayerMovePackage(Vector3 pos, Vector3 rot, Direction dir)
     {
+        RotationOnly = false;
         Position = pos;
         Rotation = rot;
         Dir = dir;
