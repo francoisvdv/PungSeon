@@ -114,6 +114,9 @@ public class GameManager : PersistentMonoBehaviour
 
             SkinnedMeshRenderer smr = (SkinnedMeshRenderer)robot.GetComponentInChildren(typeof(SkinnedMeshRenderer));
             smr.material = robotMaterials[players.IndexOf(player)];
+
+            if (!player.IsControlled)
+                robot.GetComponentInChildren<Camera>().enabled = false;
         }
         else
             robot = player.gameObject;
