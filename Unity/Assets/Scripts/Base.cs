@@ -4,6 +4,10 @@ using System.Collections;
 
 public class Base : MonoBehaviour, INetworkListener
 {
+    public int BaseId { get { return GameManager.Instance.GetBases().IndexOf(this); } }
+
+    Player owner;
+
     void Start()
     {
         NetworkManager.Instance.Client.AddListener(this);
@@ -20,6 +24,23 @@ public class Base : MonoBehaviour, INetworkListener
 
     public void OnDataReceived(DataPackage dp)
     {
-        
+        if (dp is BaseCapturePackage)
+        {
+            BaseCapturePackage bcp = (BaseCapturePackage)dp;
+
+            if (bcp.BaseId == BaseId)
+            {
+                owner = GameManager.Instance.GetPlayer(bcp.PlayerIP);
+
+                Component[] mrs = b.GetComponentsInChildren(typeof(MeshRenderer));
+                foreach (MeshRenderer mr in mrs)
+                {
+                    if (mr.material.name.Contains("Material #4"))
+                        mr.material = GameManager.Instance.baseMaterials[BaseId * 2];
+                    if (mr.material.name.Contains("Material #5"))
+                        mr.material = GameManager.Instance.baseMaterials[BaseId * 2 + 1];
+                }
+            }
+        }
     }
 }

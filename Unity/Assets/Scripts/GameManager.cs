@@ -32,6 +32,24 @@ public class GameManager : PersistentMonoBehaviour
     List<Player> players = new List<Player>();
     List<Base> bases = new List<Base>();
 
+    public List<Player> GetPlayers()
+    {
+        return players;
+    }
+    public Player GetPlayer(System.Net.IPAddress ip)
+    {
+        foreach (Player p in players)
+        {
+            if (p.PlayerIP.Equals(ip))
+                return p;
+        }
+        return null;
+    }
+    public List<Base> GetBases()
+    {
+        return bases;
+    }
+
     void Awake()
     {
         if (IsDuplicate())
@@ -145,18 +163,6 @@ public class GameManager : PersistentMonoBehaviour
         
         Base bs = b.GetComponent<Base>();
         bases.Add(bs);
-
-        int matId = Random.Range(0, baseMaterials.Length / 2);
-        matId *= 2;
-        
-        Component[] mrs = b.GetComponentsInChildren(typeof(MeshRenderer));
-        foreach (MeshRenderer mr in mrs)
-        {
-            if (mr.material.name.Contains("Material #4"))
-                mr.material = baseMaterials[matId];
-            if (mr.material.name.Contains("Material #5"))
-                mr.material = baseMaterials[matId + 1];
-        }
     }
 
 	void spawnBlocks()

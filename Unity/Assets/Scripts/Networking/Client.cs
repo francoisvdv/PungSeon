@@ -81,6 +81,7 @@ public class Client : IDisposable, INetworkListener
             Factories.Add(TokenChangePackage.factory);
             Factories.Add(ChatMessagePackage.factory);
             Factories.Add(PlayerMovePackage.factory);
+            Factories.Add(BaseCapturePackage.factory);
         }
         else if (m == Mode.ClientServer)
         {
