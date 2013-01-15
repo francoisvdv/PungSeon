@@ -40,6 +40,7 @@ public class Player : MonoBehaviour, INetworkListener
     PlayerMovePackage.Direction currentDirection = PlayerMovePackage.Direction.Stop;
     bool firing = false;
 
+    bool resend = false;
 
 	// Use this for initialization
 	void Start ()
@@ -87,6 +88,22 @@ public class Player : MonoBehaviour, INetworkListener
         HandleMovement();
         HandleFiring();
         HandleFlagPickup();
+
+        if (resend)
+        {
+            //PlayerMovePackage pmp = new PlayerMovePackage(transform.root.rotation.eulerAngles);
+            PlayerMovePackage pmp = null;
+            if (sendCounter == 5)
+            {
+                pmp = new PlayerMovePackage(transform.root.position, transform.root.rotation.eulerAngles, currentDirection);
+                sendCounter = 0;
+            }
+            else
+                pmp = new PlayerMovePackage(transform.root.rotation.eulerAngles);
+
+            NetworkManager.Instance.Client.SendData(pmp);
+            resend = false;
+        }
     }
 
 	Vector3 calculateCentroid(params Vector3[] centerPoints)
@@ -226,19 +243,13 @@ public class Player : MonoBehaviour, INetworkListener
     {
         if (dp is TokenChangePackage)
         {
-            //PlayerMovePackage pmp = new PlayerMovePackage(transform.root.rotation.eulerAngles);
-
-            PlayerMovePackage pmp = null;
-            if (sendCounter == 5)
+            if (sendCounter == 0)
             {
-                pmp = new PlayerMovePackage(transform.root.position, transform.root.rotation.eulerAngles, currentDirection);
+                resend = true;
                 sendCounter = 0;
             }
             else
-                pmp = new PlayerMovePackage(transform.root.rotation.eulerAngles);
-
-            NetworkManager.Instance.Client.SendData(pmp);
-            sendCounter++;
+                sendCounter++;
         }
         else if (dp is PlayerMovePackage && dp.SenderRemoteIPEndpoint.Address.Equals(PlayerIP))
         {
