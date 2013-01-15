@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-public class GameManager : PersistentMonoBehaviour
+public class GameManager : PersistentMonoBehaviour, INetworkListener
 {
     public static GameManager Instance;
     public static bool IsMaster()
@@ -61,6 +61,24 @@ public class GameManager : PersistentMonoBehaviour
         }
         return null;
     }
+    public Flag GetFlag(long flagId)
+    {
+        foreach (Flag v in flags)
+        {
+            if (v.FlagId == flagId)
+                return v;
+        }
+        return null;
+    }
+    public Flag GetFlag(Player p)
+    {
+        foreach (Flag v in flags)
+        {
+            if (v.Owner == p)
+                return v;
+        }
+        return null;
+    }
 
     void Awake()
     {
@@ -72,6 +90,8 @@ public class GameManager : PersistentMonoBehaviour
 
 	void Start ()
     {
+        NetworkManager.Instance.Client.AddListener(this);
+
         OnLevelWasLoaded(Application.loadedLevel);
 	}
 	
@@ -117,6 +137,9 @@ public class GameManager : PersistentMonoBehaviour
             spawnRobot(v, bases[bases.Count - 1].transform.root.FindChild("RobotSpawnPoint").gameObject);
         }
 
+        if (!IsMaster())
+            return;
+
         spawnFlag();
         if (NetworkManager.Instance.Client.GetOutgoingAddresses().Count >= 4)
             spawnFlag();
@@ -132,7 +155,7 @@ public class GameManager : PersistentMonoBehaviour
     void spawnBlock(int id)
     {
         GameObject blockObject = (GameObject)Instantiate(blockPrefabs[id]);
-        placeRandom(blockObject, Vector3.zero);
+        blockObject.transform.position = getRandomPositionOnTerrain(0);
     }
     void spawnRobot(System.Net.IPAddress ip, GameObject spawnPoint = null)
     {
@@ -176,7 +199,7 @@ public class GameManager : PersistentMonoBehaviour
             robot.transform.rotation = spawnPoint.transform.rotation;
         }
         else
-            placeRandom(robot, Vector3.zero);
+            robot.transform.position = getRandomPositionOnTerrain(0);
     }
     void spawnBase(GameObject baseSpawnPoint = null)
     {
@@ -187,26 +210,68 @@ public class GameManager : PersistentMonoBehaviour
     }
     void spawnFlag()
     {
-        GameObject b = (GameObject)Instantiate(flagPrefab);
-        placeRandom(b, new Vector3(0, 1.6f, 0));
-
-        Flag f = b.GetComponent<Flag>();
-        flags.Add(f);
+        FlagPackage fp = new FlagPackage();
+        fp.FlagId = System.DateTime.Now.Ticks;
+        fp.Event = FlagPackage.FlagEvent.Spawn;
+        fp.Position = getRandomPositionOnTerrain(Flag.TerrainOffset);
+        NetworkManager.Instance.Client.SendData(fp);
     }
 
-    void placeRandom(GameObject obj, Vector3 offset)
+    public Vector3 getRandomPositionOnTerrain(float heightOffset)
     {
-        obj.transform.position = new Vector3(Random.Range(BlockSpawnMinX, BlockSpawnMaxX),
+        Vector3 result = new Vector3(Random.Range(BlockSpawnMinX, BlockSpawnMaxX),
             BlockSpawnStartY, Random.Range(BlockSpawnMinZ, BlockSpawnMaxZ));
 
         RaycastHit hit;
-        if (Physics.Raycast(obj.transform.position + offset, -Vector3.up, out hit) && hit.collider.gameObject.Equals(terrain))
+        if (Physics.Raycast(result + new Vector3(0, heightOffset, 0), -Vector3.up, out hit) && hit.collider.gameObject.Equals(terrain))
         {
             var distanceToGround = hit.distance;
             Vector3 dist = new Vector3(0, -distanceToGround + 1, 0);
-            obj.transform.position += dist;
+            result += dist;
         }
         else
-            placeRandom(obj, offset);
+            return getRandomPositionOnTerrain(heightOffset);
+
+        return result;
+    }
+    public Vector3 getPositionOnTerrain(Vector3 from, float heightOffset)
+    {
+        Vector3 result = from;
+
+        RaycastHit hit;
+        if (Physics.Raycast(result + new Vector3(0, heightOffset, 0), -Vector3.up, out hit) && hit.collider.gameObject.Equals(terrain))
+        {
+            var distanceToGround = hit.distance;
+            Vector3 dist = new Vector3(0, -distanceToGround + 1, 0);
+            result += dist;
+        }
+
+        return result;
+    }
+
+    public void OnDataReceived(DataPackage dp)
+    {
+        if (dp is FlagPackage)
+        {
+            FlagPackage fp = (FlagPackage)dp;
+            if (fp.Event == FlagPackage.FlagEvent.Spawn)
+            {
+                GameObject b = (GameObject)Instantiate(flagPrefab);
+                b.transform.position = fp.Position;
+
+                Flag f = b.GetComponent<Flag>();
+                flags.Add(f);
+                f.FlagId = fp.FlagId;
+            }
+            else if (fp.Event == FlagPackage.FlagEvent.Capture)
+            {
+                Flag f = GetFlag(fp.FlagId);
+                if (f != null)
+                {
+                    Destroy(f.transform.root.gameObject);
+                    flags.Remove(f);
+                }
+            }
+        }
     }
 }

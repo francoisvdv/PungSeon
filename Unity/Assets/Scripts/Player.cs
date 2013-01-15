@@ -15,6 +15,8 @@ public class Player : MonoBehaviour, INetworkListener
 
 	[NonSerialized]
 	public int Health;
+    [NonSerialized]
+    public int Score;
 
 	Transform laserTarget;
 	
@@ -239,14 +241,28 @@ public class Player : MonoBehaviour, INetworkListener
         if (!IsControlled)
             return;
 
-        Base b = col.transform.root.gameObject.GetComponentInChildren<Base>();
-        if (GameManager.Instance.GetPlayerBase(this) != null || b == null || b.Owner != null)
-            return;
+        if (col.gameObject.name.Contains("Base"))
+        {
+            Base b = col.transform.root.gameObject.GetComponentInChildren<Base>();
+            if (GameManager.Instance.GetPlayerBase(this) != null || b == null || b.Owner != null)
+                return;
 
-        BaseCapturePackage bcp = new BaseCapturePackage();
-        bcp.PlayerIP = Client.GetLocalIPAddress();
-        bcp.BaseId = b.BaseId;
-        NetworkManager.Instance.Client.SendData(bcp);
+            BaseCapturePackage bcp = new BaseCapturePackage();
+            bcp.PlayerIP = Client.GetLocalIPAddress();
+            bcp.BaseId = b.BaseId;
+            NetworkManager.Instance.Client.SendData(bcp);
+        }
+        else if (col.gameObject.name.Contains("Flag"))
+        {
+            Flag f = col.GetComponentInChildren<Flag>();
+            if (GameManager.Instance.GetFlag(this) != null || f == null || f.Owner != null)
+                return;
+
+            FlagPackage fp = new FlagPackage();
+            fp.Event = FlagPackage.FlagEvent.PickUp;
+            fp.FlagId = f.FlagId;
+            NetworkManager.Instance.Client.SendData(fp);
+        }
     }
 
     int sendCounter = 0;
@@ -321,6 +337,12 @@ public class Player : MonoBehaviour, INetworkListener
                 float newRotZ = pmp.Rotation.z - transform.root.rotation.eulerAngles.z;
                 transform.root.Rotate(newRotX, newRotY, newRotZ);
             }
+        }
+        else if (dp is FlagPackage && dp.SenderRemoteIPEndpoint.Address.Equals(PlayerIP))
+        {
+            FlagPackage fp = (FlagPackage)dp;
+            if (fp.Event == FlagPackage.FlagEvent.Capture)
+                Score++;
         }
     }
 }

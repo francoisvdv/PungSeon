@@ -5,7 +5,6 @@ using System.Collections;
 public class Base : MonoBehaviour, INetworkListener
 {
     public int BaseId { get { return GameManager.Instance.GetBases().IndexOf(this); } }
-
     public Player Owner { get; set; }
 
     void Start()
