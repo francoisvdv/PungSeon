@@ -127,9 +127,9 @@ public class Player : MonoBehaviour, INetworkListener
             dir = dir.Add(PlayerMovePackage.Direction.Up);
         if (Input.GetKey(Options.Controls.Backward))
             dir = dir.Add(PlayerMovePackage.Direction.Back);
-        if (Input.GetKeyDown(Options.Controls.StrafeLeft))
+        if (Input.GetKey(Options.Controls.StrafeLeft))
             dir = dir.Add(PlayerMovePackage.Direction.Left);
-        if (Input.GetKeyDown(Options.Controls.StrafeRight))
+        if (Input.GetKey(Options.Controls.StrafeRight))
             dir = dir.Add(PlayerMovePackage.Direction.Right);
 
         if (currentDirection != dir)
@@ -221,12 +221,24 @@ public class Player : MonoBehaviour, INetworkListener
         NetworkManager.Instance.Client.SendData(bcp);
     }
 
+    int sendCounter = 0;
     public void OnDataReceived(DataPackage dp)
     {
         if (dp is TokenChangePackage)
         {
-            PlayerMovePackage pmp = new PlayerMovePackage(transform.root.rotation.eulerAngles);
+            //PlayerMovePackage pmp = new PlayerMovePackage(transform.root.rotation.eulerAngles);
+
+            PlayerMovePackage pmp = null;
+            if (sendCounter == 5)
+            {
+                pmp = new PlayerMovePackage(transform.root.position, transform.root.rotation.eulerAngles, currentDirection);
+                sendCounter = 0;
+            }
+            else
+                pmp = new PlayerMovePackage(transform.root.rotation.eulerAngles);
+
             NetworkManager.Instance.Client.SendData(pmp);
+            sendCounter++;
         }
         else if (dp is PlayerMovePackage && dp.SenderRemoteIPEndpoint.Address.Equals(PlayerIP))
         {

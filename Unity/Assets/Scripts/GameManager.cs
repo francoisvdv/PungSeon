@@ -107,24 +107,19 @@ public class GameManager : PersistentMonoBehaviour
         spawnBlocks();
 
         List<GameObject> baseSpawnPoints = GameObject.FindGameObjectsWithTag("BaseSpawnPoint").ToList();
+        int bspIndex = 0;
         foreach (var v in NetworkManager.Instance.Client.GetOutgoingAddresses())
         {
-            GameObject bsp = baseSpawnPoints[Random.Range(0, baseSpawnPoints.Count - 1)];
+            GameObject bsp = baseSpawnPoints[bspIndex];
             baseSpawnPoints.Remove(bsp);
             spawnBase(bsp);
+            bspIndex++;
 
             spawnRobot(v, bases[bases.Count - 1].transform.root.FindChild("RobotSpawnPoint").gameObject);
         }
 
-        while(baseSpawnPoints.Count != 0)
-        {
-            GameObject bsp = baseSpawnPoints[Random.Range(0, baseSpawnPoints.Count - 1)];
-            baseSpawnPoints.Remove(bsp);
-            spawnBase(bsp);
-        }
-
         spawnFlag();
-        if (NetworkManager.Instance.Client.GetOutgoingAddresses().Count > 4)
+        if (NetworkManager.Instance.Client.GetOutgoingAddresses().Count >= 4)
             spawnFlag();
     }
 
@@ -169,7 +164,7 @@ public class GameManager : PersistentMonoBehaviour
                 robot.GetComponentInChildren<Camera>().enabled = false;
                 foreach(var v in robot.GetComponentsInChildren<Light>().Where(x => x.name == "LaserTarget"))
                     v.enabled = false;
-                foreach(var v in robot.GetComponentsInChildren<MouseLook>())
+                foreach (var v in robot.GetComponentsInChildren<MouseLook>())
                     v.enabled = false;
             }
         }
