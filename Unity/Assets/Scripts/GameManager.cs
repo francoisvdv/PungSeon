@@ -24,6 +24,7 @@ public class GameManager : PersistentMonoBehaviour
     public Material[] baseMaterials;
     public GameObject robotPrefab;
     public Material[] robotMaterials;
+    public GameObject flagPrefab;
 
     int newLevel = -1; //-1 is 'no new level'
 
@@ -31,6 +32,7 @@ public class GameManager : PersistentMonoBehaviour
 
     List<Player> players = new List<Player>();
     List<Base> bases = new List<Base>();
+    List<Flag> flags = new List<Flag>();
 
     public List<Player> GetPlayers()
     {
@@ -120,8 +122,24 @@ public class GameManager : PersistentMonoBehaviour
             baseSpawnPoints.Remove(bsp);
             spawnBase(bsp);
         }
+
+        spawnFlag();
+        if (NetworkManager.Instance.Client.GetOutgoingAddresses().Count > 4)
+            spawnFlag();
     }
 
+    void spawnBlocks()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            spawnBlock(Random.Range(0, blockPrefabs.Length));
+        }
+    }
+    void spawnBlock(int id)
+    {
+        GameObject blockObject = (GameObject)Instantiate(blockPrefabs[id]);
+        placeRandom(blockObject, Vector3.zero);
+    }
     void spawnRobot(System.Net.IPAddress ip, GameObject spawnPoint = null)
     {
         Player player = null;
@@ -164,7 +182,7 @@ public class GameManager : PersistentMonoBehaviour
             robot.transform.rotation = spawnPoint.transform.rotation;
         }
         else
-            placeRandom(robot);
+            placeRandom(robot, Vector3.zero);
     }
     void spawnBase(GameObject baseSpawnPoint = null)
     {
@@ -173,44 +191,28 @@ public class GameManager : PersistentMonoBehaviour
         Base bs = b.GetComponent<Base>();
         bases.Add(bs);
     }
-
-	void spawnBlocks()
-	{
-		for(int i = 0; i < 10; i++)
-		{
-            spawnBlock(Random.Range(0, blockPrefabs.Length));
-		}
-	}
-	void spawnBlock(int id)
+    void spawnFlag()
     {
-        GameObject blockObject = (GameObject)Instantiate(blockPrefabs[id]);
-        placeRandom(blockObject);
-	}
+        GameObject b = (GameObject)Instantiate(flagPrefab);
+        placeRandom(b, new Vector3(0, 1.6f, 0));
 
-    void placeRandom(GameObject obj)
+        Flag f = b.GetComponent<Flag>();
+        flags.Add(f);
+    }
+
+    void placeRandom(GameObject obj, Vector3 offset)
     {
         obj.transform.position = new Vector3(Random.Range(BlockSpawnMinX, BlockSpawnMaxX),
             BlockSpawnStartY, Random.Range(BlockSpawnMinZ, BlockSpawnMaxZ));
 
-        BoxCollider bc = obj.AddComponent<BoxCollider>();
-        BoxCollision bcl = obj.AddComponent<BoxCollision>();
-
-        bool again = false;
-
         RaycastHit hit;
-        if (Physics.Raycast(obj.transform.position, -Vector3.up, out hit) && hit.collider.gameObject.Equals(terrain))
+        if (Physics.Raycast(obj.transform.position + offset, -Vector3.up, out hit) && hit.collider.gameObject.Equals(terrain))
         {
             var distanceToGround = hit.distance;
             Vector3 dist = new Vector3(0, -distanceToGround + 1, 0);
             obj.transform.position += dist;
         }
         else
-            again = true;
-
-        Destroy(bc);
-        Destroy(bcl);
-
-        if(again)
-            placeRandom(obj);
+            placeRandom(obj, offset);
     }
 }
