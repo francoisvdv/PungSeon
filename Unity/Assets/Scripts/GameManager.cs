@@ -28,7 +28,6 @@ public class GameManager : PersistentMonoBehaviour
     int newLevel = -1; //-1 is 'no new level'
 
     GameObject terrain;
-    GameObject[] robotSpawnPoints;
 
     List<Player> players = new List<Player>();
     List<Base> bases = new List<Base>();
@@ -75,18 +74,17 @@ public class GameManager : PersistentMonoBehaviour
     void SetUpScene()
     {
         terrain = GameObject.Find("Terrain");
-        robotSpawnPoints = GameObject.FindGameObjectsWithTag("RobotSpawnPoint");
 
         spawnBlocks();
 
         List<GameObject> baseSpawnPoints = GameObject.FindGameObjectsWithTag("BaseSpawnPoint").ToList();
         foreach (var v in NetworkManager.Instance.Client.GetOutgoingAddresses())
         {
-            spawnRobot(v);
-
             GameObject bsp = baseSpawnPoints[Random.Range(0, baseSpawnPoints.Count - 1)];
             baseSpawnPoints.Remove(bsp);
             spawnBase(bsp);
+
+            spawnRobot(v, bases[bases.Count - 1].transform.root.FindChild("RobotSpawnPoint").gameObject);
         }
 
         while(baseSpawnPoints.Count != 0)
@@ -108,9 +106,6 @@ public class GameManager : PersistentMonoBehaviour
                 break;
             }
         }
-
-        if (spawnPoint == null)
-            spawnPoint = robotSpawnPoints[Random.Range(0, robotSpawnPoints.Length - 1)];
 
         GameObject robot = null;
         if (player == null)
@@ -136,8 +131,13 @@ public class GameManager : PersistentMonoBehaviour
         else
             robot = player.gameObject;
 
-        robot.transform.position = spawnPoint.transform.position;
-        robot.transform.rotation = spawnPoint.transform.rotation;
+        if (spawnPoint != null)
+        {
+            robot.transform.position = spawnPoint.transform.position;
+            robot.transform.rotation = spawnPoint.transform.rotation;
+        }
+        else
+            placeRandom(robot);
     }
     void spawnBase(GameObject baseSpawnPoint = null)
     {
@@ -168,25 +168,35 @@ public class GameManager : PersistentMonoBehaviour
 	}
 	void spawnBlock(int id)
     {
-        GameObject blockObject = (GameObject)Instantiate(blockPrefabs[id], new Vector3(Random.Range(BlockSpawnMinX, BlockSpawnMaxX),
-            BlockSpawnStartY, Random.Range(BlockSpawnMinZ, BlockSpawnMaxZ)), Quaternion.identity);		
-		
-		blockObject.AddComponent<BoxCollider>().isTrigger = true;
-		blockObject.AddComponent("BoxCollision");
-		blockObject.AddComponent("Light");
-		
-		RaycastHit hit;
+        GameObject blockObject = (GameObject)Instantiate(blockPrefabs[id]);
+        placeRandom(blockObject);
+	}
 
-		if(Physics.Raycast(blockObject.transform.position, -Vector3.up, out hit) && hit.collider.gameObject.Equals(terrain))
+    void placeRandom(GameObject obj)
+    {
+        obj.transform.position = new Vector3(Random.Range(BlockSpawnMinX, BlockSpawnMaxX),
+            BlockSpawnStartY, Random.Range(BlockSpawnMinZ, BlockSpawnMaxZ));
+
+        BoxCollider bc = obj.AddComponent<BoxCollider>();
+        BoxCollision bcl = obj.AddComponent<BoxCollision>();
+        bc.isTrigger = true;
+
+        bool again = false;
+
+        RaycastHit hit;
+        if (Physics.Raycast(obj.transform.position, -Vector3.up, out hit) && hit.collider.gameObject.Equals(terrain))
         {
-			var distanceToGround = hit.distance;
-			Vector3 dist = new Vector3(0, -distanceToGround + 1, 0);
-			blockObject.transform.position += dist;
-		}
+            var distanceToGround = hit.distance;
+            Vector3 dist = new Vector3(0, -distanceToGround + 1, 0);
+            obj.transform.position += dist;
+        }
         else
-        {
-			Destroy(blockObject);
-			spawnBlock (id);
-		}
-	}	
+            again = true;
+
+        Destroy(bc);
+        Destroy(bcl);
+
+        if(again)
+            placeRandom(obj);
+    }
 }
