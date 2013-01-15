@@ -13,7 +13,8 @@ public class BaseCollision : MonoBehaviour {
 	
 	}
 	
-	void OnTriggerEnter (Collider col) {	
+	void OnTriggerEnter (Collider col)
+    {	
 		GameObject newBase = (GameObject)Resources.LoadAssetAtPath("Assets/Bases/p1_base.fbx", typeof(GameObject));
 		
 		GameObject baseObject = (GameObject)Instantiate(newBase, this.gameObject.transform.position, Quaternion.identity);		

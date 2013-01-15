@@ -209,6 +209,18 @@ public class Player : MonoBehaviour, INetworkListener
 	{
 	}
 
+    void OnTriggerEnter(Collider col)
+    {
+        Base b = col.transform.root.gameObject.GetComponentInChildren<Base>();
+        if (GameManager.Instance.GetPlayerBase(this) != null || b == null || b.Owner != null)
+            return;
+
+        BaseCapturePackage bcp = new BaseCapturePackage();
+        bcp.PlayerIP = Client.GetLocalIPAddress();
+        bcp.BaseId = b.BaseId;
+        NetworkManager.Instance.Client.SendData(bcp);
+    }
+
     public void OnDataReceived(DataPackage dp)
     {
         if (dp is TokenChangePackage)

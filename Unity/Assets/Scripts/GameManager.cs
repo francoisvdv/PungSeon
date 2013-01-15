@@ -49,6 +49,15 @@ public class GameManager : PersistentMonoBehaviour
     {
         return bases;
     }
+    public Base GetPlayerBase(Player p)
+    {
+        foreach (Base b in bases)
+        {
+            if (b.Owner == p)
+                return b;
+        }
+        return null;
+    }
 
     void Awake()
     {
@@ -185,7 +194,6 @@ public class GameManager : PersistentMonoBehaviour
 
         BoxCollider bc = obj.AddComponent<BoxCollider>();
         BoxCollision bcl = obj.AddComponent<BoxCollision>();
-        bc.isTrigger = true;
 
         bool again = false;
 
