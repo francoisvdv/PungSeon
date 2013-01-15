@@ -26,20 +26,19 @@ public class Base : MonoBehaviour, INetworkListener
         if (dp is BaseCapturePackage)
         {
             BaseCapturePackage bcp = (BaseCapturePackage)dp;
-            
-            if (bcp.BaseId == BaseId)
-            {
-                Owner = GameManager.Instance.GetPlayer(bcp.PlayerIP);
-                int playerIndex = GameManager.Instance.GetPlayers().IndexOf(Owner);
+            if (bcp.BaseId != BaseId)
+                return;
 
-                Component[] mrs = transform.root.gameObject.GetComponentsInChildren(typeof(MeshRenderer));
-                foreach (MeshRenderer mr in mrs)
-                {
-                    if (mr.material.name.Contains("Material #4"))
-                        mr.material = GameManager.Instance.baseMaterials[playerIndex * 2];
-                    if (mr.material.name.Contains("Material #5"))
-                        mr.material = GameManager.Instance.baseMaterials[playerIndex * 2 + 1];
-                }
+            Owner = GameManager.Instance.GetPlayer(bcp.PlayerIP);
+            int playerIndex = GameManager.Instance.GetPlayers().IndexOf(Owner);
+
+            Component[] mrs = transform.root.gameObject.GetComponentsInChildren(typeof(MeshRenderer));
+            foreach (MeshRenderer mr in mrs)
+            {
+                if (mr.material.name.Contains("Material #4"))
+                    mr.material = GameManager.Instance.baseMaterials[playerIndex * 2];
+                if (mr.material.name.Contains("Material #5"))
+                    mr.material = GameManager.Instance.baseMaterials[playerIndex * 2 + 1];
             }
         }
     }

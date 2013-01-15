@@ -244,13 +244,25 @@ public class Player : MonoBehaviour, INetworkListener
         if (col.gameObject.name.Contains("Base"))
         {
             Base b = col.transform.root.gameObject.GetComponentInChildren<Base>();
-            if (GameManager.Instance.GetPlayerBase(this) != null || b == null || b.Owner != null)
+            Flag f = GameManager.Instance.GetFlag(this);
+            if (b == null || f == null || (b.Owner != null && b.Owner != this))
                 return;
 
-            BaseCapturePackage bcp = new BaseCapturePackage();
-            bcp.PlayerIP = Client.GetLocalIPAddress();
-            bcp.BaseId = b.BaseId;
-            NetworkManager.Instance.Client.SendData(bcp);
+            if (b.Owner == null)
+            {
+                //capture base
+
+                BaseCapturePackage bcp = new BaseCapturePackage();
+                bcp.PlayerIP = Client.GetLocalIPAddress();
+                bcp.BaseId = b.BaseId;
+                NetworkManager.Instance.Client.SendData(bcp);
+            }
+            
+
+            FlagPackage fp = new FlagPackage();
+            fp.Event = FlagPackage.FlagEvent.Capture;
+            fp.FlagId = f.FlagId;
+            NetworkManager.Instance.Client.SendData(fp);
         }
         else if (col.gameObject.name.Contains("Flag"))
         {
