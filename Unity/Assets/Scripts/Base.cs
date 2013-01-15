@@ -32,7 +32,7 @@ public class Base : MonoBehaviour, INetworkListener
             {
                 owner = GameManager.Instance.GetPlayer(bcp.PlayerIP);
 
-                Component[] mrs = b.GetComponentsInChildren(typeof(MeshRenderer));
+                Component[] mrs = transform.root.gameObject.GetComponentsInChildren(typeof(MeshRenderer));
                 foreach (MeshRenderer mr in mrs)
                 {
                     if (mr.material.name.Contains("Material #4"))
