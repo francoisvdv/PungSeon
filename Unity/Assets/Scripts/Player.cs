@@ -24,6 +24,8 @@ public class Player : MonoBehaviour, INetworkListener
 	Transform laserBeamL;
 	Transform laserBeamR;
 
+    GameObject gangnamObject;
+
     Animator anim;							                                // a reference to the animator on the character
     CapsuleCollider col;					                                // a reference to the capsule collider of the character
     static int idleState = Animator.StringToHash("Base Layer.Idle");
@@ -79,6 +81,12 @@ public class Player : MonoBehaviour, INetworkListener
 		
 		if(AlwaysFireLaserBeams)
 			SetLasersEnabled(true);
+
+        if (gangnamObject != null)
+        {
+            gangnamObject.transform.position = this.gameObject.transform.position;
+            gangnamObject.transform.rotation = this.gameObject.transform.rotation;
+        }
 	}
     void FixedUpdate()
     {
@@ -228,6 +236,9 @@ public class Player : MonoBehaviour, INetworkListener
 
     void OnTriggerEnter(Collider col)
     {
+        if (!IsControlled)
+            return;
+
         Base b = col.transform.root.gameObject.GetComponentInChildren<Base>();
         if (GameManager.Instance.GetPlayerBase(this) != null || b == null || b.Owner != null)
             return;
@@ -273,6 +284,24 @@ public class Player : MonoBehaviour, INetworkListener
                     anim.SetFloat("Speed", 1);
                 if (pmp.Dir.Has(PlayerMovePackage.Direction.Back))
                     anim.SetFloat("Speed", -1);
+
+                if (pmp.Dir == PlayerMovePackage.Direction.Stop)
+                {
+                    gangnamObject = (GameObject)Instantiate(GameManager.Instance.gangnamPrefab);
+                    gangnamObject.transform.position = this.gameObject.transform.position;
+                    gangnamObject.transform.rotation = this.gameObject.transform.rotation;
+                    gangnamObject.transform.localScale += this.gameObject.transform.localScale;
+                    this.GetComponentInChildren<SkinnedMeshRenderer>().enabled = false;
+
+                    SkinnedMeshRenderer thisMR = (SkinnedMeshRenderer)this.GetComponentInChildren(typeof(SkinnedMeshRenderer));
+                    SkinnedMeshRenderer gangnamMR = (SkinnedMeshRenderer)gangnamObject.GetComponentInChildren(typeof(SkinnedMeshRenderer));
+                    gangnamMR.material = thisMR.material;
+                }
+                else
+                {
+                    this.GetComponentInChildren<SkinnedMeshRenderer>().enabled = true;
+                    Destroy(gangnamObject);
+                }
 
                 anim.speed = animSpeed;
 

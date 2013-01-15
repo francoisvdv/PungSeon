@@ -25,6 +25,7 @@ public class GameManager : PersistentMonoBehaviour
     public GameObject robotPrefab;
     public Material[] robotMaterials;
     public GameObject flagPrefab;
+    public GameObject gangnamPrefab;
 
     int newLevel = -1; //-1 is 'no new level'
 
@@ -38,6 +39,10 @@ public class GameManager : PersistentMonoBehaviour
     {
         return players;
     }
+    public List<Base> GetBases()
+    {
+        return bases;
+    }
     public Player GetPlayer(System.Net.IPAddress ip)
     {
         foreach (Player p in players)
@@ -46,10 +51,6 @@ public class GameManager : PersistentMonoBehaviour
                 return p;
         }
         return null;
-    }
-    public List<Base> GetBases()
-    {
-        return bases;
     }
     public Base GetPlayerBase(Player p)
     {
