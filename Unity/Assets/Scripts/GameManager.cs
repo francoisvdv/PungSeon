@@ -107,13 +107,11 @@ public class GameManager : PersistentMonoBehaviour
         spawnBlocks();
 
         List<GameObject> baseSpawnPoints = GameObject.FindGameObjectsWithTag("BaseSpawnPoint").ToList();
-        int bspIndex = 0;
         foreach (var v in NetworkManager.Instance.Client.GetOutgoingAddresses())
         {
-            GameObject bsp = baseSpawnPoints[bspIndex];
+            GameObject bsp = baseSpawnPoints[0];
             baseSpawnPoints.Remove(bsp);
             spawnBase(bsp);
-            bspIndex++;
 
             spawnRobot(v, bases[bases.Count - 1].transform.root.FindChild("RobotSpawnPoint").gameObject);
         }
