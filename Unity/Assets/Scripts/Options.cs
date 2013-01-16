@@ -3,7 +3,7 @@ using System.Collections;
 
 public class ControlSettings
 {
-	public KeyCode Fire = KeyCode.V;
+	public KeyCode Fire = KeyCode.Mouse0;
     public KeyCode Forward = KeyCode.W;
     public KeyCode Backward = KeyCode.S;
     public KeyCode StrafeLeft = KeyCode.A;

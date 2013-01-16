@@ -364,7 +364,9 @@ public class Player : MonoBehaviour, INetworkListener
         {
             FlagPackage fp = (FlagPackage)dp;
             if (fp.Event == FlagPackage.FlagEvent.Capture)
-                Score++;
+                Score += 3;
+            else if (fp.Event == FlagPackage.FlagEvent.Drop)
+                Score--;
         }
         else if (dp is FireWeaponPackage && dp.SenderRemoteIPEndpoint.Address.Equals(PlayerIP))
         {

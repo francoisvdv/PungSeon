@@ -144,16 +144,6 @@ public class GameManager : PersistentMonoBehaviour, INetworkListener
         newLevel = level;
     }
 
-    //void OnGUI()
-    //{
-    //    int y = 0;
-    //    foreach (var v in NetworkManager.Instance.Client.GetOutgoingAddresses())
-    //    {
-    //        GUI.Label(new Rect(0, y, Screen.width, Screen.height), v.ToString());
-    //        y += 15;
-    //    }
-    //}
-
     void SetUpScene()
     {
         terrain = GameObject.Find("Terrain");
