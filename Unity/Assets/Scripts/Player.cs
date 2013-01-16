@@ -38,13 +38,14 @@ public class Player : MonoBehaviour, INetworkListener
     static int rollState = Animator.StringToHash("Base Layer.Roll");
     static int waveState = Animator.StringToHash("Layer2.Wave");
 
-    bool fired = false;
     bool hit;
     RaycastHit hitInfo; //updated once per Update(), containing hitInfo about what the laser target has hit
 
     PlayerMovePackage.Direction currentDirection = PlayerMovePackage.Direction.Stop;
     bool firing = false;
     int fireTimer = 0;
+    bool fired = false;
+    bool cancelSent = false;
 
     bool resend = false;
 
@@ -95,14 +96,12 @@ public class Player : MonoBehaviour, INetworkListener
     void FixedUpdate()
     {
         fireTimer++;
-
+        //print(fireTimer);
         if (firing && fireTimer <= 10)
             SetLasersEnabled(true);
-        else
-        {
-            fired = false;
+        else if (fireTimer >= 20)
             SetLasersEnabled(false);
-        }
+
         if (!IsControlled)
             return;
 
@@ -190,22 +189,27 @@ public class Player : MonoBehaviour, INetworkListener
         {
             //PlayerMovePackage pmp = new PlayerMovePackage(transform.root.position, transform.root.rotation.eulerAngles, currentDirection);
             //NetworkManager.Instance.Client.SendData(pmp);
-            if (!fired)
+
+            if(!fired)
             {
+                fired = true;
+                print("send package");
                 FireWeaponPackage fwp = new FireWeaponPackage();
                 fwp.Enabled = true;
                 fwp.Target = GetComponentInChildren<Camera>().transform.rotation.eulerAngles.x;
                 NetworkManager.Instance.Client.SendData(fwp);
-                fired = true;
             }
         }
         else if(firing && !Input.GetKey(Options.Controls.Fire))
         {
-            fired = false;
-            FireWeaponPackage fwp = new FireWeaponPackage();
-            fwp.Enabled = false;
-            fwp.Target = GetComponentInChildren<Camera>().transform.rotation.eulerAngles.x;
-            NetworkManager.Instance.Client.SendData(fwp);
+            if (!cancelSent)
+            {
+                cancelSent = true;
+                FireWeaponPackage fwp = new FireWeaponPackage();
+                fwp.Enabled = false;
+                fwp.Target = GetComponentInChildren<Camera>().transform.rotation.eulerAngles.x;
+                NetworkManager.Instance.Client.SendData(fwp);
+            }
         }
     }
 	void HandleFlagPickup()
@@ -392,6 +396,9 @@ public class Player : MonoBehaviour, INetworkListener
             float newRotX = fwp.Target - c.transform.rotation.eulerAngles.x;
             c.transform.Rotate(newRotX, 0, 0);
 
+           // print("fired to false / "+fwp.ToString());
+            fired = false;
+            cancelSent = false;
             firing = fwp.Enabled;
             fireTimer = 0;
         }
