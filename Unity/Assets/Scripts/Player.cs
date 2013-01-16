@@ -43,6 +43,7 @@ public class Player : MonoBehaviour, INetworkListener
 
     PlayerMovePackage.Direction currentDirection = PlayerMovePackage.Direction.Stop;
     bool firing = false;
+    int fireTimer = 0;
 
     bool resend = false;
 
@@ -92,8 +93,18 @@ public class Player : MonoBehaviour, INetworkListener
 	}
     void FixedUpdate()
     {
+        fireTimer++;
+
+        if (firing && fireTimer <= 10)
+            SetLasersEnabled(true);
+        else
+            SetLasersEnabled(false);
+
         if (!IsControlled)
             return;
+
+        if (firing && fireTimer <= 10)
+            Fire();
 
         HandleMovement();
         HandleFiring();
@@ -170,23 +181,23 @@ public class Player : MonoBehaviour, INetworkListener
         currentDirection = dir;
     }
 	void HandleFiring()
-	{	
-		if(Input.GetKeyDown(Options.Controls.Fire))
-		{
-			SetLasersEnabled(true);
-			firing = true;
-		}
-		else if(Input.GetKeyUp (Options.Controls.Fire))
-		{
-			SetLasersEnabled(false);
-			firing = false;
-		}
-		
-		if(!firing || !hit)
-			return;
-		
-		Fire();
-	}
+	{
+        // If you press the fire key, or when you are still firing
+        if ((!firing && Input.GetKey(Options.Controls.Fire)) || (firing && fireTimer >= 20))
+        {
+            FireWeaponPackage fwp = new FireWeaponPackage();
+            fwp.Enabled = true;
+            fwp.Target = GetComponentInChildren<Camera>().transform.rotation.eulerAngles.x;
+            NetworkManager.Instance.Client.SendData(fwp);
+        }
+        else if(firing && !Input.GetKey(Options.Controls.Fire))
+        {
+            FireWeaponPackage fwp = new FireWeaponPackage();
+            fwp.Enabled = false;
+            fwp.Target = GetComponentInChildren<Camera>().transform.rotation.eulerAngles.x;
+            NetworkManager.Instance.Client.SendData(fwp);
+        }
+    }
 	void HandleFlagPickup()
 	{
 		PickUpFlag();
@@ -199,23 +210,22 @@ public class Player : MonoBehaviour, INetworkListener
 	{
 		ApplyBlockEffect(0);
 	}
-	
+
 	void Die()
 	{
 		GameObject.Destroy(this.gameObject);
 	}
-	
 	void Fire()
 	{
+        if (!hit)
+            return;
+
         Player otherPlayer = hitInfo.transform.GetComponent<Player>();
 		if(otherPlayer == null)
 			return;
-		
-		//apparantly there's a hit
-		
+
 		ParticleSystem ps = laserTarget.GetComponent<ParticleSystem>();
-		//if(!ps.isPlaying)
-			ps.Play();
+        ps.Play();
 		
 		otherPlayer.UpdateHealth(otherPlayer.Health - 1);
 	}
@@ -355,6 +365,57 @@ public class Player : MonoBehaviour, INetworkListener
             FlagPackage fp = (FlagPackage)dp;
             if (fp.Event == FlagPackage.FlagEvent.Capture)
                 Score++;
+        }
+        else if (dp is FireWeaponPackage && dp.SenderRemoteIPEndpoint.Address.Equals(PlayerIP))
+        {
+            FireWeaponPackage fwp = (FireWeaponPackage)dp;
+
+            //Set laser target
+            Camera c = GetComponentInChildren<Camera>();
+            float newRotX = fwp.Target - c.transform.rotation.eulerAngles.x;
+            c.transform.Rotate(newRotX, 0, 0);
+
+            firing = fwp.Enabled;
+            fireTimer = 0;
+
+            //if (Input.GetKeyDown(Options.Controls.Fire) || firing)
+            //{
+            //    // Update the fire timer
+            //    fireTimer++;
+            //    if (fireTimer == 1)
+            //    {
+            //        print("Network send");
+
+            //    }
+            //    // As long as it is at the "fire the lazor" state
+            //    if (fireTimer >= 0 && fireTimer <= 10)
+            //    {
+            //        // Enable the laser
+            //        SetLasersEnabled(true);
+            //        firing = true;
+            //    }
+            //}
+            //// If the key is held up
+            //if (Input.GetKeyUp(Options.Controls.Fire))
+            //{
+            //    // Reset timer, and set firing to false
+            //    fireTimer = 0;
+            //    SetLasersEnabled(false);
+            //    firing = false;
+            //}
+            //else if (fireTimer > 10)
+            //{
+            //    if (fireTimer > 20)
+            //    {
+            //        fireTimer = 0;
+            //    }
+            //    SetLasersEnabled(false);
+            //}
+
+            //if (!firing || !hit)
+            //    return;
+
+            //Fire();
         }
     }
 }

@@ -16,4 +16,5 @@ public static class Options
 	public static ControlSettings Controls = new ControlSettings();
 	public static int LaserTargetDistance = 5;
 	public static int StartingHealth = 100;
+    public static int SongIndex = 0;
 }
