@@ -14,6 +14,26 @@ public class GameManager : PersistentMonoBehaviour, INetworkListener
 
         return v[0].Equals(Client.GetLocalIPAddress());
     }
+    public static Color GetColor(int id)
+    {
+        switch (id)
+        {
+            case 0:
+                return new Color(255, 0, 0);
+            case 1:
+                return new Color(0, 127, 14);
+            case 2:
+                return new Color(178, 0, 255);
+            case 3:
+                return new Color(182, 255, 0);
+            case 4:
+                return new Color(0, 255, 255);
+            case 5:
+                return new Color(255, 216, 0);
+        }
+
+        return Color.black;
+    }
 
     public int BlockSpawnStartY = 100;
     public int BlockSpawnMinX = 0, BlockSpawnMaxX = 150;
@@ -78,6 +98,15 @@ public class GameManager : PersistentMonoBehaviour, INetworkListener
                 return v;
         }
         return null;
+    }
+    public Color GetColor(System.Net.IPAddress ip)
+    {
+        for (int i = 0; i < players.Count; i++)
+        {
+            if (players[i].PlayerIP.Equals(ip))
+                return GetColor(i);
+        }
+        return Color.black;
     }
 
     void Awake()
