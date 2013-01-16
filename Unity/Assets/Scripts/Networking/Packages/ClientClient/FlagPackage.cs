@@ -21,7 +21,7 @@ public class FlagPackage : DataPackage
             string[] split = b.Split('|');
 
             FlagPackage fp = new FlagPackage();
-            fp.FlagId = long.Parse(split[0]);
+            fp.FlagId = new Guid(split[0]);
             fp.Event = (FlagEvent)int.Parse(split[1]);
 
             if (fp.Event == FlagEvent.Drop || fp.Event == FlagEvent.Spawn)
@@ -57,7 +57,7 @@ public class FlagPackage : DataPackage
         get { return factory; }
     }
 
-    public long FlagId { get; set; }
+    public Guid FlagId { get; set; }
     public FlagEvent Event { get; set; }
     public Vector3 Position { get; set; }
 }

@@ -61,7 +61,7 @@ public class GameManager : PersistentMonoBehaviour, INetworkListener
         }
         return null;
     }
-    public Flag GetFlag(long flagId)
+    public Flag GetFlag(System.Guid flagId)
     {
         foreach (Flag v in flags)
         {
@@ -136,13 +136,18 @@ public class GameManager : PersistentMonoBehaviour, INetworkListener
 
             spawnRobot(v, bases[bases.Count - 1].transform.root.FindChild("RobotSpawnPoint").gameObject);
         }
-
+        
         if (!IsMaster())
             return;
 
-        spawnFlag();
-        if (NetworkManager.Instance.Client.GetOutgoingAddresses().Count >= 4)
+        for (int i = 0; i < 20; i++)
+        {
             spawnFlag();
+        }
+
+        //spawnFlag();
+        //if (NetworkManager.Instance.Client.GetOutgoingAddresses().Count >= 4)
+        //    spawnFlag();
     }
 
     void spawnBlocks()
@@ -211,7 +216,7 @@ public class GameManager : PersistentMonoBehaviour, INetworkListener
     void spawnFlag()
     {
         FlagPackage fp = new FlagPackage();
-        fp.FlagId = System.DateTime.Now.Ticks;
+        fp.FlagId = System.Guid.NewGuid();
         fp.Event = FlagPackage.FlagEvent.Spawn;
         fp.Position = getRandomPositionOnTerrain(Flag.TerrainOffset);
         NetworkManager.Instance.Client.SendData(fp);

@@ -241,13 +241,14 @@ public class Player : MonoBehaviour, INetworkListener
         if (!IsControlled)
             return;
 
-        if (col.gameObject.name.Contains("Base"))
+        if (col.transform.root.name.Contains("Base"))
         {
             Base b = col.transform.root.gameObject.GetComponentInChildren<Base>();
             Flag f = GameManager.Instance.GetFlag(this);
-            if (b == null || f == null || (b.Owner != null && b.Owner != this))
+            if (b == null || f == null || (b.Owner == null && GameManager.Instance.GetPlayerBase(this) != null) ||
+                (b.Owner != null && b.Owner != this))
                 return;
-
+            
             if (b.Owner == null)
             {
                 //capture base
@@ -258,7 +259,6 @@ public class Player : MonoBehaviour, INetworkListener
                 NetworkManager.Instance.Client.SendData(bcp);
             }
             
-
             FlagPackage fp = new FlagPackage();
             fp.Event = FlagPackage.FlagEvent.Capture;
             fp.FlagId = f.FlagId;
