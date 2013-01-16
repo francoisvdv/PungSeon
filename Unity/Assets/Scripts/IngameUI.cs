@@ -14,9 +14,35 @@ public class IngameUI : MonoBehaviour
     float displayMinutes;
     float displaySeconds;
 
+    public AudioClip audio1;
+    public AudioClip audio2;
+    public AudioClip audio3;
+    public AudioClip audio4;
+
     void Start()
     {
         theTimer = theStartTimer;
+
+        switch (Options.SongIndex)
+        {
+            case 0:
+                this.audio.clip = audio1;
+                break;
+
+            case 1:
+                this.audio.clip = audio2;
+                break;
+
+            case 2:
+                this.audio.clip = audio3;
+                break;
+
+            case 3:
+                this.audio.clip = audio4;
+                break;
+        }
+
+        this.audio.Play();
     }
 
     void Update()
