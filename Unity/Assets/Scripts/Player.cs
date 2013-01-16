@@ -37,7 +37,8 @@ public class Player : MonoBehaviour, INetworkListener
     static int fallState = Animator.StringToHash("Base Layer.Fall");
     static int rollState = Animator.StringToHash("Base Layer.Roll");
     static int waveState = Animator.StringToHash("Layer2.Wave");
-    
+
+    bool fired = false;
     bool hit;
     RaycastHit hitInfo; //updated once per Update(), containing hitInfo about what the laser target has hit
 
@@ -98,8 +99,10 @@ public class Player : MonoBehaviour, INetworkListener
         if (firing && fireTimer <= 10)
             SetLasersEnabled(true);
         else
+        {
+            fired = false;
             SetLasersEnabled(false);
-
+        }
         if (!IsControlled)
             return;
 
@@ -187,14 +190,18 @@ public class Player : MonoBehaviour, INetworkListener
         {
             //PlayerMovePackage pmp = new PlayerMovePackage(transform.root.position, transform.root.rotation.eulerAngles, currentDirection);
             //NetworkManager.Instance.Client.SendData(pmp);
-
-            FireWeaponPackage fwp = new FireWeaponPackage();
-            fwp.Enabled = true;
-            fwp.Target = GetComponentInChildren<Camera>().transform.rotation.eulerAngles.x;
-            NetworkManager.Instance.Client.SendData(fwp);
+            if (!fired)
+            {
+                FireWeaponPackage fwp = new FireWeaponPackage();
+                fwp.Enabled = true;
+                fwp.Target = GetComponentInChildren<Camera>().transform.rotation.eulerAngles.x;
+                NetworkManager.Instance.Client.SendData(fwp);
+                fired = true;
+            }
         }
         else if(firing && !Input.GetKey(Options.Controls.Fire))
         {
+            fired = false;
             FireWeaponPackage fwp = new FireWeaponPackage();
             fwp.Enabled = false;
             fwp.Target = GetComponentInChildren<Camera>().transform.rotation.eulerAngles.x;
@@ -300,7 +307,7 @@ public class Player : MonoBehaviour, INetworkListener
     {
         if (dp is TokenChangePackage)
         {
-            if (sendCounter == 10)
+            if (sendCounter == 1)
             {
                 resend = true;
                 sendCounter = 0;
