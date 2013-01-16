@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class IngameUI : MonoBehaviour
 {
@@ -43,8 +44,11 @@ public class IngameUI : MonoBehaviour
 		GUI.DrawTexture(new Rect((Screen.width/2)-208, Screen.height-46, hp*4, 29), hpbar);
         GUI.Label(new Rect((Screen.width/2)-13, Screen.height-43, 100, 20), hp+"%", style2);
 
+        List<Player> sorted = GameManager.Instance.GetPlayers();
+        sorted.Sort(delegate(Player p1, Player p2) { return p2.Score.CompareTo(p1.Score); });
+
         int y = 20;
-        foreach (var v in GameManager.Instance.GetPlayers())
+        foreach (var v in sorted)
         {
             Color c = GameManager.Instance.GetColor(v.PlayerIP);
 

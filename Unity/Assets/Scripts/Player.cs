@@ -185,6 +185,9 @@ public class Player : MonoBehaviour, INetworkListener
         // If you press the fire key, or when you are still firing
         if ((!firing && Input.GetKey(Options.Controls.Fire)) || (firing && fireTimer >= 20))
         {
+            PlayerMovePackage pmp = new PlayerMovePackage(transform.root.position, transform.root.rotation.eulerAngles, currentDirection);
+            NetworkManager.Instance.Client.SendData(pmp);
+
             FireWeaponPackage fwp = new FireWeaponPackage();
             fwp.Enabled = true;
             fwp.Target = GetComponentInChildren<Camera>().transform.rotation.eulerAngles.x;
