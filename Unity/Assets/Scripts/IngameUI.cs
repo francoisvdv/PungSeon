@@ -8,6 +8,7 @@ public class IngameUI : MonoBehaviour
     public float theStartTimer = 218.0f;
 	public GUIStyle style;
 	public GUIStyle style2;
+    public GUIStyle style3;
 	public Texture hpbar;
 	public Texture hpbarEmpty;
     float displayMinutes;
@@ -52,7 +53,11 @@ public class IngameUI : MonoBehaviour
         {
             Color c = GameManager.Instance.GetColor(v.PlayerIP);
 
-            GUI.Label(new Rect(Screen.width - 250, y, 10, 10), v.PlayerIP.ToString(), style2);
+            if (v.PlayerIP.Equals(Client.GetLocalIPAddress()))
+                GUI.Label(new Rect(Screen.width - 250, y, 10, 10), v.PlayerIP.ToString(), style2);
+            else
+                GUI.Label(new Rect(Screen.width - 250, y, 10, 10), v.PlayerIP.ToString(), style3);
+
             GUI.Label(new Rect(Screen.width - 50, y, 10, 10), v.Score.ToString(), style2);
             GUI.DrawTexture(new Rect(Screen.width - 270, y + 6, 10, 10), listBlock(c));
 

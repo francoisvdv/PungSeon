@@ -214,9 +214,20 @@ public class Player : MonoBehaviour, INetworkListener
 		ApplyBlockEffect(0);
 	}
 
+    void OnGUI()
+    {
+        if (Health <= 0)
+        {
+            int oldFontSize = GUI.skin.label.fontSize;
+            GUI.skin.label.fontSize = 100;
+            GUI.Label(new Rect(0, 0, Screen.width, Screen.height), "YOU ARE DEAD, MUTHAFUCKAAAAAAAAA");
+            GUI.skin.label.fontSize = oldFontSize;
+        }
+    }
+
 	void Die()
 	{
-		GameObject.Destroy(this.gameObject);
+		//GameObject.Destroy(this.gameObject);
 	}
 	void Fire()
 	{
@@ -227,17 +238,11 @@ public class Player : MonoBehaviour, INetworkListener
 		if(otherPlayer == null)
 			return;
 
-		ParticleSystem ps = laserTarget.GetComponent<ParticleSystem>();
-        ps.Play();
-		
-		otherPlayer.UpdateHealth(otherPlayer.Health - 1);
-	}
-	public void UpdateHealth(int newAmount)
-	{
-		Health = newAmount;
-		
-		if(Health <= 0)
-			Die();
+        PlayerHealthPackage ps = new PlayerHealthPackage();
+        ps.PlayerIP = otherPlayer.PlayerIP;
+        ps.Value = Options.HitDamage;
+        ps.Hit = true;
+        NetworkManager.Instance.Client.SendData(ps);
 	}
 	void PickUpFlag()	
 	{
@@ -382,45 +387,20 @@ public class Player : MonoBehaviour, INetworkListener
 
             firing = fwp.Enabled;
             fireTimer = 0;
+        }
+        else if (dp is PlayerHealthPackage)
+        {
+            PlayerHealthPackage php = (PlayerHealthPackage)dp;
+            if(!php.PlayerIP.Equals(PlayerIP))
+                return;
 
-            //if (Input.GetKeyDown(Options.Controls.Fire) || firing)
-            //{
-            //    // Update the fire timer
-            //    fireTimer++;
-            //    if (fireTimer == 1)
-            //    {
-            //        print("Network send");
+            ParticleSystem ps = laserTarget.GetComponent<ParticleSystem>();
+            ps.Play();
 
-            //    }
-            //    // As long as it is at the "fire the lazor" state
-            //    if (fireTimer >= 0 && fireTimer <= 10)
-            //    {
-            //        // Enable the laser
-            //        SetLasersEnabled(true);
-            //        firing = true;
-            //    }
-            //}
-            //// If the key is held up
-            //if (Input.GetKeyUp(Options.Controls.Fire))
-            //{
-            //    // Reset timer, and set firing to false
-            //    fireTimer = 0;
-            //    SetLasersEnabled(false);
-            //    firing = false;
-            //}
-            //else if (fireTimer > 10)
-            //{
-            //    if (fireTimer > 20)
-            //    {
-            //        fireTimer = 0;
-            //    }
-            //    SetLasersEnabled(false);
-            //}
+            Health -= php.Value;
 
-            //if (!firing || !hit)
-            //    return;
-
-            //Fire();
+            if (Health <= 0)
+                Die();
         }
     }
 }

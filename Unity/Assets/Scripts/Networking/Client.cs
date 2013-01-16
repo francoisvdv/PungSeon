@@ -84,6 +84,7 @@ public class Client : IDisposable, INetworkListener
             Factories.Add(BaseCapturePackage.factory);
             Factories.Add(FlagPackage.factory);
 			Factories.Add(FireWeaponPackage.factory);
+            Factories.Add(PlayerHealthPackage.factory);
         }
         else if (m == Mode.ClientServer)
         {
