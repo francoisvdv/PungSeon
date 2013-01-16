@@ -3,7 +3,6 @@ using System.Collections;
 
 public class IngameUI : MonoBehaviour
 {
-	public int hp = 100;
     private float theTimer = 0.0f;
     public float theStartTimer = 218.0f;
 	public GUIStyle style;
@@ -21,8 +20,7 @@ public class IngameUI : MonoBehaviour
     void Update()
     {
         theTimer -= Time.deltaTime;
-		updateHealth(1); 
-		
+
         if (theTimer <= 0)
         {
             Debug.Log("End game");
@@ -39,7 +37,8 @@ public class IngameUI : MonoBehaviour
         string text = string.Format("{0:00}:{1:00}", displayMinutes.ToString("0"), displaySeconds.ToString("00"));
 		GUI.Label (new Rect(10, 6, 100, 30),"Time remaining:");
         GUI.Label(new Rect(10, 20, 100, 20), text, style);
-		
+
+        int hp = GameManager.Instance.GetPlayer().Health;
 		GUI.DrawTexture(new Rect((Screen.width/2)-220, Screen.height-55, 427, 60), hpbarEmpty);
 		GUI.DrawTexture(new Rect((Screen.width/2)-208, Screen.height-46, hp*4, 29), hpbar);
         GUI.Label(new Rect((Screen.width/2)-13, Screen.height-43, 100, 20), hp+"%", style2);
@@ -55,13 +54,6 @@ public class IngameUI : MonoBehaviour
 
             y += 21;
         }
-	}
-	
-	void updateHealth(int damage)
-    {
-		if (hp>0) {
-	        hp -= damage;
-		}
 	}
 	
 	Texture listBlock(Color color)

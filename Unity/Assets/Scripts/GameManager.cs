@@ -63,6 +63,10 @@ public class GameManager : PersistentMonoBehaviour, INetworkListener
     {
         return bases;
     }
+    public Player GetPlayer()
+    {
+        return GetPlayer(Client.GetLocalIPAddress());
+    }
     public Player GetPlayer(System.Net.IPAddress ip)
     {
         foreach (Player p in players)
