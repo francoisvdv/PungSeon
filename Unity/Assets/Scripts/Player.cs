@@ -37,7 +37,7 @@ public class Player : MonoBehaviour, INetworkListener
     static int fallState = Animator.StringToHash("Base Layer.Fall");
     static int rollState = Animator.StringToHash("Base Layer.Roll");
     static int waveState = Animator.StringToHash("Layer2.Wave");
-
+    
     bool hit;
     RaycastHit hitInfo; //updated once per Update(), containing hitInfo about what the laser target has hit
 
@@ -185,8 +185,8 @@ public class Player : MonoBehaviour, INetworkListener
         // If you press the fire key, or when you are still firing
         if ((!firing && Input.GetKeyDown(Options.Controls.Fire)) || (firing && fireTimer >= 20))
         {
-            PlayerMovePackage pmp = new PlayerMovePackage(transform.root.position, transform.root.rotation.eulerAngles, currentDirection);
-            NetworkManager.Instance.Client.SendData(pmp);
+            //PlayerMovePackage pmp = new PlayerMovePackage(transform.root.position, transform.root.rotation.eulerAngles, currentDirection);
+            //NetworkManager.Instance.Client.SendData(pmp);
 
             FireWeaponPackage fwp = new FireWeaponPackage();
             fwp.Enabled = true;
@@ -300,7 +300,7 @@ public class Player : MonoBehaviour, INetworkListener
     {
         if (dp is TokenChangePackage)
         {
-            if (sendCounter == 0)
+            if (sendCounter == 10)
             {
                 resend = true;
                 sendCounter = 0;

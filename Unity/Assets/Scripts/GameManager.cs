@@ -279,6 +279,8 @@ public class GameManager : PersistentMonoBehaviour, INetworkListener
 
     public void OnDataReceived(DataPackage dp)
     {
+        print(dp.Id);
+
         if (dp is FlagPackage)
         {
             FlagPackage fp = (FlagPackage)dp;
