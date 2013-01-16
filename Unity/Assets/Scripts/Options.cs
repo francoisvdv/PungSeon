@@ -19,4 +19,6 @@ public static class Options
 	public static int StartingHealth = 100;
     public static int SongIndex = 0;
     public static int HitDamage = 10;
+
+    public static float RespawnTimer = 10;
 }

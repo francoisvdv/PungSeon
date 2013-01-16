@@ -173,19 +173,19 @@ public class GameManager : PersistentMonoBehaviour, INetworkListener
         //    spawnFlag();
     }
 
-    void spawnBlocks()
+    public void spawnBlocks()
     {
         for (int i = 0; i < 10; i++)
         {
             spawnBlock(Random.Range(0, blockPrefabs.Length));
         }
     }
-    void spawnBlock(int id)
+    public void spawnBlock(int id)
     {
         GameObject blockObject = (GameObject)Instantiate(blockPrefabs[id]);
         blockObject.transform.position = getRandomPositionOnTerrain(0);
     }
-    void spawnRobot(System.Net.IPAddress ip, GameObject spawnPoint = null)
+    public void spawnRobot(System.Net.IPAddress ip, GameObject spawnPoint = null)
     {
         Player player = null;
         foreach (Player p in players)
@@ -207,6 +207,7 @@ public class GameManager : PersistentMonoBehaviour, INetworkListener
             players.Add(player);
 
             SkinnedMeshRenderer smr = (SkinnedMeshRenderer)robot.GetComponentInChildren(typeof(SkinnedMeshRenderer));
+            smr.enabled = true;
             smr.material = robotMaterials[players.IndexOf(player)];
 
             if (!player.IsControlled)
@@ -229,14 +230,14 @@ public class GameManager : PersistentMonoBehaviour, INetworkListener
         else
             robot.transform.position = getRandomPositionOnTerrain(0);
     }
-    void spawnBase(GameObject baseSpawnPoint = null)
+    public void spawnBase(GameObject baseSpawnPoint = null)
     {
         GameObject b = (GameObject)Instantiate(basePrefab, baseSpawnPoint.transform.position, baseSpawnPoint.transform.rotation);
         
         Base bs = b.GetComponent<Base>();
         bases.Add(bs);
     }
-    void spawnFlag()
+    public void spawnFlag()
     {
         FlagPackage fp = new FlagPackage();
         fp.FlagId = System.Guid.NewGuid();

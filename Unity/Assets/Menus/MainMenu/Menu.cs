@@ -155,6 +155,8 @@ public class Menu : MonoBehaviour, INetworkListener
             catch (System.Exception ex)
             {
                 message = ex.ToString();
+
+                c2s.Connect("192.168.1.100", 4551);
             }
         }
     }

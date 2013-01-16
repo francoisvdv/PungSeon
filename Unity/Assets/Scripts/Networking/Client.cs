@@ -85,6 +85,7 @@ public class Client : IDisposable, INetworkListener
             Factories.Add(FlagPackage.factory);
 			Factories.Add(FireWeaponPackage.factory);
             Factories.Add(PlayerHealthPackage.factory);
+            Factories.Add(PlayerSpawnPackage.factory);
         }
         else if (m == Mode.ClientServer)
         {

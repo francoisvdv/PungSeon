@@ -46,8 +46,9 @@ public class Player : MonoBehaviour, INetworkListener
     int fireTimer = 0;
     bool fired = false;
     bool cancelSent = false;
-
     bool resend = false;
+
+    float spawnTimer = 0;
 
 	// Use this for initialization
 	void Start ()
@@ -75,6 +76,17 @@ public class Player : MonoBehaviour, INetworkListener
 
 	void Update ()
 	{
+        if (spawnTimer != 0)
+            spawnTimer -= Time.deltaTime;
+        else if(spawnTimer < 0)
+        {
+            spawnTimer = 0;
+            GameManager.Instance.spawnRobot(PlayerIP);
+
+            PlayerSpawnPackage psp = new PlayerSpawnPackage();
+            NetworkManager.Instance.Client.SendData(psp);
+        }
+
 		//direction is (pointB - pointA).normalized
 		Vector3 start = calculateCentroid(eyesL.position, eyesR.position);
 		Ray r = new Ray(start, (laserTarget.position - start).normalized);
@@ -193,7 +205,6 @@ public class Player : MonoBehaviour, INetworkListener
             if(!fired)
             {
                 fired = true;
-                print("send package");
                 FireWeaponPackage fwp = new FireWeaponPackage();
                 fwp.Enabled = true;
                 fwp.Target = GetComponentInChildren<Camera>().transform.rotation.eulerAngles.x;
@@ -225,20 +236,17 @@ public class Player : MonoBehaviour, INetworkListener
 		ApplyBlockEffect(0);
 	}
 
-    void OnGUI()
-    {
-        if (Health <= 0)
-        {
-            int oldFontSize = GUI.skin.label.fontSize;
-            GUI.skin.label.fontSize = 100;
-            GUI.Label(new Rect(0, 0, Screen.width, Screen.height), "YOU ARE DEAD, MUTHAFUCKAAAAAAAAA");
-            GUI.skin.label.fontSize = oldFontSize;
-        }
-    }
-
 	void Die()
 	{
-		//GameObject.Destroy(this.gameObject);
+        hideGangnamRobot();
+
+        SkinnedMeshRenderer smr = (SkinnedMeshRenderer)transform.root.GetComponentInChildren(typeof(SkinnedMeshRenderer));
+        smr.enabled = false;
+
+        if (!IsControlled)
+            return;
+
+        spawnTimer = Options.RespawnTimer;
 	}
 	void Fire()
 	{
@@ -306,6 +314,24 @@ public class Player : MonoBehaviour, INetworkListener
         }
     }
 
+    void showGangnamRobot()
+    {
+        gangnamObject = (GameObject)Instantiate(GameManager.Instance.gangnamPrefab);
+        gangnamObject.transform.position = this.gameObject.transform.position;
+        gangnamObject.transform.rotation = this.gameObject.transform.rotation;
+        gangnamObject.transform.localScale += this.gameObject.transform.localScale;
+        this.GetComponentInChildren<SkinnedMeshRenderer>().enabled = false;
+
+        SkinnedMeshRenderer thisMR = (SkinnedMeshRenderer)this.GetComponentInChildren(typeof(SkinnedMeshRenderer));
+        SkinnedMeshRenderer gangnamMR = (SkinnedMeshRenderer)gangnamObject.GetComponentInChildren(typeof(SkinnedMeshRenderer));
+        gangnamMR.material = thisMR.material;
+    }
+    void hideGangnamRobot()
+    {
+        this.GetComponentInChildren<SkinnedMeshRenderer>().enabled = true;
+        Destroy(gangnamObject);
+    }
+
     int sendCounter = 0;
     public void OnDataReceived(DataPackage dp)
     {
@@ -343,22 +369,9 @@ public class Player : MonoBehaviour, INetworkListener
                     anim.SetFloat("Speed", -1);
 
                 if (pmp.Dir == PlayerMovePackage.Direction.Stop)
-                {
-                    gangnamObject = (GameObject)Instantiate(GameManager.Instance.gangnamPrefab);
-                    gangnamObject.transform.position = this.gameObject.transform.position;
-                    gangnamObject.transform.rotation = this.gameObject.transform.rotation;
-                    gangnamObject.transform.localScale += this.gameObject.transform.localScale;
-                    this.GetComponentInChildren<SkinnedMeshRenderer>().enabled = false;
-
-                    SkinnedMeshRenderer thisMR = (SkinnedMeshRenderer)this.GetComponentInChildren(typeof(SkinnedMeshRenderer));
-                    SkinnedMeshRenderer gangnamMR = (SkinnedMeshRenderer)gangnamObject.GetComponentInChildren(typeof(SkinnedMeshRenderer));
-                    gangnamMR.material = thisMR.material;
-                }
+                    showGangnamRobot();
                 else
-                {
-                    this.GetComponentInChildren<SkinnedMeshRenderer>().enabled = true;
-                    Destroy(gangnamObject);
-                }
+                    hideGangnamRobot();
 
                 anim.speed = animSpeed;
 
@@ -396,7 +409,6 @@ public class Player : MonoBehaviour, INetworkListener
             float newRotX = fwp.Target - c.transform.rotation.eulerAngles.x;
             c.transform.Rotate(newRotX, 0, 0);
 
-           // print("fired to false / "+fwp.ToString());
             fired = false;
             cancelSent = false;
             firing = fwp.Enabled;
@@ -414,7 +426,15 @@ public class Player : MonoBehaviour, INetworkListener
             Health -= php.Value;
 
             if (Health <= 0)
+            {
+                Health = 0;
                 Die();
+            }
+        }
+        else if (dp is PlayerSpawnPackage && dp.SenderRemoteIPEndpoint.Address.Equals(PlayerIP))
+        {
+            SkinnedMeshRenderer smr = (SkinnedMeshRenderer)transform.root.GetComponentInChildren(typeof(SkinnedMeshRenderer));
+            smr.enabled = true;
         }
     }
 }

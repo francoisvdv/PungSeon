@@ -90,9 +90,13 @@ public class IngameUI : MonoBehaviour
             y += 21;
         }
 	}
-	
+
+    Dictionary<Color, Texture2D> textures = new Dictionary<Color, Texture2D>();
 	Texture listBlock(Color color)
     {
+        if (textures.ContainsKey(color))
+            return textures[color];
+
 	    var texture = new Texture2D(10, 10, TextureFormat.ARGB32, false);
 		
 		for (int y = 0; y < 10; ++y) {
@@ -101,6 +105,8 @@ public class IngameUI : MonoBehaviour
 		    }
 		}
 		texture.Apply();
+
+        textures.Add(color, texture);
 		return texture;
 	}   
 }
