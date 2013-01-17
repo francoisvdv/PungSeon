@@ -207,12 +207,13 @@ public class Player : MonoBehaviour, INetworkListener
         // If you press the fire key, or when you are still firing
         if ((!firing && Input.GetKeyDown(Options.Controls.Fire)) || (firing && fireTimer >= 20))
         {
-            //PlayerMovePackage pmp = new PlayerMovePackage(transform.root.position, transform.root.rotation.eulerAngles, currentDirection);
-            //NetworkManager.Instance.Client.SendData(pmp);
-
             if(!fired)
             {
                 fired = true;
+
+                PlayerMovePackage pmp = new PlayerMovePackage(transform.root.position, transform.root.rotation.eulerAngles, currentDirection);
+                NetworkManager.Instance.Client.SendData(pmp);
+
                 FireWeaponPackage fwp = new FireWeaponPackage();
                 fwp.Enabled = true;
                 fwp.Target = GetComponentInChildren<Camera>().transform.rotation.eulerAngles.x;
@@ -341,12 +342,11 @@ public class Player : MonoBehaviour, INetworkListener
     }
     void setGangnamVisible(bool val)
     {
-        if (val)
+        if (val && gangnamObject == null)
         {
             gangnamObject = (GameObject)Instantiate(GameManager.Instance.gangnamPrefab);
             gangnamObject.transform.position = this.gameObject.transform.position;
             gangnamObject.transform.rotation = this.gameObject.transform.rotation;
-            //gangnamObject.transform.localScale += this.gameObject.transform.localScale;
             this.GetComponentInChildren<SkinnedMeshRenderer>().enabled = false;
 
             SkinnedMeshRenderer thisMR = (SkinnedMeshRenderer)this.GetComponentInChildren(typeof(SkinnedMeshRenderer));
@@ -357,6 +357,7 @@ public class Player : MonoBehaviour, INetworkListener
         {
             this.GetComponentInChildren<SkinnedMeshRenderer>().enabled = true;
             Destroy(gangnamObject);
+            gangnamObject = null;
         }
     }
 
