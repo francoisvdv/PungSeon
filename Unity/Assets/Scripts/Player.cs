@@ -46,11 +46,11 @@ public class Player : MonoBehaviour, INetworkListener
     PlayerMovePackage.Direction currentDirection = PlayerMovePackage.Direction.Stop;
     bool firing = false;
     int fireTimer = 0;
-    bool fired = false;
-    bool cancelSent = false;
+    bool startFiringPackageSent = false;
+    bool stopFiringPackageSent = false;
     bool resend = false;
 
-    float spawnTimer = 0;
+    float respawnTimer = 0;
 
 	// Use this for initialization
 	void Start ()
@@ -82,11 +82,11 @@ public class Player : MonoBehaviour, INetworkListener
         {
             transform.root.position = new Vector3(0, 0, 0);
 
-            if (spawnTimer > 0)
-                spawnTimer -= Time.deltaTime;
-            else if (spawnTimer <= 0)
+            if (respawnTimer > 0)
+                respawnTimer -= Time.deltaTime;
+            else if (respawnTimer <= 0)
             {
-                spawnTimer = 0;
+                respawnTimer = 0;
 
                 Health = 100;
 
@@ -207,9 +207,9 @@ public class Player : MonoBehaviour, INetworkListener
         // If you press the fire key, or when you are still firing
         if ((!firing && Input.GetKeyDown(Options.Controls.Fire)) || (firing && fireTimer >= 20))
         {
-            if(!fired)
+            if(!startFiringPackageSent)
             {
-                fired = true;
+                startFiringPackageSent = true;
 
                 PlayerMovePackage pmp = new PlayerMovePackage(transform.root.position, transform.root.rotation.eulerAngles, currentDirection);
                 NetworkManager.Instance.Client.SendData(pmp);
@@ -222,9 +222,9 @@ public class Player : MonoBehaviour, INetworkListener
         }
         else if(firing && !Input.GetKey(Options.Controls.Fire))
         {
-            if (!cancelSent)
+            if (!stopFiringPackageSent)
             {
-                cancelSent = true;
+                stopFiringPackageSent = true;
                 FireWeaponPackage fwp = new FireWeaponPackage();
                 fwp.Enabled = false;
                 fwp.Target = GetComponentInChildren<Camera>().transform.rotation.eulerAngles.x;
@@ -253,7 +253,7 @@ public class Player : MonoBehaviour, INetworkListener
         if (!IsControlled)
             return;
 
-        spawnTimer = Options.RespawnTimer;
+        respawnTimer = Options.RespawnTimer;
 	}
 	void Fire()
 	{
@@ -366,7 +366,7 @@ public class Player : MonoBehaviour, INetworkListener
         if (!IsDead || !IsControlled)
             return;
 
-        GUI.Label(new Rect(0, 0, Screen.width, Screen.height), "Respawning in " + Math.Round(spawnTimer, 1).ToString() + " seconds!", DeathLabelStyle);
+        GUI.Label(new Rect(0, 0, Screen.width, Screen.height), "Respawning in " + Math.Round(respawnTimer, 1).ToString() + " seconds!", DeathLabelStyle);
     }
 
     int sendCounter = 0;
@@ -446,8 +446,8 @@ public class Player : MonoBehaviour, INetworkListener
             float newRotX = fwp.Target - c.transform.rotation.eulerAngles.x;
             c.transform.Rotate(newRotX, 0, 0);
 
-            fired = false;
-            cancelSent = false;
+            startFiringPackageSent = false;
+            stopFiringPackageSent = false;
             firing = fwp.Enabled;
             fireTimer = 0;
         }
