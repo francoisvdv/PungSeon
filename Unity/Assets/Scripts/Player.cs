@@ -189,7 +189,7 @@ public class Player : MonoBehaviour, INetworkListener
             PlayerMovePackage pmp = new PlayerMovePackage(transform.root.position, transform.root.rotation.eulerAngles, dir);
             NetworkManager.Instance.Client.SendData(pmp);
 
-            print("Changed: " + dir);
+            //print("Changed: " + dir);
         }
 
         currentDirection = dir;
@@ -312,6 +312,14 @@ public class Player : MonoBehaviour, INetworkListener
             fp.FlagId = f.FlagId;
             NetworkManager.Instance.Client.SendData(fp);
         }
+    }
+
+    void disableRobot()
+    {
+
+    }
+    void enableRobot()
+    {
     }
 
     void showGangnamRobot()

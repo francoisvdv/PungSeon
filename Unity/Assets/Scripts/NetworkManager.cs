@@ -18,7 +18,7 @@ public class NetworkManager : PersistentMonoBehaviour
         Instance = this;
 
         Client = new Client();
-        Client.OnLog = x => print(x);
+        //Client.OnLog = x => print(x);
         Client.SetMode(Client.Mode.ClientClient);
         Client.StartConnectionListener();
         

@@ -141,15 +141,17 @@ public class Client : IDisposable, INetworkListener
         tcpListener = new TcpListener(IPAddress.Any, port);
         tcpListener.Start();
         tcpListener.BeginAcceptTcpClient(ConnectCallback, tcpListener);
-
-        OnLog("Started TCP listening for incoming connections");
+		
+		if(OnLog != null)
+        	OnLog("Started TCP listening for incoming connections");
     }
     public void StopConnectionListener()
     {
         if (tcpListener != null)
             tcpListener.Stop();
-
-        OnLog("Stopped TCP listening for incoming connections");
+		
+		if(OnLog != null)
+        	OnLog("Stopped TCP listening for incoming connections");
     }
 
     void ConnectCallback(IAsyncResult iar)
