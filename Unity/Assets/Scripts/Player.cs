@@ -95,6 +95,18 @@ public class Player : MonoBehaviour, INetworkListener
             }
         }
 
+        if (IsControlled)
+        {
+            if (transform.root.position.y < -50)
+            {
+                PlayerHealthPackage ps = new PlayerHealthPackage();
+                ps.PlayerIP = PlayerIP;
+                ps.Value = -Health;
+                ps.Hit = true;
+                NetworkManager.Instance.Client.SendData(ps);
+            }
+        }
+
 		//direction is (pointB - pointA).normalized
 		Vector3 start = calculateCentroid(eyesL.position, eyesR.position);
 		Ray r = new Ray(start, (laserTarget.position - start).normalized);

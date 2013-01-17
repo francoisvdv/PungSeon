@@ -223,7 +223,7 @@ public class GameManager : PersistentMonoBehaviour, INetworkListener
             robot.transform.rotation = spawnPoint.transform.rotation;
         }
         else
-            robot.transform.position = getRandomPositionOnTerrain(-10);
+            robot.transform.position = getRandomPositionOnTerrain(10);
     }
     public void spawnBase(GameObject baseSpawnPoint = null)
     {
