@@ -25,7 +25,7 @@ public class Client : IDisposable, INetworkListener
     Dictionary<TcpClient, RemoteClient> clients = new Dictionary<TcpClient, RemoteClient>(); //string contains the client's 'username'
     List<TcpClient> outgoing = new List<TcpClient>();
 
-    Queue<DataPackage> queue = new Queue<DataPackage>();
+    List<DataPackage> queue = new List<DataPackage>();
     List<WeakReference> networkListeners = new List<WeakReference>();
 
     List<DataPackage> receiveBuffer = new List<DataPackage>();
@@ -337,7 +337,23 @@ public class Client : IDisposable, INetworkListener
     }
     public void SendData(DataPackage dp)
     {
-        queue.Enqueue(dp);
+        if (queue.Count != 0)
+        {
+            PlayerMovePackage newPmp = dp as PlayerMovePackage;
+            if (newPmp != null)
+            {
+                for (int i = queue.Count - 1; i >= 0; i--)
+                {
+                    PlayerMovePackage pmp = queue[i] as PlayerMovePackage;
+                    if (pmp == null || pmp.RotationOnly != newPmp.RotationOnly)
+                        continue;
+
+                    queue.RemoveAt(i);
+                }
+            }
+        }
+
+        queue.Add(dp);
     }
     void ReceiveData(TcpClient sender, string data)
     {
@@ -383,7 +399,8 @@ public class Client : IDisposable, INetworkListener
 
         while (queue.Count != 0)
         {
-            DataPackage dp = queue.Dequeue();
+            DataPackage dp = queue[0];
+            queue.RemoveAt(0);
             WriteAll(dp);
         }
 

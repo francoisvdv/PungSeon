@@ -266,8 +266,7 @@ public class GameManager : PersistentMonoBehaviour, INetworkListener
         if (Physics.Raycast(result + new Vector3(0, heightOffset, 0), -Vector3.up, out hit) && hit.collider.gameObject.Equals(terrain))
         {
             var distanceToGround = hit.distance;
-            Vector3 dist = new Vector3(0, -distanceToGround + 1, 0);
-            result += dist;
+            result += new Vector3(0, -distanceToGround + 1, 0);
         }
 
         return result;
