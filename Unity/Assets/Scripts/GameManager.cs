@@ -275,7 +275,7 @@ public class GameManager : PersistentMonoBehaviour, INetworkListener
 
     public void OnDataReceived(DataPackage dp)
     {
-        print(dp.Id);
+        //print(dp.Id);
 
         if (dp is FlagPackage)
         {

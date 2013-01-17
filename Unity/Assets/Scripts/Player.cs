@@ -136,7 +136,7 @@ public class Player : MonoBehaviour, INetworkListener
         {
             //PlayerMovePackage pmp = new PlayerMovePackage(transform.root.rotation.eulerAngles);
             PlayerMovePackage pmp = null;
-            if (sendCounter == 5)
+            if (sendCounter == 1)
             {
                 pmp = new PlayerMovePackage(transform.root.position, transform.root.rotation.eulerAngles, currentDirection);
                 sendCounter = 0;
