@@ -8,10 +8,12 @@ using System.Collections;
 public class Player : MonoBehaviour, INetworkListener
 {
     public float animSpeed = 1.5f;				// a public setting for overall animator animation speed
+    public bool AlwaysFireLaserBeams = false;
+    public GUIStyle DeathLabelStyle = GUIStyle.none;
 
     public System.Net.IPAddress PlayerIP = Client.GetLocalIPAddress();
     public bool IsControlled { get { return PlayerIP.Equals(Client.GetLocalIPAddress()); } }
-	public bool AlwaysFireLaserBeams = false;
+    public bool IsDead { get { return Health <= 0; } }
 
 	[NonSerialized]
 	public int Health;
@@ -76,13 +78,17 @@ public class Player : MonoBehaviour, INetworkListener
 
 	void Update ()
 	{
-        if (IsDead())
+        if (IsDead && IsControlled)
         {
+            transform.root.position = new Vector3(0, 0, 0);
+
             if (spawnTimer > 0)
                 spawnTimer -= Time.deltaTime;
             else if (spawnTimer <= 0)
             {
                 spawnTimer = 0;
+
+                Health = 100;
 
                 PlayerSpawnPackage psp = new PlayerSpawnPackage();
                 NetworkManager.Instance.Client.SendData(psp);
@@ -116,7 +122,7 @@ public class Player : MonoBehaviour, INetworkListener
         else if (fireTimer >= 20)
             SetLasersEnabled(false);
 
-        if (!IsControlled || IsDead())
+        if (!IsControlled || IsDead)
             return;
 
         if (firing && fireTimer <= 10)
@@ -141,11 +147,6 @@ public class Player : MonoBehaviour, INetworkListener
             NetworkManager.Instance.Client.SendData(pmp);
             resend = false;
         }
-    }
-
-    bool IsDead()
-    {
-        return Health <= 0;
     }
 
 	Vector3 calculateCentroid(params Vector3[] centerPoints)
@@ -329,6 +330,14 @@ public class Player : MonoBehaviour, INetworkListener
         {
             v.enabled = val;
         }
+
+        if (IsControlled)
+        {
+            Camera cam = transform.root.GetComponentInChildren<Camera>();
+            cam.enabled = val;
+
+            GameObject.Find("DeathCam").GetComponent<Camera>().enabled = !val;
+        }
     }
     void setGangnamVisible(bool val)
     {
@@ -349,6 +358,14 @@ public class Player : MonoBehaviour, INetworkListener
             this.GetComponentInChildren<SkinnedMeshRenderer>().enabled = true;
             Destroy(gangnamObject);
         }
+    }
+
+    void OnGUI()
+    {
+        if (!IsDead || !IsControlled)
+            return;
+
+        GUI.Label(new Rect(0, 0, Screen.width, Screen.height), "Respawning in " + Math.Round(spawnTimer, 1).ToString() + " seconds!", DeathLabelStyle);
     }
 
     int sendCounter = 0;
@@ -444,7 +461,7 @@ public class Player : MonoBehaviour, INetworkListener
 
             Health -= php.Value;
 
-            if (IsDead())
+            if (IsDead)
             {
                 Health = 0;
                 Die();
@@ -455,7 +472,10 @@ public class Player : MonoBehaviour, INetworkListener
             setRobotVisible(true);
             setGangnamVisible(true);
 
-            GameManager.Instance.spawnRobot(PlayerIP);
+            Health = 100;
+
+            if (IsControlled)
+                GameManager.Instance.spawnRobot(PlayerIP);
         }
     }
 }
