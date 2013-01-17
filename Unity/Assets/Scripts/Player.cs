@@ -76,15 +76,17 @@ public class Player : MonoBehaviour, INetworkListener
 
 	void Update ()
 	{
-        if (spawnTimer != 0)
-            spawnTimer -= Time.deltaTime;
-        else if(spawnTimer < 0)
+        if (IsDead())
         {
-            spawnTimer = 0;
-            GameManager.Instance.spawnRobot(PlayerIP);
+            if (spawnTimer > 0)
+                spawnTimer -= Time.deltaTime;
+            else if (spawnTimer <= 0)
+            {
+                spawnTimer = 0;
 
-            PlayerSpawnPackage psp = new PlayerSpawnPackage();
-            NetworkManager.Instance.Client.SendData(psp);
+                PlayerSpawnPackage psp = new PlayerSpawnPackage();
+                NetworkManager.Instance.Client.SendData(psp);
+            }
         }
 
 		//direction is (pointB - pointA).normalized
@@ -114,7 +116,7 @@ public class Player : MonoBehaviour, INetworkListener
         else if (fireTimer >= 20)
             SetLasersEnabled(false);
 
-        if (!IsControlled)
+        if (!IsControlled || IsDead())
             return;
 
         if (firing && fireTimer <= 10)
@@ -139,6 +141,11 @@ public class Player : MonoBehaviour, INetworkListener
             NetworkManager.Instance.Client.SendData(pmp);
             resend = false;
         }
+    }
+
+    bool IsDead()
+    {
+        return Health <= 0;
     }
 
 	Vector3 calculateCentroid(params Vector3[] centerPoints)
@@ -238,10 +245,8 @@ public class Player : MonoBehaviour, INetworkListener
 
 	void Die()
 	{
-        hideGangnamRobot();
-
-        SkinnedMeshRenderer smr = (SkinnedMeshRenderer)transform.root.GetComponentInChildren(typeof(SkinnedMeshRenderer));
-        smr.enabled = false;
+        setRobotVisible(false);
+        setGangnamVisible(false);
 
         if (!IsControlled)
             return;
@@ -314,30 +319,36 @@ public class Player : MonoBehaviour, INetworkListener
         }
     }
 
-    void disableRobot()
+    void setRobotVisible(bool val)
     {
+        SkinnedMeshRenderer smr = (SkinnedMeshRenderer)transform.root.GetComponentInChildren(typeof(SkinnedMeshRenderer));
+        smr.enabled = val;
 
+        Collider[] colliders = transform.root.GetComponentsInChildren<Collider>();
+        foreach (var v in colliders)
+        {
+            v.enabled = val;
+        }
     }
-    void enableRobot()
+    void setGangnamVisible(bool val)
     {
-    }
+        if (val)
+        {
+            gangnamObject = (GameObject)Instantiate(GameManager.Instance.gangnamPrefab);
+            gangnamObject.transform.position = this.gameObject.transform.position;
+            gangnamObject.transform.rotation = this.gameObject.transform.rotation;
+            gangnamObject.transform.localScale += this.gameObject.transform.localScale;
+            this.GetComponentInChildren<SkinnedMeshRenderer>().enabled = false;
 
-    void showGangnamRobot()
-    {
-        gangnamObject = (GameObject)Instantiate(GameManager.Instance.gangnamPrefab);
-        gangnamObject.transform.position = this.gameObject.transform.position;
-        gangnamObject.transform.rotation = this.gameObject.transform.rotation;
-        gangnamObject.transform.localScale += this.gameObject.transform.localScale;
-        this.GetComponentInChildren<SkinnedMeshRenderer>().enabled = false;
-
-        SkinnedMeshRenderer thisMR = (SkinnedMeshRenderer)this.GetComponentInChildren(typeof(SkinnedMeshRenderer));
-        SkinnedMeshRenderer gangnamMR = (SkinnedMeshRenderer)gangnamObject.GetComponentInChildren(typeof(SkinnedMeshRenderer));
-        gangnamMR.material = thisMR.material;
-    }
-    void hideGangnamRobot()
-    {
-        this.GetComponentInChildren<SkinnedMeshRenderer>().enabled = true;
-        Destroy(gangnamObject);
+            SkinnedMeshRenderer thisMR = (SkinnedMeshRenderer)this.GetComponentInChildren(typeof(SkinnedMeshRenderer));
+            SkinnedMeshRenderer gangnamMR = (SkinnedMeshRenderer)gangnamObject.GetComponentInChildren(typeof(SkinnedMeshRenderer));
+            gangnamMR.material = thisMR.material;
+        }
+        else
+        {
+            this.GetComponentInChildren<SkinnedMeshRenderer>().enabled = true;
+            Destroy(gangnamObject);
+        }
     }
 
     int sendCounter = 0;
@@ -377,9 +388,9 @@ public class Player : MonoBehaviour, INetworkListener
                     anim.SetFloat("Speed", -1);
 
                 if (pmp.Dir == PlayerMovePackage.Direction.Stop)
-                    showGangnamRobot();
+                    setGangnamVisible(true);
                 else
-                    hideGangnamRobot();
+                    setGangnamVisible(false);
 
                 anim.speed = animSpeed;
 
@@ -433,7 +444,7 @@ public class Player : MonoBehaviour, INetworkListener
 
             Health -= php.Value;
 
-            if (Health <= 0)
+            if (IsDead())
             {
                 Health = 0;
                 Die();
@@ -441,8 +452,10 @@ public class Player : MonoBehaviour, INetworkListener
         }
         else if (dp is PlayerSpawnPackage && dp.SenderRemoteIPEndpoint.Address.Equals(PlayerIP))
         {
-            SkinnedMeshRenderer smr = (SkinnedMeshRenderer)transform.root.GetComponentInChildren(typeof(SkinnedMeshRenderer));
-            smr.enabled = true;
+            setRobotVisible(true);
+            setGangnamVisible(true);
+
+            GameManager.Instance.spawnRobot(PlayerIP);
         }
     }
 }
