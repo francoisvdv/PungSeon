@@ -253,6 +253,15 @@ public class Player : MonoBehaviour, INetworkListener
             return;
 
         respawnTimer = Options.RespawnTimer;
+
+        Flag f = GameManager.Instance.GetFlag(this);
+        if (f != null)
+        {
+            FlagPackage fp = new FlagPackage();
+            fp.Event = FlagPackage.FlagEvent.Drop;
+            fp.FlagId = f.FlagId;
+            NetworkManager.Instance.Client.SendData(fp);
+        }
 	}
 	void Fire()
 	{

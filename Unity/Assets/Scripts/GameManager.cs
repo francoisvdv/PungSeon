@@ -163,14 +163,9 @@ public class GameManager : PersistentMonoBehaviour, INetworkListener
         if (!IsMaster())
             return;
 
-        for (int i = 0; i < 20; i++)
-        {
+        spawnFlag();
+        if (NetworkManager.Instance.Client.GetOutgoingAddresses().Count >= 4)
             spawnFlag();
-        }
-
-        //spawnFlag();
-        //if (NetworkManager.Instance.Client.GetOutgoingAddresses().Count >= 4)
-        //    spawnFlag();
     }
 
     public void spawnBlocks()
@@ -302,6 +297,8 @@ public class GameManager : PersistentMonoBehaviour, INetworkListener
                     Destroy(f.transform.root.gameObject);
                     flags.Remove(f);
                 }
+
+                spawnFlag();
             }
         }
     }
