@@ -119,14 +119,14 @@ public class Player : MonoBehaviour, INetworkListener
         //print(fireTimer);
         if (firing && fireTimer <= 10)
             SetLasersEnabled(true);
-        else if (fireTimer >= 20)
+        else if (fireTimer > 10)
             SetLasersEnabled(false);
 
         if (!IsControlled || IsDead)
             return;
 
-        if (firing && fireTimer <= 10)
-            Fire();
+        //if (firing && fireTimer <= 10)
+            //Fire();
 
         HandleMovement();
         HandleFiring();
@@ -211,13 +211,12 @@ public class Player : MonoBehaviour, INetworkListener
             {
                 startFiringPackageSent = true;
 
-                PlayerMovePackage pmp = new PlayerMovePackage(transform.root.position, transform.root.rotation.eulerAngles, currentDirection);
-                NetworkManager.Instance.Client.SendData(pmp);
-
                 FireWeaponPackage fwp = new FireWeaponPackage();
                 fwp.Enabled = true;
                 fwp.Target = GetComponentInChildren<Camera>().transform.rotation.eulerAngles.x;
                 NetworkManager.Instance.Client.SendData(fwp);
+
+                Fire();
             }
         }
         else if(firing && !Input.GetKey(Options.Controls.Fire))
@@ -263,6 +262,9 @@ public class Player : MonoBehaviour, INetworkListener
         Player otherPlayer = hitInfo.transform.GetComponent<Player>();
 		if(otherPlayer == null)
 			return;
+
+        ParticleSystem hitParticles = laserTarget.GetComponent<ParticleSystem>();
+        hitParticles.Play();
 
         PlayerHealthPackage ps = new PlayerHealthPackage();
         ps.PlayerIP = otherPlayer.PlayerIP;
@@ -456,9 +458,6 @@ public class Player : MonoBehaviour, INetworkListener
             PlayerHealthPackage php = (PlayerHealthPackage)dp;
             if(!php.PlayerIP.Equals(PlayerIP))
                 return;
-
-            ParticleSystem ps = laserTarget.GetComponent<ParticleSystem>();
-            ps.Play();
 
             Health -= php.Value;
 
