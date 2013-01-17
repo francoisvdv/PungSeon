@@ -4,7 +4,7 @@ using System;
 
 public class Flag : MonoBehaviour, INetworkListener
 {
-    public const float TerrainOffset = 1.8f;
+    public const float TerrainOffset = -1.8f;
 
     public Guid FlagId { get; set; }
     public Player Owner { get; set; }

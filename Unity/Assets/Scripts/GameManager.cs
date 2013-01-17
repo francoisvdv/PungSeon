@@ -223,7 +223,7 @@ public class GameManager : PersistentMonoBehaviour, INetworkListener
             robot.transform.rotation = spawnPoint.transform.rotation;
         }
         else
-            robot.transform.position = getRandomPositionOnTerrain(0);
+            robot.transform.position = getRandomPositionOnTerrain(-10);
     }
     public void spawnBase(GameObject baseSpawnPoint = null)
     {
@@ -247,29 +247,28 @@ public class GameManager : PersistentMonoBehaviour, INetworkListener
             BlockSpawnStartY, Random.Range(BlockSpawnMinZ, BlockSpawnMaxZ));
 
         RaycastHit hit;
-        if (Physics.Raycast(result + new Vector3(0, heightOffset, 0), -Vector3.up, out hit) && hit.collider.gameObject.Equals(terrain))
+        if (Physics.Raycast(result + new Vector3(0, 100, 0), -Vector3.up, out hit) && hit.collider.gameObject.Equals(terrain))
         {
             var distanceToGround = hit.distance;
-            Vector3 dist = new Vector3(0, -distanceToGround + 1, 0);
-            result += dist;
+            result += new Vector3(0, -(distanceToGround - 100) + 1, 0);
         }
         else
             return getRandomPositionOnTerrain(heightOffset);
 
-        return result;
+        return result + new Vector3(0, heightOffset, 0);
     }
     public Vector3 getPositionOnTerrain(Vector3 from, float heightOffset)
     {
         Vector3 result = from;
 
         RaycastHit hit;
-        if (Physics.Raycast(result + new Vector3(0, heightOffset, 0), -Vector3.up, out hit) && hit.collider.gameObject.Equals(terrain))
+        if (Physics.Raycast(result + new Vector3(0, 100, 0), -Vector3.up, out hit) && hit.collider.gameObject.Equals(terrain))
         {
             var distanceToGround = hit.distance;
-            result += new Vector3(0, -distanceToGround + 1, 0);
+            result += new Vector3(0, -(distanceToGround - 100) + 1, 0);
         }
 
-        return result;
+        return result + new Vector3(0, heightOffset, 0);
     }
 
     public void OnDataReceived(DataPackage dp)
