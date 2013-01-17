@@ -346,7 +346,7 @@ public class Player : MonoBehaviour, INetworkListener
             gangnamObject = (GameObject)Instantiate(GameManager.Instance.gangnamPrefab);
             gangnamObject.transform.position = this.gameObject.transform.position;
             gangnamObject.transform.rotation = this.gameObject.transform.rotation;
-            gangnamObject.transform.localScale += this.gameObject.transform.localScale;
+            //gangnamObject.transform.localScale += this.gameObject.transform.localScale;
             this.GetComponentInChildren<SkinnedMeshRenderer>().enabled = false;
 
             SkinnedMeshRenderer thisMR = (SkinnedMeshRenderer)this.GetComponentInChildren(typeof(SkinnedMeshRenderer));
